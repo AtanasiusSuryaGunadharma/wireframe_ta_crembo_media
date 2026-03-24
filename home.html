@@ -479,6 +479,84 @@
 			font-size: 0.95rem;
 		}
 
+		.schedule-preview-top {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			gap: 10px;
+			flex-wrap: wrap;
+			margin-bottom: 10px;
+		}
+
+		.mode-pills {
+			display: inline-flex;
+			gap: 6px;
+			border: 1px solid var(--line);
+			padding: 4px;
+			background: #f2f2f2;
+		}
+
+		.mode-pill {
+			display: inline-block;
+			padding: 5px 10px;
+			border: 1px solid #bcbcbc;
+			font-size: 0.83rem;
+			background: #fff;
+		}
+
+		.mode-pill.active {
+			background: #111;
+			color: #fff;
+			border-color: #111;
+		}
+
+		.schedule-note {
+			margin: 0;
+			font-size: 0.86rem;
+			color: #535353;
+		}
+
+		.schedule-legend {
+			display: flex;
+			gap: 7px;
+			flex-wrap: wrap;
+			margin-bottom: 10px;
+		}
+
+		.schedule-legend .chip {
+			padding: 5px 8px;
+			font-size: 0.8rem;
+		}
+
+		.schedule-table .no-col {
+			width: 62px;
+		}
+
+		.schedule-table .date-col {
+			width: 200px;
+		}
+
+		.schedule-table .time-col {
+			width: 120px;
+		}
+
+		.blocked-row td {
+			background: #e3e3e3;
+		}
+
+		.blocked-inline {
+			border: 1px dashed #4a4a4a;
+			padding: 7px 9px;
+			font-size: 0.84rem;
+			background: #f6f6f6;
+			font-weight: 600;
+		}
+
+		.blocked-inline span {
+			font-weight: 400;
+			color: #555;
+		}
+
 		.schedule-table th,
 		.schedule-table td {
 			border: 1px solid var(--line-soft);
@@ -731,7 +809,7 @@
 					<li><a href="#">Home</a></li>
 					<li><a href="tentang-crembo.html">Tentang Crembo</a></li>
 					<li><a href="jadwal-streaming.html">Jadwal Streaming</a></li>
-					<li><a href="#">Agenda</a></li>
+					<li><a href="agenda.html">Agenda</a></li>
 					<li><a href="#">Pengumuman</a></li>
 					<li><a href="#">Form Pendaftaran</a></li>
 				</ul>
@@ -846,39 +924,64 @@
 		<section class="section" aria-label="Jadwal Streaming">
 			<div class="section-title">
 				<h3>Jadwal Streaming</h3>
-				<button class="btn-ghost" type="button">Lihat Semua</button>
+				<a class="btn-ghost" href="jadwal-streaming.html">Lihat Semua</a>
+			</div>
+			<div class="schedule-preview-top">
+				<div class="mode-pills" aria-label="Preview mode jadwal">
+					<span class="mode-pill active">Bulanan Biasa</span>
+					<span class="mode-pill">Hari Raya</span>
+				</div>
+				<p class="schedule-note">Tanggal hari raya diblok dan diarahkan ke mode Hari Raya.</p>
+			</div>
+			<div class="schedule-legend">
+				<span class="chip"><span class="swatch normal"></span> Jadwal normal</span>
+				<span class="chip"><span class="swatch blocked"></span> Diblok karena hari raya</span>
 			</div>
 			<table class="schedule-table">
 				<thead>
 					<tr>
-						<th>Tanggal</th>
-						<th>Waktu</th>
-						<th>Jenis Misa</th>
-						<th>Petugas Dibutuhkan</th>
-						<th>Status</th>
+						<th class="no-col">No</th>
+						<th class="date-col">Tanggal</th>
+						<th class="time-col">Jam</th>
+						<th>Operator</th>
+						<th>Kameramen</th>
+						<th>Supervisor</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
-						<td>Jumat, 27 Maret 2026</td>
-						<td>18.00</td>
-						<td>Misa Harian</td>
-						<td>Operator, Kameramen</td>
-						<td>Tersedia</td>
+						<td>1</td>
+						<td>27 Maret 2026</td>
+						<td>18:00</td>
+						<td>Rikha</td>
+						<td>Jeni</td>
+						<td>Tyas</td>
 					</tr>
 					<tr>
-						<td>Minggu, 29 Maret 2026</td>
-						<td>08.00</td>
-						<td>Misa Mingguan</td>
-						<td>Operator, Kameramen, Supervisor</td>
-						<td>Terisi Sebagian</td>
+						<td>2</td>
+						<td>28 Maret 2026</td>
+						<td>18:00</td>
+						<td>Lisa</td>
+						<td>Evan</td>
+						<td>Jose</td>
+					</tr>
+					<tr class="blocked-row">
+						<td>3</td>
+						<td>29 Maret 2026</td>
+						<td colspan="4">
+							<div class="blocked-inline">
+								DIBLOK: Misa Minggu Palma (Hari Raya)
+								<span>- buka mode Hari Raya untuk detail petugas khusus.</span>
+							</div>
+						</td>
 					</tr>
 					<tr>
-						<td>Kamis, 02 April 2026</td>
-						<td>19.00</td>
-						<td>Misa Kamis Putih</td>
-						<td>Semua Slot</td>
-						<td>Pendaftaran Dibuka</td>
+						<td>4</td>
+						<td>30 Maret 2026</td>
+						<td>18:00</td>
+						<td>Rossa</td>
+						<td>Aurel</td>
+						<td>Asha</td>
 					</tr>
 				</tbody>
 			</table>
@@ -887,7 +990,7 @@
 		<section class="section" aria-label="Agenda">
 			<div class="section-title">
 				<h3>Agenda</h3>
-				<button class="btn-ghost" type="button">Lihat Semua</button>
+				<a class="btn-ghost" href="agenda.html">Lihat Semua</a>
 			</div>
 			<div class="cards-3">
 				<article class="card">
@@ -897,8 +1000,8 @@
 						<h4>Briefing Petugas Pekan Suci</h4>
 						<p>Agenda briefing internal untuk persiapan pelayanan multimedia.</p>
 						<div class="card-actions">
-							<button class="btn-ghost" type="button">Lihat Detail</button>
-							<button class="btn-primary" type="button">Daftar</button>
+							<a class="btn-ghost" href="agenda-detail.html">Lihat Detail</a>
+							<a class="btn-primary" href="agenda-detail.html">Daftar</a>
 						</div>
 					</div>
 				</article>
