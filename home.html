@@ -171,21 +171,120 @@
 			background: var(--surface);
 			border: 2px solid var(--line);
 			padding: 24px;
-			min-height: 280px;
-			display: grid;
-			grid-template-columns: 1.3fr 1fr;
-			gap: 24px;
 		}
 
-		.hero-copy h2 {
-			margin: 0 0 10px;
+		.hero-head {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			margin-bottom: 14px;
+		}
+
+		.hero h2 {
+			margin: 0;
 			font-size: clamp(1.3rem, 3vw, 2rem);
 		}
 
-		.hero-copy p {
-			margin: 0 0 18px;
+		.dynamic-note {
+			margin: 0;
+			font-size: 0.88rem;
 			color: var(--muted);
-			max-width: 60ch;
+		}
+
+		.carousel-wrap {
+			position: relative;
+			border: 1px solid var(--line-soft);
+			padding: 12px 42px;
+			background: #fff;
+		}
+
+		.carousel-track {
+			display: flex;
+			gap: 12px;
+			overflow-x: auto;
+			scroll-snap-type: x mandatory;
+			scroll-behavior: smooth;
+			padding-bottom: 4px;
+		}
+
+		.carousel-track::-webkit-scrollbar {
+			height: 8px;
+		}
+
+		.carousel-track::-webkit-scrollbar-thumb {
+			background: #9d9d9d;
+		}
+
+		.slide {
+			min-width: 100%;
+			scroll-snap-align: start;
+			border: 2px dashed #7a7a7a;
+			background: repeating-linear-gradient(
+				135deg,
+				#f8f8f8,
+				#f8f8f8 12px,
+				#efefef 12px,
+				#efefef 24px
+			);
+			min-height: 220px;
+			padding: 18px;
+			display: grid;
+			align-content: center;
+			gap: 8px;
+		}
+
+		.slide h3 {
+			margin: 0;
+			font-size: 1.2rem;
+		}
+
+		.slide p {
+			margin: 0;
+			color: #4d4d4d;
+			max-width: 58ch;
+		}
+
+		.carousel-btn {
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			width: 30px;
+			height: 30px;
+			border: 1px solid var(--line);
+			background: #fff;
+			font-size: 1.1rem;
+			cursor: pointer;
+		}
+
+		.carousel-btn:hover {
+			background: var(--hover);
+		}
+
+		.carousel-btn.prev {
+			left: 8px;
+		}
+
+		.carousel-btn.next {
+			right: 8px;
+		}
+
+		.carousel-dots {
+			display: flex;
+			justify-content: center;
+			gap: 8px;
+			margin-top: 12px;
+		}
+
+		.dot {
+			width: 8px;
+			height: 8px;
+			border-radius: 999px;
+			background: #b9b9b9;
+		}
+
+		.dot.active {
+			background: #222;
 		}
 
 		.frame {
@@ -243,12 +342,71 @@
 		.about-text {
 			border: 1px solid var(--line-soft);
 			padding: 12px;
-			min-height: 190px;
+			min-height: 220px;
 		}
 
-		.about-text p {
+		.about-editable {
 			margin: 0 0 12px;
+			padding: 10px;
+			border: 1px dashed #868686;
+			min-height: 130px;
+			background: #fafafa;
 			color: #4f4f4f;
+			font-size: 0.94rem;
+		}
+
+		.embed-note {
+			margin: 8px 0 0;
+			font-size: 0.85rem;
+			color: #5f5f5f;
+		}
+
+		.embed-box {
+			border: 1px solid var(--line-soft);
+			min-height: 220px;
+			background: #f7f7f7;
+			overflow: hidden;
+		}
+
+		.embed-box iframe {
+			width: 100%;
+			height: 100%;
+			min-height: 220px;
+			border: 0;
+			background: #fff;
+		}
+
+		.embed-grid {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 14px;
+		}
+
+		.embed-card {
+			border: 1px solid var(--line-soft);
+			padding: 12px;
+		}
+
+		.embed-card h4 {
+			margin: 0 0 8px;
+			font-size: 1rem;
+		}
+
+		.ig-grid {
+			display: grid;
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+			gap: 12px;
+		}
+
+		.ig-card {
+			border: 1px solid var(--line-soft);
+			padding: 10px;
+			background: #fff;
+		}
+
+		.ig-card .embed-box,
+		.ig-card .embed-box iframe {
+			min-height: 250px;
 		}
 
 		.cards-3 {
@@ -273,6 +431,16 @@
 			padding: 10px;
 		}
 
+		.meta-date {
+			display: inline-block;
+			font-size: 0.8rem;
+			color: #5d5d5d;
+			border: 1px solid #cfcfcf;
+			padding: 2px 8px;
+			margin-bottom: 8px;
+			background: #f6f6f6;
+		}
+
 		.card h4 {
 			margin: 0 0 8px;
 			font-size: 1rem;
@@ -283,6 +451,26 @@
 			margin: 0;
 			font-size: 0.9rem;
 			color: #505050;
+		}
+
+		.card-actions {
+			margin-top: 10px;
+			display: flex;
+			gap: 8px;
+			flex-wrap: wrap;
+		}
+
+		.btn-primary {
+			border: 1px solid #000;
+			background: #111;
+			color: #fff;
+			padding: 7px 12px;
+			cursor: pointer;
+			font-size: 0.85rem;
+		}
+
+		.btn-primary:hover {
+			background: #2a2a2a;
 		}
 
 		.schedule-table {
@@ -328,19 +516,114 @@
 			margin-top: 26px;
 			border-top: 2px solid var(--line);
 			border-bottom: 2px solid var(--line);
+			background: linear-gradient(180deg, #f7f7f7 0%, #ececec 100%);
+			padding: 0;
+			color: #2e2e2e;
+		}
+
+		.footer-main {
+			padding: 22px 0 16px;
+		}
+
+		.footer-grid {
+			display: grid;
+			grid-template-columns: 1.15fr 1fr 1fr;
+			gap: 18px;
+		}
+
+		.footer-col {
+			border: 1px solid #bdbdbd;
 			background: #fff;
-			padding: 16px 0;
+			padding: 14px;
+		}
+
+		.footer-brand {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			margin-bottom: 10px;
+		}
+
+		.footer-logo {
+			width: 54px;
+			height: 54px;
+			object-fit: contain;
+			filter: grayscale(100%);
+			border: 1px solid #222;
+			padding: 4px;
+			background: #fff;
+		}
+
+		.footer-title {
+			margin: 0;
+			font-size: 1rem;
+		}
+
+		.footer-sub {
+			margin: 2px 0 0;
+			font-size: 0.85rem;
+			color: #666;
+		}
+
+		.contact-list {
+			margin: 0;
+			padding: 0;
+			list-style: none;
+			display: grid;
+			gap: 8px;
+			font-size: 0.9rem;
+		}
+
+		.contact-list strong {
+			display: inline-block;
+			min-width: 70px;
+		}
+
+		.social-list {
+			margin: 0;
+			padding: 0;
+			list-style: none;
+			display: grid;
+			gap: 8px;
+			font-size: 0.9rem;
+		}
+
+		.social-item {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.social-dot {
+			width: 26px;
+			height: 26px;
+			border-radius: 999px;
+			display: grid;
+			place-items: center;
+			font-size: 0.75rem;
+			font-weight: 700;
+			border: 1px solid #222;
+			background: #f4f4f4;
+		}
+
+		.footer-bottom {
+			border-top: 1px solid #bebebe;
+			padding: 10px 0 14px;
 			text-align: center;
-			color: #444;
-			font-size: 0.92rem;
+			font-size: 0.85rem;
+			color: #5c5c5c;
 		}
 
 		@media (max-width: 980px) {
-			.hero,
 			.about-grid,
 			.cards-3,
 			.cards-2 {
 				grid-template-columns: 1fr;
+			}
+
+			.embed-grid,
+			.ig-grid {
+				grid-template-columns: repeat(2, minmax(0, 1fr));
 			}
 
 			.right-tools {
@@ -350,6 +633,10 @@
 
 			.nav-row {
 				flex-wrap: wrap;
+			}
+
+			.footer-grid {
+				grid-template-columns: 1fr;
 			}
 		}
 
@@ -407,6 +694,19 @@
 				flex-direction: column;
 				align-items: flex-start;
 			}
+
+			.carousel-wrap {
+				padding: 10px;
+			}
+
+			.carousel-btn {
+				display: none;
+			}
+
+			.embed-grid,
+			.ig-grid {
+				grid-template-columns: 1fr;
+			}
 		}
 	</style>
 </head>
@@ -429,7 +729,7 @@
 			<nav id="mainNav" aria-label="Navigasi utama">
 				<ul>
 					<li><a href="#">Home</a></li>
-					<li><a href="#">Tentang Crembo</a></li>
+					<li><a href="tentang-crembo.html">Tentang Crembo</a></li>
 					<li><a href="#">Jadwal Streaming</a></li>
 					<li><a href="#">Agenda</a></li>
 					<li><a href="#">Pengumuman</a></li>
@@ -448,33 +748,98 @@
 
 	<main class="container">
 		<section class="hero" aria-label="Hero section">
-			<div class="hero-copy">
-				<h2>Selamat Datang di Website Crembo Media</h2>
-				<p>
-					Halaman ini adalah wireframe hitam-putih untuk menggambarkan struktur utama halaman home sebelum
-					masuk ke tahap desain high-fidelity.
-				</p>
-				<button class="btn-ghost" type="button">Lihat Informasi Utama</button>
+			<div class="hero-head">
+				<h2>Carousel Home (Fleksibel)</h2>
+				<p class="dynamic-note">Konten slide bisa Anda ubah manual di HTML atau lewat panel CMS nantinya.</p>
 			</div>
-			<div class="frame">Placeholder Banner / Carousel</div>
+			<div class="carousel-wrap">
+				<button id="carouselPrev" class="carousel-btn prev" type="button" aria-label="Slide sebelumnya">&#8249;</button>
+				<div id="carouselTrack" class="carousel-track" aria-label="Daftar slide carousel">
+					<article class="slide">
+						<h3>Slide 1 - Jadwal Misa Mingguan</h3>
+						<p>Contoh isi bebas: judul, deskripsi singkat, dan call to action sesuai kebutuhan.</p>
+					</article>
+					<article class="slide">
+						<h3>Slide 2 - Open Recruitment Petugas</h3>
+						<p>Anda bisa menambahkan slide baru sebanyak apapun, lalu user bisa scroll ke samping.</p>
+					</article>
+					<article class="slide">
+						<h3>Slide 3 - Pengumuman Agenda</h3>
+						<p>Area ini low-fidelity, jadi konten dipakai sebagai placeholder wireframe yang bisa diganti.</p>
+					</article>
+				</div>
+				<button id="carouselNext" class="carousel-btn next" type="button" aria-label="Slide berikutnya">&#8250;</button>
+			</div>
+			<div id="carouselDots" class="carousel-dots" aria-hidden="true"></div>
 		</section>
 
 		<section class="section" aria-label="Tentang Crembo">
 			<div class="section-title">
 				<h3>Tentang Crembo</h3>
+				<p class="dynamic-note">Deskripsi dan media profil dapat diisi manual.</p>
 			</div>
 			<div class="about-grid">
 				<div class="about-text">
-					<p>
+					<div id="aboutText" class="about-editable">
 						Ringkasan profil organisasi, visi pelayanan multimedia, serta peran Crembo dalam mendukung kegiatan
-						liturgi dan agenda komunitas.
-					</p>
-					<p>
-						Blok ini bisa dipakai untuk ringkasan deskriptif 1-2 paragraf dengan tombol menuju halaman detail.
-					</p>
+						liturgi dan agenda komunitas. Konten ini nantinya diatur dari panel admin setelah login.
+					</div>
 					<button class="btn-ghost" type="button">Pelajari Lebih Lanjut</button>
 				</div>
-				<div class="frame">Placeholder Foto / Video Profil</div>
+				<div>
+					<div class="embed-box">
+						<iframe id="aboutMediaFrame" src="" title="Media profil Crembo" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+					</div>
+					<p class="embed-note">Sumber media profil diatur melalui panel admin.</p>
+				</div>
+			</div>
+		</section>
+
+		<section class="section" aria-label="Embed YouTube dan lokasi">
+			<div class="section-title">
+				<h3>YouTube Dan Google Maps</h3>
+				<p class="dynamic-note">Kedua link embed bisa diganti manual kapan saja.</p>
+			</div>
+			<div class="embed-grid">
+				<article class="embed-card">
+					<h4>Embed YouTube</h4>
+					<div class="embed-box">
+						<iframe id="ytFrame" src="" title="Embed YouTube" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+					</div>
+					<p class="embed-note">Link embed YouTube diatur melalui panel admin.</p>
+				</article>
+				<article class="embed-card">
+					<h4>Embed Google Maps</h4>
+					<div class="embed-box">
+						<iframe id="mapFrame" src="" title="Embed Google Maps" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+					</div>
+					<p class="embed-note">Link embed Google Maps diatur melalui panel admin.</p>
+				</article>
+			</div>
+		</section>
+
+		<section class="section" aria-label="Preview postingan instagram">
+			<div class="section-title">
+				<h3>Preview Postingan Instagram</h3>
+				<p class="dynamic-note">Tampilan 4 kotak menyamping untuk preview post IG.</p>
+			</div>
+			<div class="ig-grid">
+				<article class="ig-card">
+					<div class="embed-box"><iframe id="igFrame1" src="" title="Instagram preview 1" loading="lazy"></iframe></div>
+					<p class="embed-note">Sumber embed IG 1 diatur panel admin.</p>
+				</article>
+				<article class="ig-card">
+					<div class="embed-box"><iframe id="igFrame2" src="" title="Instagram preview 2" loading="lazy"></iframe></div>
+					<p class="embed-note">Sumber embed IG 2 diatur panel admin.</p>
+				</article>
+				<article class="ig-card">
+					<div class="embed-box"><iframe id="igFrame3" src="" title="Instagram preview 3" loading="lazy"></iframe></div>
+					<p class="embed-note">Sumber embed IG 3 diatur panel admin.</p>
+				</article>
+				<article class="ig-card">
+					<div class="embed-box"><iframe id="igFrame4" src="" title="Instagram preview 4" loading="lazy"></iframe></div>
+					<p class="embed-note">Sumber embed IG 4 diatur panel admin.</p>
+				</article>
 			</div>
 		</section>
 
@@ -524,20 +889,43 @@
 				<h3>Agenda</h3>
 				<button class="btn-ghost" type="button">Lihat Semua</button>
 			</div>
-			<ul class="agenda-list">
-				<li class="agenda-item">
-					<span>Briefing Petugas Pekan Suci</span>
-					<small>30 Maret 2026</small>
-				</li>
-				<li class="agenda-item">
-					<span>Pelatihan Operator Streaming</span>
-					<small>03 April 2026</small>
-				</li>
-				<li class="agenda-item">
-					<span>Evaluasi Pelayanan Bulanan</span>
-					<small>10 April 2026</small>
-				</li>
-			</ul>
+			<div class="cards-3">
+				<article class="card">
+					<div class="thumb frame">Preview Gambar Agenda</div>
+					<div class="body">
+						<span class="meta-date">30 Maret 2026</span>
+						<h4>Briefing Petugas Pekan Suci</h4>
+						<p>Agenda briefing internal untuk persiapan pelayanan multimedia.</p>
+						<div class="card-actions">
+							<button class="btn-ghost" type="button">Lihat Detail</button>
+							<button class="btn-primary" type="button">Daftar</button>
+						</div>
+					</div>
+				</article>
+				<article class="card">
+					<div class="thumb frame">Preview Gambar Agenda</div>
+					<div class="body">
+						<span class="meta-date">03 April 2026</span>
+						<h4>Pelatihan Operator Streaming</h4>
+						<p>Pendalaman teknis kamera, audio, dan live switch untuk tim operator.</p>
+						<div class="card-actions">
+							<button class="btn-ghost" type="button">Lihat Detail</button>
+							<button class="btn-primary" type="button">Daftar</button>
+						</div>
+					</div>
+				</article>
+				<article class="card">
+					<div class="thumb frame">Preview Gambar Agenda</div>
+					<div class="body">
+						<span class="meta-date">10 April 2026</span>
+						<h4>Evaluasi Pelayanan Bulanan</h4>
+						<p>Sesi evaluasi hasil pelayanan dan penyusunan perbaikan bulan berikutnya.</p>
+						<div class="card-actions">
+							<button class="btn-ghost" type="button">Lihat Detail</button>
+						</div>
+					</div>
+				</article>
+			</div>
 		</section>
 
 		<section class="section" aria-label="Pengumuman atau berita">
@@ -549,22 +937,34 @@
 				<article class="card">
 					<div class="thumb frame">Placeholder Gambar</div>
 					<div class="body">
+						<span class="meta-date">25 Februari 2026</span>
 						<h4>Judul Informasi 1</h4>
 						<p>Ringkasan singkat informasi terbaru dari Crembo Media.</p>
+						<div class="card-actions">
+							<button class="btn-ghost" type="button">Baca Selengkapnya</button>
+						</div>
 					</div>
 				</article>
 				<article class="card">
 					<div class="thumb frame">Placeholder Gambar</div>
 					<div class="body">
+						<span class="meta-date">24 Februari 2026</span>
 						<h4>Judul Informasi 2</h4>
 						<p>Ringkasan singkat informasi terbaru dari Crembo Media.</p>
+						<div class="card-actions">
+							<button class="btn-ghost" type="button">Baca Selengkapnya</button>
+						</div>
 					</div>
 				</article>
 				<article class="card">
 					<div class="thumb frame">Placeholder Gambar</div>
 					<div class="body">
+						<span class="meta-date">20 Februari 2026</span>
 						<h4>Judul Informasi 3</h4>
 						<p>Ringkasan singkat informasi terbaru dari Crembo Media.</p>
+						<div class="card-actions">
+							<button class="btn-ghost" type="button">Baca Selengkapnya</button>
+						</div>
 					</div>
 				</article>
 			</div>
@@ -594,7 +994,39 @@
 	</main>
 
 	<footer class="footer">
-		<div class="container">Wireframe Home Crembo Media - Tahap Low Fidelity (B/W)</div>
+		<div class="footer-main">
+			<div class="container footer-grid">
+				<section class="footer-col" aria-label="Identitas Crembo">
+					<div class="footer-brand">
+						<img class="footer-logo" src="logo crembo hitam.png" alt="Logo Crembo Media">
+						<div>
+							<h4 class="footer-title">Crew Multimedia Baciro</h4>
+							<p class="footer-sub">Paroki Kristus Raja Baciro - Yogyakarta</p>
+						</div>
+					</div>
+					<p class="footer-sub">Platform informasi, jadwal streaming, agenda, dan pengumuman internal komunitas.</p>
+				</section>
+				<section class="footer-col" aria-label="Kontak">
+					<h4 class="footer-title">Kontak</h4>
+					<ul class="contact-list">
+						<li><strong>Email</strong> : crembomedia@example.com</li>
+						<li><strong>Telepon</strong> : 08xx-xxxx-xxxx</li>
+						<li><strong>Alamat</strong> : Jl. Melati Wetan 47, Baciro, Yogyakarta</li>
+					</ul>
+				</section>
+				<section class="footer-col" aria-label="Media sosial">
+					<h4 class="footer-title">Media Sosial</h4>
+					<ul class="social-list">
+						<li class="social-item"><span class="social-dot">IG</span><span>@crembomedia</span></li>
+						<li class="social-item"><span class="social-dot">YT</span><span>Crembo Media Official</span></li>
+						<li class="social-item"><span class="social-dot">WA</span><span>Admin Pelayanan Multimedia</span></li>
+					</ul>
+				</section>
+			</div>
+		</div>
+		<div class="footer-bottom">
+			<div class="container">&copy; 2026 Crew Multimedia Baciro - Low Fidelity Wireframe</div>
+		</div>
 	</footer>
 
 	<script>
@@ -602,6 +1034,11 @@
 		const mainNav = document.getElementById("mainNav");
 		const searchForm = document.getElementById("searchForm");
 		const searchInput = document.getElementById("searchInput");
+		const carouselTrack = document.getElementById("carouselTrack");
+		const carouselPrev = document.getElementById("carouselPrev");
+		const carouselNext = document.getElementById("carouselNext");
+		const carouselDots = document.getElementById("carouselDots");
+		const slideCount = carouselTrack.children.length;
 
 		menuToggle.addEventListener("click", function () {
 			const isOpen = mainNav.classList.toggle("open");
@@ -613,6 +1050,37 @@
 			const keyword = searchInput.value.trim();
 			alert(keyword ? "Simulasi pencarian: " + keyword : "Masukkan kata kunci pencarian.");
 		});
+
+		function buildDots() {
+			for (let i = 0; i < slideCount; i += 1) {
+				const dot = document.createElement("span");
+				dot.className = "dot";
+				if (i === 0) {
+					dot.classList.add("active");
+				}
+				carouselDots.appendChild(dot);
+			}
+		}
+
+		function syncActiveDot() {
+			const slideWidth = carouselTrack.clientWidth;
+			const activeIndex = Math.round(carouselTrack.scrollLeft / slideWidth);
+			const dots = carouselDots.querySelectorAll(".dot");
+			dots.forEach(function (dot, index) {
+				dot.classList.toggle("active", index === activeIndex);
+			});
+		}
+
+		function scrollCarousel(direction) {
+			const step = carouselTrack.clientWidth;
+			carouselTrack.scrollBy({ left: direction * step, behavior: "smooth" });
+		}
+
+		buildDots();
+		carouselTrack.addEventListener("scroll", syncActiveDot);
+		carouselPrev.addEventListener("click", function () { scrollCarousel(-1); });
+		carouselNext.addEventListener("click", function () { scrollCarousel(1); });
+
 	</script>
 </body>
 </html>
