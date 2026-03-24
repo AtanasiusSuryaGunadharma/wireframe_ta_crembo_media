@@ -40,6 +40,9 @@
 		.top-header {
 			border-bottom: 2px solid var(--line);
 			background: var(--surface);
+			position: sticky;
+			top: 0;
+			z-index: 1200;
 		}
 
 		.top-header .container {
@@ -83,6 +86,9 @@
 		.nav-wrap {
 			background: var(--surface);
 			border-bottom: 2px solid var(--line);
+			position: sticky;
+			top: var(--header-h, 124px);
+			z-index: 1150;
 		}
 
 		.nav-row {
@@ -789,7 +795,7 @@
 	</style>
 </head>
 <body>
-	<header class="top-header">
+	<header class="top-header" id="topHeader">
 		<div class="container">
 			<div class="logo-box">
 				<img src="logo crembo hitam.png" alt="Logo Crembo Media">
@@ -811,7 +817,7 @@
 					<li><a href="jadwal-streaming.html">Jadwal Streaming</a></li>
 					<li><a href="agenda.html">Agenda</a></li>
 					<li><a href="pengumuman.html">Pengumuman</a></li>
-					<li><a href="#">Form Pendaftaran</a></li>
+					<li><a href="form-pendaftaran.html">Form Pendaftaran</a></li>
 				</ul>
 			</nav>
 			<div class="right-tools">
@@ -1076,6 +1082,7 @@
 		<section class="section" aria-label="Form pendaftaran">
 			<div class="section-title">
 				<h3>Form Pendaftaran</h3>
+				<a class="btn-ghost" href="form-pendaftaran.html">Lihat Semua</a>
 			</div>
 			<div class="cards-2">
 				<article class="card">
@@ -1083,6 +1090,10 @@
 					<div class="body">
 						<h4>Pendaftaran Kegiatan Umum</h4>
 						<p>Digunakan untuk open recruitment atau agenda yang terbuka untuk umum.</p>
+						<div class="card-actions">
+							<a class="btn-ghost" href="form-pendaftaran-detail.html">Lihat Detail</a>
+							<a class="btn-primary" href="form-pendaftaran-detail.html">Isi Form</a>
+						</div>
 					</div>
 				</article>
 				<article class="card">
@@ -1090,6 +1101,10 @@
 					<div class="body">
 						<h4>Pendaftaran Khusus Anggota</h4>
 						<p>Digunakan untuk kegiatan internal dan pendaftaran berbasis akun anggota.</p>
+						<div class="card-actions">
+							<a class="btn-ghost" href="form-pendaftaran-detail.html">Lihat Detail</a>
+							<a class="btn-primary" href="form-pendaftaran-detail.html">Isi Form</a>
+						</div>
 					</div>
 				</article>
 			</div>
@@ -1133,6 +1148,7 @@
 	</footer>
 
 	<script>
+		const topHeader = document.getElementById("topHeader");
 		const menuToggle = document.getElementById("menuToggle");
 		const mainNav = document.getElementById("mainNav");
 		const searchForm = document.getElementById("searchForm");
@@ -1142,6 +1158,14 @@
 		const carouselNext = document.getElementById("carouselNext");
 		const carouselDots = document.getElementById("carouselDots");
 		const slideCount = carouselTrack.children.length;
+
+		function syncStickyOffset() {
+			const headerHeight = topHeader ? topHeader.offsetHeight : 124;
+			document.documentElement.style.setProperty("--header-h", headerHeight + "px");
+		}
+
+		syncStickyOffset();
+		window.addEventListener("resize", syncStickyOffset);
 
 		menuToggle.addEventListener("click", function () {
 			const isOpen = mainNav.classList.toggle("open");

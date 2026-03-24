@@ -3,30 +3,43 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Detail Pengumuman - Wireframe</title>
+  <title>Form Pendaftaran - Wireframe</title>
   <style>
     :root {
       --bg: #f2f2f2;
       --surface: #ffffff;
-      --ink: #141414;
-      --muted: #666666;
+      --ink: #151515;
+      --muted: #656565;
       --line: #202020;
       --line-soft: #c4c4c4;
       --hover: #ececec;
+      --header-h: 118px;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.47; }
+    body { margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--ink); }
     a { color: inherit; text-decoration: none; }
     .container { width: min(1140px, 94vw); margin: 0 auto; }
 
-    .top-header { border-bottom: 2px solid var(--line); background: var(--surface); position: sticky; top: 0; z-index: 1200; }
+    .top-header {
+      border-bottom: 2px solid var(--line);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 1200;
+    }
     .top-header .container { display: grid; grid-template-columns: 92px 1fr; gap: 14px; align-items: center; padding: 14px 0; }
     .logo-box { width: 86px; height: 86px; border: 2px solid var(--line); display: grid; place-items: center; background: #fff; padding: 6px; }
     .logo-box img { max-width: 100%; max-height: 100%; object-fit: contain; filter: grayscale(100%); }
     .brand h1 { margin: 0; font-size: clamp(1.3rem, 2.7vw, 1.9rem); text-transform: uppercase; letter-spacing: 0.35px; }
     .brand p { margin: 4px 0 0; color: var(--muted); font-size: 0.92rem; }
 
-    .nav-wrap { background: var(--surface); border-bottom: 2px solid var(--line); position: sticky; top: var(--header-h, 118px); z-index: 1150; }
+    .nav-wrap {
+      background: var(--surface);
+      border-bottom: 2px solid var(--line);
+      position: sticky;
+      top: var(--header-h);
+      z-index: 1150;
+    }
     .nav-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; flex-wrap: wrap; }
     nav ul { margin: 0; padding: 0; list-style: none; display: flex; gap: 6px; flex-wrap: wrap; }
     nav a { display: inline-block; padding: 8px 10px; border: 1px solid transparent; font-size: 0.94rem; }
@@ -40,83 +53,51 @@
     .btn-primary { background: #121212; color: #fff; border-color: #121212; }
     .btn-primary:hover { background: #2c2c2c; }
 
-    .hero {
-      min-height: 276px;
-      position: relative;
-      display: grid;
-      place-items: center;
-      text-align: center;
-      padding: 24px 16px;
-      border-bottom: 2px solid var(--line);
-      overflow: hidden;
-      isolation: isolate;
-    }
-    .hero::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image: url("IMG_1970.JPG");
-      background-size: cover;
-      background-position: center;
-      filter: grayscale(100%);
-      z-index: -2;
-    }
-    .badge { display: inline-block; border: 1px solid #d7d7d7; background: rgba(255,255,255,0.2); color: #fff; border-radius: 999px; padding: 4px 12px; font-size: 0.84rem; }
-    .hero h2 { margin: 10px 0 0; color: #fff; font-size: clamp(1.9rem, 4.5vw, 3.25rem); text-transform: uppercase; line-height: 1.1; text-shadow: 0 2px 6px rgba(0,0,0,.45); }
-    .hero-meta { margin-top: 10px; color: #ececec; font-size: 0.9rem; }
+    .hero { min-height: 235px; position: relative; display: grid; place-items: center; text-align: center; padding: 16px; border-bottom: 2px solid var(--line); overflow: hidden; isolation: isolate; }
+    .hero::before { content: ""; position: absolute; inset: 0; background-image: url("IMG_1970.JPG"); background-size: cover; background-position: center; filter: grayscale(100%); z-index: -2; }
+    .hero::after { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.48); z-index: -1; }
+    .hero h2 { margin: 0; color: #fff; font-size: clamp(1.9rem, 4.4vw, 3.1rem); text-transform: uppercase; text-shadow: 0 2px 6px rgba(0,0,0,0.45); }
+    .hero p { margin: 8px 0 0; color: #ececec; font-size: 0.95rem; }
 
     .breadcrumb-wrap { border-bottom: 1px solid var(--line-soft); background: #fafafa; }
     .breadcrumb { margin: 0; padding: 11px 0; list-style: none; display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.88rem; color: #545454; }
     .breadcrumb li + li::before { content: "/"; margin-right: 10px; color: #8a8a8a; }
 
-    .content { padding: 22px 0 34px; }
-    .article-card { border: 2px solid var(--line); background: #fff; padding: 16px; max-width: 980px; margin: 0 auto; }
-    .article-card h3 { margin: 0 0 10px; font-size: clamp(1.35rem, 2.5vw, 2rem); line-height: 1.22; text-transform: uppercase; }
-    .doc-preview {
-      border: 2px solid #2e2e2e;
-      margin: 8px 0 16px;
-      padding: 12px;
-      background: #fcfcfc;
-    }
-    .doc-preview h4 { margin: 0 0 10px; text-align: center; font-size: 1rem; }
-    .post-header-preview {
-      min-height: 220px;
-      border: 1px solid #4b4b4b;
-      background: repeating-linear-gradient(135deg,#f8f8f8,#f8f8f8 12px,#efefef 12px,#efefef 24px);
-      display: grid;
-      place-items: center;
-      color: #5b5b5b;
-      text-align: center;
-      padding: 12px;
-      font-size: 0.92rem;
-    }
+    .content { padding: 24px 0 34px; }
+    .filter-card { border: 2px solid var(--line); background: #fff; padding: 14px; margin-bottom: 18px; }
+    .filter-grid { display: grid; grid-template-columns: 2fr 1fr auto auto; gap: 8px; align-items: end; }
+    .field { display: grid; gap: 5px; }
+    .field label { font-size: 0.84rem; color: #4f4f4f; }
+    .field input, .field select { border: 1px solid var(--line-soft); background: #fff; padding: 8px 10px; font-size: 0.9rem; }
+    .meta-line { margin: 0 0 10px; font-size: 0.84rem; color: #636363; }
 
-    .article-card p { margin: 0 0 12px; font-size: 0.95rem; color: #3f3f3f; text-align: justify; }
-    .inline-image {
-      min-height: 240px;
+    .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .card { border: 1px solid var(--line-soft); background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
+    .thumb { min-height: 145px; border-bottom: 1px solid var(--line-soft); background: repeating-linear-gradient(135deg,#f8f8f8,#f8f8f8 12px,#efefef 12px,#efefef 24px); display: grid; place-items: center; color: #666; }
+    .body { padding: 11px; }
+    .title { margin: 0 0 8px; font-size: 1.03rem; }
+    .meta { margin: 0 0 8px; display: grid; gap: 4px; font-size: 0.85rem; color: #555; }
+    .desc { margin: 0; font-size: 0.9rem; color: #4d4d4d; min-height: 54px; }
+    .lampiran { margin: 10px 0 0; padding: 8px; border: 1px solid #d7d7d7; background: #f8f8f8; font-size: 0.82rem; color: #555; }
+    .actions { margin-top: 10px; }
+    .actions .btn,
+    .actions .btn-primary {
+      display: block;
+      width: 100%;
+      text-align: center;
+    }
+    .btn-disabled {
+      display: block;
+      width: 100%;
       border: 1px solid var(--line-soft);
-      background: repeating-linear-gradient(135deg,#f8f8f8,#f8f8f8 12px,#efefef 12px,#efefef 24px);
-      display: grid;
-      place-items: center;
-      margin: 10px 0 14px;
-      color: #666;
-      padding: 12px;
+      background: #f1f1f1;
+      color: #6a6a6a;
+      padding: 8px 12px;
+      font-size: 0.9rem;
       text-align: center;
+      cursor: not-allowed;
+      user-select: none;
     }
-
-    .attachments-wrap { margin-top: 18px; border-top: 1px solid #d2d2d2; padding-top: 12px; }
-    .attachments-wrap h4 { margin: 0 0 10px; font-size: 1.05rem; }
-    .attachment-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-    .attachment-item {
-      border: 1px solid #d5d5d5;
-      background: #f8f8f8;
-      padding: 9px;
-      font-size: 0.84rem;
-      color: #565656;
-      overflow-wrap: anywhere;
-    }
-
-    .back-wrap { margin-top: 16px; }
 
     .footer { border-top: 2px solid var(--line); border-bottom: 2px solid var(--line); background: linear-gradient(180deg,#f7f7f7 0%,#ececec 100%); margin-top: 10px; color: #2e2e2e; }
     .footer-main { padding: 20px 0 14px; }
@@ -133,7 +114,8 @@
     .footer-bottom { border-top: 1px solid #bebebe; padding: 10px 0 14px; text-align: center; font-size: 0.84rem; color: #5c5c5c; }
 
     @media (max-width: 980px) {
-      .attachment-grid { grid-template-columns: 1fr 1fr; }
+      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .filter-grid { grid-template-columns: 1fr 1fr; }
       .footer-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 760px) {
@@ -142,17 +124,20 @@
       .right-tools { width: 100%; justify-content: stretch; flex-wrap: wrap; }
       .search { flex: 1 1 230px; }
       .search input { width: 100%; }
-      .attachment-grid { grid-template-columns: 1fr; }
+      .filter-grid { grid-template-columns: 1fr; }
+      .cards { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <header class="top-header" id="topHeader">
     <div class="container">
-      <div class="logo-box"><img src="logo crembo hitam.png" alt="Logo Crembo Media"></div>
+      <div class="logo-box">
+        <img src="logo crembo hitam.png" alt="Logo Crembo Media">
+      </div>
       <div class="brand">
         <h1>Crew Multimedia Baciro</h1>
-        <p>Wireframe Low-Fidelity - Detail Pengumuman</p>
+        <p>Wireframe Low-Fidelity - Halaman Form Pendaftaran</p>
       </div>
     </div>
   </header>
@@ -165,8 +150,8 @@
           <li><a href="tentang-crembo.html">Tentang Crembo</a></li>
           <li><a href="jadwal-streaming.html">Jadwal Streaming</a></li>
           <li><a href="agenda.html">Agenda</a></li>
-          <li><a class="active" href="pengumuman.html">Pengumuman</a></li>
-          <li><a href="form-pendaftaran.html">Form Pendaftaran</a></li>
+          <li><a href="pengumuman.html">Pengumuman</a></li>
+          <li><a class="active" href="form-pendaftaran.html">Form Pendaftaran</a></li>
         </ul>
       </nav>
       <div class="right-tools">
@@ -179,11 +164,10 @@
     </div>
   </div>
 
-  <section class="hero" aria-label="Header detail pengumuman">
+  <section class="hero" aria-label="Header form pendaftaran">
     <div>
-      <span class="badge">Pengumuman</span>
-      <h2>Mahasiswa Informatika UAJY Unjuk Kreativitas Melalui Pameran Hasil...</h2>
-      <div class="hero-meta">Super Admin • 19 Februari 2026</div>
+      <h2>Form Pendaftaran</h2>
+      <p>Pilih form yang tersedia dan isi data melalui halaman detail.</p>
     </div>
   </section>
 
@@ -191,46 +175,73 @@
     <div class="container">
       <ol class="breadcrumb" aria-label="Breadcrumb">
         <li><a href="home.html">Beranda</a></li>
-        <li><a href="pengumuman.html">Pengumuman</a></li>
-        <li aria-current="page">Detail</li>
+        <li aria-current="page">Form Pendaftaran</li>
       </ol>
     </div>
   </div>
 
   <main class="container content">
-    <article class="article-card">
-      <h3>Mahasiswa Informatika UAJY Unjuk Kreativitas Melalui Pameran Hasil Karya UAS</h3>
-
-      <div class="doc-preview">
-        <h4>Preview Header Postingan</h4>
-        <div class="post-header-preview">Preview Dokumentasi Header Pengumuman</div>
-      </div>
-
-      <p>Program Studi Informatika Universitas Atma Jaya Yogyakarta (UAJY) menggelar pameran hasil karya Mata Kuliah Pemikiran Desain dan Kreativitas. Pameran diadakan setiap tahun oleh mahasiswa semester satu sebagai bentuk evaluasi proyek akhir semester.</p>
-      <p>Dalam kegiatan ini, mahasiswa dibagi ke dalam beberapa kelompok untuk menampilkan hasil proyek berupa game, aplikasi, dan konsep produk digital lainnya. Panitia menilai pameran ini sebagai ruang latihan presentasi sekaligus kolaborasi lintas tim.</p>
-
-      <div class="inline-image">Preview Dokumentasi Kegiatan 1</div>
-
-      <p>Tahun ini tema pameran adalah "Akar Nusantara: Melestarikan Akar yang Menopang Warisan Kita". Tema ini menekankan keragaman budaya Nusantara yang diolah ke dalam konsep kreatif berbasis teknologi dan media digital.</p>
-      <p>Kegiatan dibuka dengan sambutan dekan dan dosen pengampu. Mereka menekankan bahwa proses kreatif harus dibangun dari pemahaman masalah yang baik, eksplorasi ide, lalu pengujian solusi agar karya yang dihasilkan lebih relevan.</p>
-
-      <div class="inline-image">Preview Dokumentasi Kegiatan 2</div>
-
-      <p>Rangkaian acara ditutup dengan sesi voting karya terbaik dan refleksi bersama. Melalui kegiatan ini, mahasiswa diharapkan semakin percaya diri mengembangkan karya inovatif, komunikatif, serta berdampak untuk komunitas.</p>
-
-      <section class="attachments-wrap" aria-label="File lampiran">
-        <h4>File Lampiran</h4>
-        <div class="attachment-grid">
-          <div class="attachment-item">jadwal-guru-dan-jadwal-kelas.zip</div>
-          <div class="attachment-item">llde-info-laporan-umum.pdf</div>
-          <div class="attachment-item">penolakan-karena-sudah-seminggu.pdf</div>
+    <section class="filter-card" aria-label="Filter form pendaftaran">
+      <div class="filter-grid">
+        <div class="field">
+          <label for="q">Cari Form</label>
+          <input id="q" type="search" placeholder="Cari berdasarkan judul form atau kategori...">
         </div>
-      </section>
-
-      <div class="back-wrap">
-        <a class="btn" href="pengumuman.html">Kembali ke Daftar Pengumuman</a>
+        <div class="field">
+          <label for="sort">Urutkan</label>
+          <select id="sort">
+            <option>Terbaru Lebih Dulu</option>
+            <option>Terlama Lebih Dulu</option>
+            <option>Judul A-Z</option>
+          </select>
+        </div>
+        <button class="btn-primary" type="button">Cari</button>
+        <button class="btn" type="button">Reset</button>
       </div>
-    </article>
+    </section>
+
+    <p class="meta-line">Menampilkan 3 form pendaftaran</p>
+
+    <section class="cards" aria-label="Daftar form pendaftaran">
+      <article class="card">
+        <div class="thumb">Preview Form</div>
+        <div class="body">
+          <h3 class="title">Form Pendaftaran Open Recruitment</h3>
+          <p class="meta">31 Mar 2026<br>Aktif<br>Untuk umum</p>
+          <p class="desc">Digunakan untuk pendaftaran calon anggota baru tim multimedia.</p>
+          <div class="lampiran">Kategori: Keanggotaan</div>
+          <div class="actions">
+            <a class="btn-primary" href="form-pendaftaran-detail.html">Lihat Form</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="thumb">Preview Form</div>
+        <div class="body">
+          <h3 class="title">Form Registrasi Pelatihan Operator</h3>
+          <p class="meta">03 Apr 2026<br>Aktif<br>Khusus anggota</p>
+          <p class="desc">Pendaftaran peserta pelatihan teknis kamera, audio, dan live switch.</p>
+          <div class="lampiran">Kategori: Pelatihan</div>
+          <div class="actions">
+            <a class="btn-primary" href="form-pendaftaran-detail.html">Lihat Form</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="thumb">Preview Form</div>
+        <div class="body">
+          <h3 class="title">Form Konfirmasi Kehadiran Briefing</h3>
+          <p class="meta">09 Apr 2026<br>Ditutup<br>Khusus anggota</p>
+          <p class="desc">Konfirmasi kehadiran briefing petugas untuk koordinasi layanan mingguan.</p>
+          <div class="lampiran">Kategori: Kehadiran</div>
+          <div class="actions">
+            <span class="btn-disabled" aria-disabled="true">Sudah Ditutup</span>
+          </div>
+        </div>
+      </article>
+    </section>
   </main>
 
   <footer class="footer">
@@ -244,7 +255,7 @@
               <p class="footer-sub">Paroki Kristus Raja Baciro - Yogyakarta</p>
             </div>
           </div>
-          <p class="footer-sub">Platform informasi, jadwal streaming, agenda, dan pengumuman internal komunitas.</p>
+          <p class="footer-sub">Platform informasi, jadwal streaming, agenda, pengumuman, dan form pendaftaran komunitas.</p>
         </section>
         <section class="footer-col" aria-label="Kontak">
           <h4 class="footer-title">Kontak</h4>
