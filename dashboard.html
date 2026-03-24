@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard - Crembo Media</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #ffffff;
+      color: #141414;
+    }
+    .wrap {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+    .card {
+      width: min(760px, 96vw);
+      border: 2px solid #1f1f1f;
+      background: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(1.3rem, 3vw, 2rem);
+    }
+    p {
+      margin: 12px 0 0;
+      color: #4f4f4f;
+      font-size: 0.95rem;
+    }
+    .role {
+      display: inline-block;
+      margin-top: 14px;
+      border: 1px solid #1f1f1f;
+      background: #f3f3f3;
+      padding: 8px 12px;
+      font-weight: 600;
+    }
+    .actions {
+      margin-top: 18px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      border: 1px solid #1f1f1f;
+      background: #fff;
+      color: #111;
+      padding: 9px 12px;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .btn:hover {
+      background: #efefef;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card" aria-label="Dashboard prototype">
+      <h1>Dashboard Prototype</h1>
+      <p>Halaman dashboard sementara (putih) untuk demo login role.</p>
+      <div id="roleBadge" class="role">Role: -</div>
+      <div class="actions">
+        <a class="btn" href="home.html">Kembali ke Beranda</a>
+        <a class="btn" href="login.html">Keluar / Login Ulang</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const roleBadge = document.getElementById("roleBadge");
+    const params = new URLSearchParams(window.location.search);
+    const role = params.get("role") || "anggota";
+
+    function formatRole(value) {
+      if (value === "super_admin") {
+        return "Super Admin";
+      }
+      if (value === "admin") {
+        return "Admin";
+      }
+      return "Anggota";
+    }
+
+    roleBadge.textContent = "Role: " + formatRole(role);
+  </script>
+</body>
+</html>

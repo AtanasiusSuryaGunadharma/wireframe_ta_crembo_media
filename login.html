@@ -316,6 +316,82 @@
 
     .status.show { display: block; }
 
+    .status.success {
+      background: #ebf7ed;
+      border-color: #9bc4a0;
+      color: #24522d;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.52);
+      display: none;
+      place-items: center;
+      z-index: 1300;
+      padding: 14px;
+    }
+
+    .modal.show {
+      display: grid;
+    }
+
+    .modal-card {
+      width: min(440px, 95vw);
+      border: 2px solid #1f1f1f;
+      background: #fff;
+      padding: 16px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+    }
+
+    .modal-card h4 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .modal-card p {
+      margin: 6px 0 0;
+      font-size: 0.9rem;
+      color: #4f4f4f;
+    }
+
+    .role-grid {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .role-btn,
+    .modal-cancel {
+      width: 100%;
+      border: 1px solid #1f1f1f;
+      background: #fff;
+      color: #111;
+      padding: 10px;
+      font-size: 0.92rem;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .role-btn:hover,
+    .modal-cancel:hover {
+      background: #efefef;
+    }
+
+    .role-btn strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .role-btn span {
+      font-size: 0.82rem;
+      color: #575757;
+    }
+
+    .modal-actions {
+      margin-top: 10px;
+    }
+
     .footer {
       margin-top: auto;
       border-top: 2px solid #1f1f1f;
@@ -491,7 +567,7 @@
 
             <div class="meta-row">
               <label class="remember"><input id="rememberMe" type="checkbox"> Ingat saya</label>
-              <a class="forgot-link" href="#" aria-disabled="true">Lupa kata sandi?</a>
+              <a class="forgot-link" href="forgot-password.html">Lupa kata sandi?</a>
             </div>
 
             <button class="btn-login" type="submit">Masuk</button>
@@ -502,6 +578,30 @@
       </section>
     </div>
   </main>
+
+  <div id="roleModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="roleModalTitle">
+    <div class="modal-card">
+      <h4 id="roleModalTitle">Pilih Jenis Login</h4>
+      <p>Prototipe: pilih role akun untuk melanjutkan ke dashboard sementara.</p>
+      <div class="role-grid">
+        <button class="role-btn" type="button" data-role="super_admin">
+          <strong>Login sebagai Super Admin</strong>
+          <span>Akses penuh sistem</span>
+        </button>
+        <button class="role-btn" type="button" data-role="admin">
+          <strong>Login sebagai Admin</strong>
+          <span>Akses pengelolaan modul utama</span>
+        </button>
+        <button class="role-btn" type="button" data-role="anggota">
+          <strong>Login sebagai Anggota</strong>
+          <span>Akses pengguna anggota tim</span>
+        </button>
+      </div>
+      <div class="modal-actions">
+        <button id="modalCancelBtn" class="modal-cancel" type="button">Batal</button>
+      </div>
+    </div>
+  </div>
 
   <footer class="footer">
     <div class="footer-main">
@@ -545,6 +645,11 @@
     const passwordInput = document.getElementById("password");
     const rememberMeInput = document.getElementById("rememberMe");
     const statusBox = document.getElementById("status");
+    const roleModal = document.getElementById("roleModal");
+    const modalCancelBtn = document.getElementById("modalCancelBtn");
+    const roleButtons = Array.from(document.querySelectorAll(".role-btn"));
+
+    let pendingLoginData = null;
 
     function detectIdentifierType(value) {
       if (value.includes("@")) {
@@ -566,22 +671,58 @@
       }
 
       const type = detectIdentifierType(identifier);
-      const mockSession = {
+      pendingLoginData = {
         identifier: identifier,
         identifierType: type,
         rememberMe: rememberMeInput.checked,
         loginAt: new Date().toISOString()
       };
 
-      localStorage.setItem("crembo-login-session", JSON.stringify(mockSession));
-
-      statusBox.classList.add("show");
-      statusBox.textContent = "Login berhasil. Akun unik terdeteksi sebagai " + type.replace("_", " ") + ". Mengarahkan ke akun Anda...";
-
-      setTimeout(function () {
-        window.location.href = "home.html";
-      }, 900);
+      roleModal.classList.add("show");
     });
+
+    roleButtons.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (!pendingLoginData) {
+          return;
+        }
+
+        const role = btn.dataset.role;
+        const sessionPayload = {
+          identifier: pendingLoginData.identifier,
+          identifierType: pendingLoginData.identifierType,
+          rememberMe: pendingLoginData.rememberMe,
+          loginAt: pendingLoginData.loginAt,
+          role: role
+        };
+
+        localStorage.setItem("crembo-login-session", JSON.stringify(sessionPayload));
+        window.location.href = "dashboard.html?role=" + encodeURIComponent(role);
+      });
+    });
+
+    modalCancelBtn.addEventListener("click", function () {
+      roleModal.classList.remove("show");
+    });
+
+    roleModal.addEventListener("click", function (event) {
+      if (event.target === roleModal) {
+        roleModal.classList.remove("show");
+      }
+    });
+
+    window.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        roleModal.classList.remove("show");
+      }
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("reset") === "success") {
+      statusBox.classList.add("show", "success");
+      statusBox.textContent = "Password berhasil direset. Silakan login dengan password baru.";
+    }
+
   </script>
 </body>
 </html>
