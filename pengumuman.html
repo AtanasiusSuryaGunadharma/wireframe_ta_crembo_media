@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Agenda & Acara - Wireframe</title>
+  <title>Pengumuman - Wireframe</title>
   <style>
     :root {
       --bg: #f2f2f2;
       --surface: #ffffff;
       --ink: #151515;
-      --muted: #656565;
+      --muted: #666666;
       --line: #202020;
       --line-soft: #c4c4c4;
       --hover: #ececec;
@@ -40,34 +40,69 @@
     .btn-primary { background: #121212; color: #fff; border-color: #121212; }
     .btn-primary:hover { background: #2c2c2c; }
 
-    .hero { min-height: 235px; position: relative; display: grid; place-items: center; text-align: center; padding: 16px; border-bottom: 2px solid var(--line); overflow: hidden; isolation: isolate; }
-    .hero::before { content: ""; position: absolute; inset: 0; background-image: url("IMG_1970.JPG"); background-size: cover; background-position: center; filter: grayscale(100%); z-index: -2; }
-    .hero::after { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.48); z-index: -1; }
-    .hero h2 { margin: 0; color: #fff; font-size: clamp(1.9rem, 4.4vw, 3.1rem); text-transform: uppercase; text-shadow: 0 2px 6px rgba(0,0,0,0.45); }
-    .hero p { margin: 8px 0 0; color: #ececec; font-size: 0.95rem; }
+    .hero {
+      min-height: 245px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 20px 16px;
+      border-bottom: 2px solid var(--line);
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("IMG_1970.JPG");
+      background-size: cover;
+      background-position: center;
+      filter: grayscale(100%);
+      z-index: -2;
+    }
+    .hero h2 { margin: 0; color: #fff; font-size: clamp(1.9rem, 4.5vw, 3.1rem); text-transform: uppercase; text-shadow: 0 2px 6px rgba(0,0,0,0.45); }
+    .hero p { margin: 9px 0 0; color: #ececec; font-size: 0.95rem; }
 
     .breadcrumb-wrap { border-bottom: 1px solid var(--line-soft); background: #fafafa; }
     .breadcrumb { margin: 0; padding: 11px 0; list-style: none; display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.88rem; color: #545454; }
     .breadcrumb li + li::before { content: "/"; margin-right: 10px; color: #8a8a8a; }
 
-    .content { padding: 24px 0 34px; }
-    .filter-card { border: 2px solid var(--line); background: #fff; padding: 14px; margin-bottom: 18px; }
+    .content { padding: 20px 0 34px; }
+    .filter-card { border: 2px solid var(--line); background: #fff; padding: 14px; margin-bottom: 14px; }
     .filter-grid { display: grid; grid-template-columns: 2fr 1fr auto auto; gap: 8px; align-items: end; }
     .field { display: grid; gap: 5px; }
     .field label { font-size: 0.84rem; color: #4f4f4f; }
     .field input, .field select { border: 1px solid var(--line-soft); background: #fff; padding: 8px 10px; font-size: 0.9rem; }
-    .meta-line { margin: 0 0 10px; font-size: 0.84rem; color: #636363; }
+    .meta-line { margin: 0 0 12px; font-size: 0.84rem; color: #636363; }
 
-    .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-    .card { border: 1px solid var(--line-soft); background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
-    .thumb { min-height: 145px; border-bottom: 1px solid var(--line-soft); background: repeating-linear-gradient(135deg,#f8f8f8,#f8f8f8 12px,#efefef 12px,#efefef 24px); display: grid; place-items: center; color: #666; }
-    .body { padding: 11px; }
-    .title { margin: 0 0 8px; font-size: 1.03rem; }
-    .meta { margin: 0 0 8px; display: grid; gap: 4px; font-size: 0.85rem; color: #555; }
-    .desc { margin: 0; font-size: 0.9rem; color: #4d4d4d; min-height: 54px; }
-    .lampiran { margin: 10px 0 0; padding: 8px; border: 1px solid #d7d7d7; background: #f8f8f8; font-size: 0.82rem; color: #555; }
-    .actions { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-    .actions a { text-align: center; }
+    .announce-list { display: grid; gap: 14px; }
+    .announce-card {
+      border: 1px solid var(--line-soft);
+      background: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 220px;
+      overflow: hidden;
+    }
+    .thumb {
+      border-right: 1px solid var(--line-soft);
+      background: repeating-linear-gradient(135deg,#f8f8f8,#f8f8f8 12px,#efefef 12px,#efefef 24px);
+      display: grid;
+      place-items: center;
+      color: #666;
+      font-size: 0.92rem;
+      padding: 12px;
+      text-align: center;
+    }
+    .body { padding: 14px 15px; display: grid; align-content: start; gap: 8px; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 0.84rem; color: #555; }
+    .badge { border: 1px solid #bdbdbd; border-radius: 999px; padding: 2px 8px; background: #f4f4f4; }
+    .title { margin: 0; font-size: clamp(1.05rem, 2.1vw, 1.55rem); text-transform: uppercase; line-height: 1.25; }
+    .desc { margin: 0; color: #4b4b4b; font-size: 0.92rem; line-height: 1.48; }
+    .bottom-row { margin-top: 4px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .lampiran { margin: 0; font-size: 0.84rem; color: #575757; }
 
     .footer { border-top: 2px solid var(--line); border-bottom: 2px solid var(--line); background: linear-gradient(180deg,#f7f7f7 0%,#ececec 100%); margin-top: 10px; color: #2e2e2e; }
     .footer-main { padding: 20px 0 14px; }
@@ -84,8 +119,9 @@
     .footer-bottom { border-top: 1px solid #bebebe; padding: 10px 0 14px; text-align: center; font-size: 0.84rem; color: #5c5c5c; }
 
     @media (max-width: 980px) {
-      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .filter-grid { grid-template-columns: 1fr 1fr; }
+      .announce-card { grid-template-columns: 1fr; }
+      .thumb { min-height: 170px; border-right: 0; border-bottom: 1px solid var(--line-soft); }
       .footer-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 760px) {
@@ -95,7 +131,6 @@
       .search { flex: 1 1 230px; }
       .search input { width: 100%; }
       .filter-grid { grid-template-columns: 1fr; }
-      .cards { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -107,7 +142,7 @@
       </div>
       <div class="brand">
         <h1>Crew Multimedia Baciro</h1>
-        <p>Wireframe Low-Fidelity - Halaman Agenda</p>
+        <p>Wireframe Low-Fidelity - Halaman Pengumuman</p>
       </div>
     </div>
   </header>
@@ -119,8 +154,8 @@
           <li><a href="home.html">Home</a></li>
           <li><a href="tentang-crembo.html">Tentang Crembo</a></li>
           <li><a href="jadwal-streaming.html">Jadwal Streaming</a></li>
-          <li><a class="active" href="agenda.html">Agenda</a></li>
-          <li><a href="pengumuman.html">Pengumuman</a></li>
+          <li><a href="agenda.html">Agenda</a></li>
+          <li><a class="active" href="pengumuman.html">Pengumuman</a></li>
           <li><a href="#">Form Pendaftaran</a></li>
         </ul>
       </nav>
@@ -134,10 +169,10 @@
     </div>
   </div>
 
-  <section class="hero" aria-label="Header agenda">
+  <section class="hero" aria-label="Header pengumuman">
     <div>
-      <h2>Agenda & Acara</h2>
-      <p>Temukan acara dan kegiatan terbaru Crembo Media</p>
+      <h2>Pengumuman & Informasi</h2>
+      <p>Update terbaru dan informasi penting dari Crembo Media</p>
     </div>
   </section>
 
@@ -145,17 +180,17 @@
     <div class="container">
       <ol class="breadcrumb" aria-label="Breadcrumb">
         <li><a href="home.html">Beranda</a></li>
-        <li aria-current="page">Agenda</li>
+        <li aria-current="page">Pengumuman</li>
       </ol>
     </div>
   </div>
 
   <main class="container content">
-    <section class="filter-card" aria-label="Filter agenda">
+    <section class="filter-card" aria-label="Filter pengumuman">
       <div class="filter-grid">
         <div class="field">
-          <label for="q">Cari Agenda</label>
-          <input id="q" type="search" placeholder="Cari berdasarkan judul, lokasi, deskripsi...">
+          <label for="q">Cari Pengumuman</label>
+          <input id="q" type="search" placeholder="Cari berdasarkan judul, isi, atau kategori...">
         </div>
         <div class="field">
           <label for="sort">Urutkan</label>
@@ -170,47 +205,69 @@
       </div>
     </section>
 
-    <p class="meta-line">Menampilkan 3 agenda</p>
+    <p class="meta-line">Menampilkan 4 pengumuman</p>
 
-    <section class="cards" aria-label="Daftar agenda">
-      <article class="card">
-        <div class="thumb">Preview Gambar Agenda</div>
+    <section class="announce-list" aria-label="Daftar pengumuman">
+      <article class="announce-card">
+        <div class="thumb">Preview Dokumen Pengumuman</div>
         <div class="body">
-          <h3 class="title">Promo Pembuatan website</h3>
-          <p class="meta">21 Feb 2026<br>10:50 - 18:50 WIB<br>STP Ampta Yogyakarta</p>
-          <p class="desc">Program studi Informatika UAJY menyelenggarakan kuliah umum bertema riset pengguna.</p>
-          <div class="lampiran">Lampiran: CVI5EMN4...pdf</div>
-          <div class="actions">
-            <a class="btn" href="agenda-detail.html">Lihat Selengkapnya</a>
-            <a class="btn-primary" href="agenda-detail.html">Daftar</a>
+          <div class="meta-row">
+            <span class="badge">Pengumuman</span>
+            <span>19 Februari 2026</span>
+          </div>
+          <h3 class="title">Mahasiswa Informatika UAJY Unjuk Kreativitas Melalui Pameran Hasil Karya UAS</h3>
+          <p class="desc">Program Studi Informatika Universitas Atma Jaya Yogyakarta menggelar pameran hasil karya mahasiswa semester 1. Kegiatan memamerkan proyek game dan aplikasi yang dikembangkan selama satu semester.</p>
+          <div class="bottom-row">
+            <p class="lampiran">3 file lampiran</p>
+            <a class="btn-primary" href="pengumuman-detail.html">Baca Selengkapnya</a>
           </div>
         </div>
       </article>
 
-      <article class="card">
-        <div class="thumb">Preview Gambar Agenda</div>
+      <article class="announce-card">
+        <div class="thumb">Preview Dokumen Pengumuman</div>
         <div class="body">
-          <h3 class="title">Pelatihan Operator Streaming</h3>
-          <p class="meta">03 Apr 2026<br>13:00 - 16:00 WIB<br>Ruang Multimedia</p>
-          <p class="desc">Pelatihan teknis live streaming untuk anggota baru dan operator aktif.</p>
-          <div class="lampiran">Lampiran: panduan-operator.pdf</div>
-          <div class="actions">
-            <a class="btn" href="agenda-detail.html">Lihat Selengkapnya</a>
-            <a class="btn-primary" href="agenda-detail.html">Daftar</a>
+          <div class="meta-row">
+            <span class="badge">Informasi</span>
+            <span>15 Februari 2026</span>
+          </div>
+          <h3 class="title">Perubahan Jadwal Gladi Bersih Pekan Suci</h3>
+          <p class="desc">Terdapat penyesuaian jadwal gladi bersih petugas multimedia. Seluruh operator, kameramen, dan tim audio diminta memeriksa pembagian sesi terbaru melalui dashboard internal.</p>
+          <div class="bottom-row">
+            <p class="lampiran">1 file lampiran</p>
+            <a class="btn" href="pengumuman-detail.html">Baca Selengkapnya</a>
           </div>
         </div>
       </article>
 
-      <article class="card">
-        <div class="thumb">Preview Gambar Agenda</div>
+      <article class="announce-card">
+        <div class="thumb">Preview Dokumen Pengumuman</div>
         <div class="body">
-          <h3 class="title">Evaluasi Pelayanan Bulanan</h3>
-          <p class="meta">10 Apr 2026<br>19:30 - 21:00 WIB<br>Aula Paroki</p>
-          <p class="desc">Sesi evaluasi bulanan untuk perbaikan alur pelayanan multimedia.</p>
-          <div class="lampiran">Lampiran: notulensi-template.docx</div>
-          <div class="actions">
-            <a class="btn" href="agenda-detail.html">Lihat Selengkapnya</a>
-            <a class="btn" href="#">Pendaftaran Ditutup</a>
+          <div class="meta-row">
+            <span class="badge">Berita</span>
+            <span>10 Februari 2026</span>
+          </div>
+          <h3 class="title">Workshop Singkat Manajemen Konten Siaran</h3>
+          <p class="desc">Crembo mengadakan sesi berbagi praktik terbaik pengelolaan konten siaran untuk media sosial dan live streaming. Materi fokus pada penjadwalan publikasi dan kualitas dokumentasi visual.</p>
+          <div class="bottom-row">
+            <p class="lampiran">2 file lampiran</p>
+            <a class="btn" href="pengumuman-detail.html">Baca Selengkapnya</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="announce-card">
+        <div class="thumb">Preview Dokumen Pengumuman</div>
+        <div class="body">
+          <div class="meta-row">
+            <span class="badge">Pengumuman</span>
+            <span>01 Februari 2026</span>
+          </div>
+          <h3 class="title">Pembaruan Format Laporan Pelayanan Bulanan</h3>
+          <p class="desc">Template laporan pelayanan telah diperbarui untuk memudahkan rekap operator, dokumentasi, serta evaluasi kualitas siaran. Anggota diminta menggunakan format terbaru mulai bulan ini.</p>
+          <div class="bottom-row">
+            <p class="lampiran">2 file lampiran</p>
+            <a class="btn" href="pengumuman-detail.html">Baca Selengkapnya</a>
           </div>
         </div>
       </article>
