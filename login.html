@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - Crembo Media</title>
+  <style>
+    :root {
+      --brand: #1f1f1f;
+      --brand-dark: #0f0f0f;
+      --ink: #111111;
+      --muted: #666666;
+      --line: #b8b8b8;
+      --surface: #ffffff;
+      --glass: rgba(33, 33, 33, 0.68);
+      --overlay: rgba(0, 0, 0, 0.52);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--ink);
+      background: #0d1b3b;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    .video-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      overflow: hidden;
+      background: #0b0b0b;
+    }
+
+    .video-bg video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) contrast(108%);
+    }
+
+    .video-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.36) 0%, rgba(0, 0, 0, 0.62) 100%);
+      pointer-events: none;
+    }
+
+    .top-bar {
+      border-bottom: 2px solid #1f1f1f;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-wrap {
+      border-bottom: 2px solid #1f1f1f;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-row {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .menu-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .menu-list a {
+      display: inline-block;
+      border: 1px solid transparent;
+      padding: 8px 10px;
+      font-size: 0.9rem;
+    }
+
+    .menu-list a:hover,
+    .menu-list a:focus-visible {
+      border-color: #b8b8b8;
+      background: #efefef;
+      outline: none;
+    }
+
+    .container {
+      width: min(1120px, 94vw);
+      margin: 0 auto;
+    }
+
+    .top-row {
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .top-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .top-logo {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      border-radius: 999px;
+      border: 1px solid #bdbdbd;
+      background: #fff;
+      padding: 4px;
+      filter: grayscale(100%);
+    }
+
+    .top-brand h1 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0.2px;
+      text-transform: uppercase;
+    }
+
+    .top-brand p {
+      margin: 2px 0 0;
+      font-size: 0.8rem;
+      color: #555555;
+    }
+
+    .back-link {
+      font-size: 0.88rem;
+      color: #1f1f1f;
+      border: 1px solid #b8b8b8;
+      background: #fff;
+      padding: 7px 10px;
+      border-radius: 8px;
+    }
+
+    .back-link:hover { background: #efefef; }
+
+    .main {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      padding: 38px 0;
+    }
+
+    .stack {
+      width: min(560px, 92vw);
+      display: grid;
+      gap: 14px;
+    }
+
+    .identity-card {
+      background: var(--glass);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .identity-logo {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 6px;
+      background: rgba(255, 255, 255, 0.95);
+      filter: grayscale(100%);
+    }
+
+    .identity-card h2 {
+      margin: 10px 0 4px;
+      font-size: clamp(1.5rem, 3.2vw, 2rem);
+      text-transform: uppercase;
+    }
+
+    .identity-card p {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #e5e7eb;
+    }
+
+    .login-card {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: #fff;
+    }
+
+    .login-head {
+      background: var(--brand);
+      color: #fff;
+      text-align: center;
+      padding: 16px 16px 12px;
+    }
+
+    .login-head h3 {
+      margin: 0;
+      font-size: 1.9rem;
+      letter-spacing: 0.4px;
+    }
+
+    .login-head p {
+      margin: 3px 0 0;
+      font-size: 0.88rem;
+      color: #d4d4d4;
+    }
+
+    .login-body {
+      background: #fff;
+      padding: 16px 18px 18px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      font-size: 0.88rem;
+      color: #2f2f2f;
+      font-weight: 600;
+    }
+
+    .field input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 11px 12px;
+      font-size: 0.93rem;
+      color: #1f1f1f;
+      outline: none;
+    }
+
+    .field input:focus {
+      border-color: #7f7f7f;
+      box-shadow: 0 0 0 3px rgba(20, 20, 20, 0.16);
+    }
+
+    .meta-row {
+      margin: 4px 0 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #4a4a4a;
+      flex-wrap: wrap;
+    }
+
+    .remember {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .forgot-link {
+      color: #1f1f1f;
+      font-weight: 600;
+    }
+
+    .forgot-link:hover { text-decoration: underline; }
+
+    .btn-login {
+      width: 100%;
+      border: 0;
+      border-radius: 8px;
+      background: var(--brand);
+      color: #fff;
+      cursor: pointer;
+      padding: 11px 14px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+
+    .btn-login:hover { background: var(--brand-dark); }
+
+    .login-note {
+      margin: 12px 0 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .status {
+      margin-top: 10px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      border: 1px solid #c4c4c4;
+      background: #f3f3f3;
+      color: #2f2f2f;
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    .status.show { display: block; }
+
+    .footer {
+      margin-top: auto;
+      border-top: 2px solid #1f1f1f;
+      border-bottom: 2px solid #1f1f1f;
+      background: linear-gradient(180deg, #f7f7f7 0%, #ececec 100%);
+      padding: 0;
+      color: #2e2e2e;
+    }
+
+    .footer-main {
+      padding: 22px 0 16px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr 1fr;
+      gap: 18px;
+    }
+
+    .footer-col {
+      border: 1px solid #bdbdbd;
+      background: #fff;
+      padding: 14px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .footer-logo {
+      width: 54px;
+      height: 54px;
+      object-fit: contain;
+      filter: grayscale(100%);
+      border: 1px solid #222;
+      padding: 4px;
+      background: #fff;
+    }
+
+    .footer-title {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .footer-sub {
+      margin: 2px 0 0;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .contact-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+
+    .contact-list strong {
+      display: inline-block;
+      min-width: 70px;
+    }
+
+    .social-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+
+    .social-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .social-dot {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border: 1px solid #222;
+      background: #f4f4f4;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid #bebebe;
+      padding: 10px 0 14px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #5c5c5c;
+    }
+
+    @media (max-width: 760px) {
+      .top-row { min-height: 58px; }
+      .top-brand h1 { font-size: 0.88rem; }
+      .top-brand p { display: none; }
+      .nav-row { min-height: 44px; }
+      .identity-card { padding: 15px; }
+      .login-head h3 { font-size: 1.5rem; }
+      .menu-list { width: 100%; }
+      .menu-list li { flex: 1 1 calc(50% - 6px); }
+      .menu-list a { width: 100%; text-align: center; }
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="video-bg" aria-hidden="true">
+    <video autoplay muted loop playsinline preload="auto">
+      <source src="bg_video_login.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <header class="top-bar">
+    <div class="container top-row">
+      <div class="top-brand">
+        <img class="top-logo" src="logo crembo hitam.png" alt="Logo Crembo Media">
+        <div>
+          <h1>Crew Multimedia Baciro</h1>
+          <p>Sistem Informasi Internal Komunitas</p>
+        </div>
+      </div>
+      <a class="back-link" href="home.html">&larr; Kembali ke Beranda</a>
+    </div>
+  </header>
+
+  <div class="nav-wrap">
+    <div class="container nav-row">
+      <ul class="menu-list" aria-label="Navigasi cepat">
+        <li><a href="home.html">Home</a></li>
+        <li><a href="tentang-crembo.html">Tentang Crembo</a></li>
+        <li><a href="jadwal-streaming.html">Jadwal Streaming</a></li>
+        <li><a href="agenda.html">Agenda</a></li>
+        <li><a href="pengumuman.html">Pengumuman</a></li>
+        <li><a href="form-pendaftaran.html">Form Pendaftaran</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <main class="main">
+    <div class="stack">
+      <section class="identity-card" aria-label="Identitas sistem">
+        <img class="identity-logo" src="logo crembo hitam.png" alt="Logo sistem Crembo">
+        <h2>CREMBO</h2>
+        <p>Sistem Informasi Crew Multimedia Baciro</p>
+      </section>
+
+      <section class="login-card" aria-label="Form login">
+        <div class="login-head">
+          <h3>Masuk Sistem</h3>
+          <p>Silakan masuk dengan akun Anda</p>
+        </div>
+        <div class="login-body">
+          <form id="loginForm">
+            <div class="field">
+              <label for="identifier">Username / No HP / Email</label>
+              <input id="identifier" name="identifier" type="text" placeholder="Masukkan username, no HP, atau email" autocomplete="username" required>
+            </div>
+            <div class="field">
+              <label for="password">Kata Sandi</label>
+              <input id="password" name="password" type="password" placeholder="Masukkan kata sandi" autocomplete="current-password" required>
+            </div>
+
+            <div class="meta-row">
+              <label class="remember"><input id="rememberMe" type="checkbox"> Ingat saya</label>
+              <a class="forgot-link" href="#" aria-disabled="true">Lupa kata sandi?</a>
+            </div>
+
+            <button class="btn-login" type="submit">Masuk</button>
+            <p class="login-note">Dashboard admin, anggota, super admin, dan halaman lupa sandi akan dibuat di tahap berikutnya.</p>
+            <div id="status" class="status" aria-live="polite"></div>
+          </form>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-main">
+      <div class="container footer-grid">
+        <section class="footer-col" aria-label="Identitas Crembo">
+          <div class="footer-brand">
+            <img class="footer-logo" src="logo crembo hitam.png" alt="Logo Crembo Media">
+            <div>
+              <h4 class="footer-title">Crew Multimedia Baciro</h4>
+              <p class="footer-sub">Paroki Kristus Raja Baciro - Yogyakarta</p>
+            </div>
+          </div>
+          <p class="footer-sub">Platform informasi, jadwal streaming, agenda, dan pengumuman internal komunitas.</p>
+        </section>
+        <section class="footer-col" aria-label="Kontak">
+          <h4 class="footer-title">Kontak</h4>
+          <ul class="contact-list">
+            <li><strong>Email</strong> : crembomedia@example.com</li>
+            <li><strong>Telepon</strong> : 08xx-xxxx-xxxx</li>
+            <li><strong>Alamat</strong> : Jl. Melati Wetan 47, Baciro, Yogyakarta</li>
+          </ul>
+        </section>
+        <section class="footer-col" aria-label="Media sosial">
+          <h4 class="footer-title">Media Sosial</h4>
+          <ul class="social-list">
+            <li class="social-item"><span class="social-dot">IG</span><span>@crembomedia</span></li>
+            <li class="social-item"><span class="social-dot">YT</span><span>Crembo Media Official</span></li>
+            <li class="social-item"><span class="social-dot">WA</span><span>Admin Pelayanan Multimedia</span></li>
+          </ul>
+        </section>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">&copy; 2026 Crew Multimedia Baciro - Login Wireframe</div>
+    </div>
+  </footer>
+
+  <script>
+    const loginForm = document.getElementById("loginForm");
+    const identifierInput = document.getElementById("identifier");
+    const passwordInput = document.getElementById("password");
+    const rememberMeInput = document.getElementById("rememberMe");
+    const statusBox = document.getElementById("status");
+
+    function detectIdentifierType(value) {
+      if (value.includes("@")) {
+        return "email";
+      }
+      if (/^[0-9+\-\s]+$/.test(value)) {
+        return "no_hp";
+      }
+      return "username";
+    }
+
+    loginForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+      const identifier = identifierInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!identifier || !password) {
+        return;
+      }
+
+      const type = detectIdentifierType(identifier);
+      const mockSession = {
+        identifier: identifier,
+        identifierType: type,
+        rememberMe: rememberMeInput.checked,
+        loginAt: new Date().toISOString()
+      };
+
+      localStorage.setItem("crembo-login-session", JSON.stringify(mockSession));
+
+      statusBox.classList.add("show");
+      statusBox.textContent = "Login berhasil. Akun unik terdeteksi sebagai " + type.replace("_", " ") + ". Mengarahkan ke akun Anda...";
+
+      setTimeout(function () {
+        window.location.href = "home.html";
+      }, 900);
+    });
+  </script>
+</body>
+</html>
