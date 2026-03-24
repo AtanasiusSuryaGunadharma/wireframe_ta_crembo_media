@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="id">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Wireframe Home - Crembo Media</title>
+	<style>
+		:root {
+			--bg: #f3f3f3;
+			--surface: #ffffff;
+			--ink: #111111;
+			--muted: #666666;
+			--line: #1f1f1f;
+			--line-soft: #b8b8b8;
+			--hover: #ebebeb;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+			background: var(--bg);
+			color: var(--ink);
+			line-height: 1.4;
+		}
+
+		a {
+			color: inherit;
+			text-decoration: none;
+		}
+
+		.container {
+			width: min(1120px, 94vw);
+			margin: 0 auto;
+		}
+
+		.top-header {
+			border-bottom: 2px solid var(--line);
+			background: var(--surface);
+		}
+
+		.top-header .container {
+			display: grid;
+			grid-template-columns: 100px 1fr;
+			gap: 16px;
+			align-items: center;
+			padding: 16px 0;
+		}
+
+		.logo-box {
+			width: 92px;
+			height: 92px;
+			border: 2px solid var(--line);
+			display: grid;
+			place-items: center;
+			padding: 6px;
+			background: #fff;
+		}
+
+		.logo-box img {
+			max-width: 100%;
+			max-height: 100%;
+			object-fit: contain;
+			filter: grayscale(100%);
+		}
+
+		.brand h1 {
+			margin: 0;
+			font-size: clamp(1.5rem, 3vw, 2.1rem);
+			text-transform: uppercase;
+			letter-spacing: 0.4px;
+		}
+
+		.brand p {
+			margin: 4px 0 0;
+			color: var(--muted);
+			font-size: 0.95rem;
+		}
+
+		.nav-wrap {
+			background: var(--surface);
+			border-bottom: 2px solid var(--line);
+		}
+
+		.nav-row {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			padding: 10px 0;
+		}
+
+		.menu-toggle {
+			display: none;
+			border: 1px solid var(--line);
+			background: #fff;
+			padding: 8px 10px;
+			font-size: 0.9rem;
+			cursor: pointer;
+		}
+
+		nav ul {
+			margin: 0;
+			padding: 0;
+			list-style: none;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			flex-wrap: wrap;
+		}
+
+		nav a {
+			display: inline-block;
+			padding: 8px 10px;
+			border: 1px solid transparent;
+			font-size: 0.95rem;
+		}
+
+		nav a:hover,
+		nav a:focus-visible {
+			border-color: var(--line-soft);
+			background: var(--hover);
+			outline: none;
+		}
+
+		.right-tools {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			flex: 0 0 auto;
+		}
+
+		.search {
+			display: flex;
+			align-items: center;
+			border: 1px solid var(--line);
+			background: #fff;
+		}
+
+		.search input {
+			border: 0;
+			outline: none;
+			padding: 8px 10px;
+			width: clamp(120px, 18vw, 190px);
+			font-size: 0.9rem;
+			background: transparent;
+		}
+
+		.search button,
+		.btn-login,
+		.btn-ghost {
+			border: 1px solid var(--line);
+			background: #fff;
+			color: var(--ink);
+			padding: 8px 12px;
+			cursor: pointer;
+			font-size: 0.9rem;
+		}
+
+		.search button:hover,
+		.btn-login:hover,
+		.btn-ghost:hover {
+			background: var(--hover);
+		}
+
+		.hero {
+			margin-top: 22px;
+			background: var(--surface);
+			border: 2px solid var(--line);
+			padding: 24px;
+			min-height: 280px;
+			display: grid;
+			grid-template-columns: 1.3fr 1fr;
+			gap: 24px;
+		}
+
+		.hero-copy h2 {
+			margin: 0 0 10px;
+			font-size: clamp(1.3rem, 3vw, 2rem);
+		}
+
+		.hero-copy p {
+			margin: 0 0 18px;
+			color: var(--muted);
+			max-width: 60ch;
+		}
+
+		.frame {
+			border: 2px dashed #7a7a7a;
+			background: repeating-linear-gradient(
+				135deg,
+				#f8f8f8,
+				#f8f8f8 12px,
+				#efefef 12px,
+				#efefef 24px
+			);
+			min-height: 210px;
+			display: grid;
+			place-items: center;
+			text-align: center;
+			color: #555;
+			font-size: 0.95rem;
+			padding: 12px;
+		}
+
+		.section {
+			margin-top: 22px;
+			background: var(--surface);
+			border: 2px solid var(--line);
+			padding: 18px;
+		}
+
+		.section-title {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			margin-bottom: 12px;
+		}
+
+		.section-title h3 {
+			margin: 0;
+			font-size: 1.2rem;
+			text-transform: uppercase;
+			letter-spacing: 0.2px;
+		}
+
+		.about-grid,
+		.cards-3,
+		.cards-2 {
+			display: grid;
+			gap: 14px;
+		}
+
+		.about-grid {
+			grid-template-columns: 1.15fr 1fr;
+			align-items: start;
+		}
+
+		.about-text {
+			border: 1px solid var(--line-soft);
+			padding: 12px;
+			min-height: 190px;
+		}
+
+		.about-text p {
+			margin: 0 0 12px;
+			color: #4f4f4f;
+		}
+
+		.cards-3 {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+
+		.cards-2 {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.card {
+			border: 1px solid var(--line-soft);
+			background: #fff;
+		}
+
+		.card .thumb {
+			border-bottom: 1px solid var(--line-soft);
+			min-height: 120px;
+		}
+
+		.card .body {
+			padding: 10px;
+		}
+
+		.card h4 {
+			margin: 0 0 8px;
+			font-size: 1rem;
+			min-height: 40px;
+		}
+
+		.card p {
+			margin: 0;
+			font-size: 0.9rem;
+			color: #505050;
+		}
+
+		.schedule-table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 0.95rem;
+		}
+
+		.schedule-table th,
+		.schedule-table td {
+			border: 1px solid var(--line-soft);
+			padding: 9px 10px;
+			text-align: left;
+		}
+
+		.schedule-table th {
+			background: #efefef;
+			font-weight: 600;
+		}
+
+		.agenda-list {
+			margin: 0;
+			padding: 0;
+			list-style: none;
+			display: grid;
+			gap: 10px;
+		}
+
+		.agenda-item {
+			border: 1px solid var(--line-soft);
+			padding: 10px 12px;
+			display: flex;
+			justify-content: space-between;
+			gap: 10px;
+			align-items: center;
+		}
+
+		.agenda-item small {
+			color: #555;
+		}
+
+		.footer {
+			margin-top: 26px;
+			border-top: 2px solid var(--line);
+			border-bottom: 2px solid var(--line);
+			background: #fff;
+			padding: 16px 0;
+			text-align: center;
+			color: #444;
+			font-size: 0.92rem;
+		}
+
+		@media (max-width: 980px) {
+			.hero,
+			.about-grid,
+			.cards-3,
+			.cards-2 {
+				grid-template-columns: 1fr;
+			}
+
+			.right-tools {
+				width: 100%;
+				justify-content: flex-end;
+			}
+
+			.nav-row {
+				flex-wrap: wrap;
+			}
+		}
+
+		@media (max-width: 760px) {
+			.top-header .container {
+				grid-template-columns: 1fr;
+				text-align: center;
+			}
+
+			.logo-box {
+				margin: 0 auto;
+			}
+
+			.menu-toggle {
+				display: inline-block;
+			}
+
+			nav {
+				width: 100%;
+				display: none;
+			}
+
+			nav.open {
+				display: block;
+			}
+
+			nav ul {
+				flex-direction: column;
+				align-items: stretch;
+			}
+
+			nav a {
+				border: 1px solid var(--line-soft);
+			}
+
+			.right-tools {
+				width: 100%;
+				justify-content: stretch;
+				flex-wrap: wrap;
+			}
+
+			.search {
+				flex: 1 1 220px;
+			}
+
+			.search input {
+				width: 100%;
+			}
+
+			.btn-login {
+				flex: 1 1 auto;
+			}
+
+			.section-title {
+				flex-direction: column;
+				align-items: flex-start;
+			}
+		}
+	</style>
+</head>
+<body>
+	<header class="top-header">
+		<div class="container">
+			<div class="logo-box">
+				<img src="logo crembo hitam.png" alt="Logo Crembo Media">
+			</div>
+			<div class="brand">
+				<h1>Crew Multimedia Baciro</h1>
+				<p>Wireframe Low-Fidelity - Beranda Website Crembo Media</p>
+			</div>
+		</div>
+	</header>
+
+	<div class="nav-wrap">
+		<div class="container nav-row">
+			<button id="menuToggle" class="menu-toggle" type="button" aria-controls="mainNav" aria-expanded="false">Menu</button>
+			<nav id="mainNav" aria-label="Navigasi utama">
+				<ul>
+					<li><a href="#">Home</a></li>
+					<li><a href="#">Tentang Crembo</a></li>
+					<li><a href="#">Jadwal Streaming</a></li>
+					<li><a href="#">Agenda</a></li>
+					<li><a href="#">Pengumuman</a></li>
+					<li><a href="#">Form Pendaftaran</a></li>
+				</ul>
+			</nav>
+			<div class="right-tools">
+				<form class="search" id="searchForm">
+					<input id="searchInput" type="search" placeholder="Cari informasi..." aria-label="Cari informasi">
+					<button type="submit">Search</button>
+				</form>
+				<button class="btn-login" type="button">Login</button>
+			</div>
+		</div>
+	</div>
+
+	<main class="container">
+		<section class="hero" aria-label="Hero section">
+			<div class="hero-copy">
+				<h2>Selamat Datang di Website Crembo Media</h2>
+				<p>
+					Halaman ini adalah wireframe hitam-putih untuk menggambarkan struktur utama halaman home sebelum
+					masuk ke tahap desain high-fidelity.
+				</p>
+				<button class="btn-ghost" type="button">Lihat Informasi Utama</button>
+			</div>
+			<div class="frame">Placeholder Banner / Carousel</div>
+		</section>
+
+		<section class="section" aria-label="Tentang Crembo">
+			<div class="section-title">
+				<h3>Tentang Crembo</h3>
+			</div>
+			<div class="about-grid">
+				<div class="about-text">
+					<p>
+						Ringkasan profil organisasi, visi pelayanan multimedia, serta peran Crembo dalam mendukung kegiatan
+						liturgi dan agenda komunitas.
+					</p>
+					<p>
+						Blok ini bisa dipakai untuk ringkasan deskriptif 1-2 paragraf dengan tombol menuju halaman detail.
+					</p>
+					<button class="btn-ghost" type="button">Pelajari Lebih Lanjut</button>
+				</div>
+				<div class="frame">Placeholder Foto / Video Profil</div>
+			</div>
+		</section>
+
+		<section class="section" aria-label="Jadwal Streaming">
+			<div class="section-title">
+				<h3>Jadwal Streaming</h3>
+				<button class="btn-ghost" type="button">Lihat Semua</button>
+			</div>
+			<table class="schedule-table">
+				<thead>
+					<tr>
+						<th>Tanggal</th>
+						<th>Waktu</th>
+						<th>Jenis Misa</th>
+						<th>Petugas Dibutuhkan</th>
+						<th>Status</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Jumat, 27 Maret 2026</td>
+						<td>18.00</td>
+						<td>Misa Harian</td>
+						<td>Operator, Kameramen</td>
+						<td>Tersedia</td>
+					</tr>
+					<tr>
+						<td>Minggu, 29 Maret 2026</td>
+						<td>08.00</td>
+						<td>Misa Mingguan</td>
+						<td>Operator, Kameramen, Supervisor</td>
+						<td>Terisi Sebagian</td>
+					</tr>
+					<tr>
+						<td>Kamis, 02 April 2026</td>
+						<td>19.00</td>
+						<td>Misa Kamis Putih</td>
+						<td>Semua Slot</td>
+						<td>Pendaftaran Dibuka</td>
+					</tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section class="section" aria-label="Agenda">
+			<div class="section-title">
+				<h3>Agenda</h3>
+				<button class="btn-ghost" type="button">Lihat Semua</button>
+			</div>
+			<ul class="agenda-list">
+				<li class="agenda-item">
+					<span>Briefing Petugas Pekan Suci</span>
+					<small>30 Maret 2026</small>
+				</li>
+				<li class="agenda-item">
+					<span>Pelatihan Operator Streaming</span>
+					<small>03 April 2026</small>
+				</li>
+				<li class="agenda-item">
+					<span>Evaluasi Pelayanan Bulanan</span>
+					<small>10 April 2026</small>
+				</li>
+			</ul>
+		</section>
+
+		<section class="section" aria-label="Pengumuman atau berita">
+			<div class="section-title">
+				<h3>Pengumuman / Informasi / Berita</h3>
+				<button class="btn-ghost" type="button">Lihat Semua</button>
+			</div>
+			<div class="cards-3">
+				<article class="card">
+					<div class="thumb frame">Placeholder Gambar</div>
+					<div class="body">
+						<h4>Judul Informasi 1</h4>
+						<p>Ringkasan singkat informasi terbaru dari Crembo Media.</p>
+					</div>
+				</article>
+				<article class="card">
+					<div class="thumb frame">Placeholder Gambar</div>
+					<div class="body">
+						<h4>Judul Informasi 2</h4>
+						<p>Ringkasan singkat informasi terbaru dari Crembo Media.</p>
+					</div>
+				</article>
+				<article class="card">
+					<div class="thumb frame">Placeholder Gambar</div>
+					<div class="body">
+						<h4>Judul Informasi 3</h4>
+						<p>Ringkasan singkat informasi terbaru dari Crembo Media.</p>
+					</div>
+				</article>
+			</div>
+		</section>
+
+		<section class="section" aria-label="Form pendaftaran">
+			<div class="section-title">
+				<h3>Form Pendaftaran</h3>
+			</div>
+			<div class="cards-2">
+				<article class="card">
+					<div class="thumb frame">Placeholder Form Pendaftaran Umum</div>
+					<div class="body">
+						<h4>Pendaftaran Kegiatan Umum</h4>
+						<p>Digunakan untuk open recruitment atau agenda yang terbuka untuk umum.</p>
+					</div>
+				</article>
+				<article class="card">
+					<div class="thumb frame">Placeholder Form Pendaftaran Anggota</div>
+					<div class="body">
+						<h4>Pendaftaran Khusus Anggota</h4>
+						<p>Digunakan untuk kegiatan internal dan pendaftaran berbasis akun anggota.</p>
+					</div>
+				</article>
+			</div>
+		</section>
+	</main>
+
+	<footer class="footer">
+		<div class="container">Wireframe Home Crembo Media - Tahap Low Fidelity (B/W)</div>
+	</footer>
+
+	<script>
+		const menuToggle = document.getElementById("menuToggle");
+		const mainNav = document.getElementById("mainNav");
+		const searchForm = document.getElementById("searchForm");
+		const searchInput = document.getElementById("searchInput");
+
+		menuToggle.addEventListener("click", function () {
+			const isOpen = mainNav.classList.toggle("open");
+			menuToggle.setAttribute("aria-expanded", String(isOpen));
+		});
+
+		searchForm.addEventListener("submit", function (event) {
+			event.preventDefault();
+			const keyword = searchInput.value.trim();
+			alert(keyword ? "Simulasi pencarian: " + keyword : "Masukkan kata kunci pencarian.");
+		});
+	</script>
+</body>
+</html>
