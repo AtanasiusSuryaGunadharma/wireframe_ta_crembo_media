@@ -326,7 +326,7 @@
     searchForm.addEventListener("submit", function (event) {
       event.preventDefault();
       const keyword = searchInput.value.trim();
-      alert(keyword ? "Simulasi pencarian: " + keyword : "Masukkan kata kunci pencarian.");
+      window.location.href = "search.html?q=" + encodeURIComponent(keyword);
     });
   </script>
 </body>
