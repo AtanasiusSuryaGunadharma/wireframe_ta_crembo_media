@@ -1,0 +1,1091 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Form Evaluasi Streaming - Wireframe</title>
+  <style>
+    :root {
+      --bg: #f2f2f2;
+      --surface: #ffffff;
+      --ink: #141414;
+      --muted: #666666;
+      --line: #202020;
+      --line-soft: #c4c4c4;
+      --hover: #ececec;
+      --ok-bg: #eef8ef;
+      --ok-line: #93c79a;
+      --warn-bg: #fff8ea;
+      --warn-line: #d9b66d;
+      --header-h: 118px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .container { width: min(1140px, 94vw); margin: 0 auto; }
+
+    .top-header {
+      border-bottom: 2px solid var(--line);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 1200;
+    }
+
+    .top-header .container {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 14px 0;
+    }
+
+    .logo-box {
+      width: 86px;
+      height: 86px;
+      border: 2px solid var(--line);
+      display: grid;
+      place-items: center;
+      background: #fff;
+      padding: 6px;
+    }
+
+    .logo-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      filter: grayscale(100%);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(1.3rem, 2.7vw, 1.9rem);
+      text-transform: uppercase;
+      letter-spacing: 0.35px;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .nav-wrap {
+      background: var(--surface);
+      border-bottom: 2px solid var(--line);
+      position: sticky;
+      top: var(--header-h);
+      z-index: 1150;
+    }
+
+    .nav-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      flex-wrap: wrap;
+    }
+
+    nav ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      display: inline-block;
+      padding: 8px 10px;
+      border: 1px solid transparent;
+      font-size: 0.94rem;
+    }
+
+    nav a:hover,
+    nav a:focus-visible,
+    nav a.active {
+      border-color: var(--line-soft);
+      background: var(--hover);
+      outline: none;
+    }
+
+    .right-tools { display: flex; align-items: center; gap: 8px; }
+
+    .search { display: flex; border: 1px solid var(--line); background: #fff; }
+
+    .search input {
+      border: 0;
+      outline: none;
+      padding: 8px 10px;
+      width: clamp(130px, 17vw, 180px);
+      font-size: 0.9rem;
+      background: transparent;
+    }
+
+    .search button,
+    .btn-login,
+    .btn,
+    .btn-primary {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .search button:hover,
+    .btn-login:hover,
+    .btn:hover,
+    .btn-primary:hover {
+      background: var(--hover);
+    }
+
+    .btn-primary {
+      background: #121212;
+      color: #fff;
+      border-color: #121212;
+    }
+
+    .btn-primary:hover { background: #2c2c2c; }
+
+    .hero {
+      min-height: 235px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 16px;
+      border-bottom: 2px solid var(--line);
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("IMG_1970.JPG");
+      background-size: cover;
+      background-position: center;
+      filter: grayscale(100%);
+      z-index: -2;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: -1;
+    }
+
+    .hero h2 {
+      margin: 0;
+      color: #fff;
+      font-size: clamp(1.9rem, 4.4vw, 3rem);
+      text-transform: uppercase;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.45);
+    }
+
+    .hero p {
+      margin: 8px 0 0;
+      color: #ececec;
+      font-size: 0.95rem;
+    }
+
+    .breadcrumb-wrap { border-bottom: 1px solid var(--line-soft); background: #fafafa; }
+
+    .breadcrumb {
+      margin: 0;
+      padding: 11px 0;
+      list-style: none;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 0.88rem;
+      color: #545454;
+    }
+
+    .breadcrumb li + li::before { content: "/"; margin-right: 10px; color: #8a8a8a; }
+
+    .content { padding: 24px 0 34px; }
+
+    .notice {
+      border: 1px dashed #8a8a8a;
+      background: #fafafa;
+      padding: 10px 12px;
+      font-size: 0.88rem;
+      color: #4f4f4f;
+      margin-bottom: 12px;
+    }
+
+    .select-card,
+    .form-card,
+    .status-card {
+      border: 2px solid var(--line);
+      background: #fff;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .select-head {
+      margin: 0 0 10px;
+      font-size: 1.15rem;
+    }
+
+    .select-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label { font-size: 0.86rem; color: #505050; }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      border: 1px solid var(--line-soft);
+      background: #fff;
+      padding: 9px 10px;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+
+    .field textarea { min-height: 96px; resize: vertical; }
+
+    .row-2,
+    .row-3 {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .row-2 { grid-template-columns: 1fr 1fr; }
+    .row-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .tag {
+      display: inline-block;
+      border: 1px solid #bcbcbc;
+      border-radius: 999px;
+      padding: 2px 9px;
+      font-size: 0.78rem;
+      background: #f5f5f5;
+    }
+
+    .tag.raya {
+      border-color: #bb9a62;
+      background: var(--warn-bg);
+    }
+
+    .session-list {
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+      max-height: 220px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .session-item {
+      border: 1px solid var(--line-soft);
+      padding: 8px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: #fbfbfb;
+    }
+
+    .session-item strong { font-size: 0.92rem; }
+
+    .session-item small { color: #5b5b5b; }
+
+    .status-card {
+      background: var(--ok-bg);
+      border-color: var(--ok-line);
+      color: #1e5a28;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .status-card.show { display: block; }
+
+    .form-card { display: none; }
+    .form-card.show { display: block; }
+
+    .form-title {
+      margin: 0 0 8px;
+      font-size: 1.2rem;
+    }
+
+    .form-sub {
+      margin: 0;
+      font-size: 0.86rem;
+      color: #555;
+    }
+
+    .roles-note {
+      border: 1px dashed #8f8f8f;
+      background: #fafafa;
+      padding: 9px;
+      font-size: 0.83rem;
+      margin-top: 10px;
+      color: #4c4c4c;
+    }
+
+    .check-wrap {
+      border: 1px solid var(--line-soft);
+      background: #fafafa;
+      padding: 9px;
+      display: grid;
+      gap: 7px;
+      font-size: 0.9rem;
+    }
+
+    .staff-eval-wrap {
+      border: 1px solid var(--line-soft);
+      background: #fafafa;
+      padding: 10px;
+      display: grid;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .staff-eval-head {
+      margin: 0;
+      font-size: 0.86rem;
+      color: #555;
+    }
+
+    .staff-eval-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .staff-eval-item {
+      border: 1px solid #bdbdbd;
+      background: #fff;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .staff-eval-item h4 {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    .staff-eval-empty {
+      margin: 0;
+      font-size: 0.84rem;
+      color: #646464;
+      border: 1px dashed #b3b3b3;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .action-row {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .footer {
+      border-top: 2px solid var(--line);
+      border-bottom: 2px solid var(--line);
+      background: linear-gradient(180deg,#f7f7f7 0%,#ececec 100%);
+      margin-top: 10px;
+      color: #2e2e2e;
+    }
+
+    .footer-main { padding: 20px 0 14px; }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    .footer-col {
+      border: 1px solid #bdbdbd;
+      background: #fff;
+      padding: 13px;
+    }
+
+    .footer-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+
+    .footer-logo {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      filter: grayscale(100%);
+      border: 1px solid #222;
+      padding: 4px;
+      background: #fff;
+    }
+
+    .footer-title { margin: 0; font-size: 0.98rem; }
+    .footer-sub { margin: 2px 0 0; font-size: 0.84rem; color: #666; }
+
+    .contact-list,
+    .social-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 7px;
+      font-size: 0.9rem;
+    }
+
+    .contact-list strong { display: inline-block; min-width: 70px; }
+
+    .social-item { display: flex; gap: 9px; align-items: center; }
+
+    .social-dot {
+      width: 25px;
+      height: 25px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border: 1px solid #222;
+      background: #f4f4f4;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid #bebebe;
+      padding: 10px 0 14px;
+      text-align: center;
+      font-size: 0.84rem;
+      color: #5c5c5c;
+    }
+
+    @media (max-width: 980px) {
+      .row-3 { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .top-header .container { grid-template-columns: 1fr; text-align: center; }
+      .logo-box { margin: 0 auto; }
+      .right-tools { width: 100%; justify-content: stretch; flex-wrap: wrap; }
+      .search { flex: 1 1 230px; }
+      .search input { width: 100%; }
+      .select-grid,
+      .row-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top-header" id="topHeader">
+    <div class="container">
+      <div class="logo-box">
+        <img src="logo crembo hitam.png" alt="Logo Crembo Media">
+      </div>
+      <div class="brand">
+        <h1>Crew Multimedia Baciro</h1>
+        <p>Wireframe Low-Fidelity - Form Evaluasi Streaming</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="nav-wrap">
+    <div class="container nav-row">
+      <nav aria-label="Navigasi utama">
+        <ul>
+          <li><a href="home.html">Home</a></li>
+          <li><a href="tentang-crembo.html">Tentang Crembo</a></li>
+          <li><a href="jadwal-streaming.html">Jadwal Streaming</a></li>
+          <li><a href="agenda.html">Agenda</a></li>
+          <li><a href="pengumuman.html">Pengumuman</a></li>
+          <li><a href="form-pendaftaran.html">Form Pendaftaran</a></li>
+        </ul>
+      </nav>
+      <div class="right-tools">
+        <form class="search" id="searchForm">
+          <input id="searchInput" type="search" placeholder="Cari informasi..." aria-label="Cari informasi">
+          <button type="submit">Search</button>
+        </form>
+        <button class="btn-login" type="button">Login</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="hero" aria-label="Header form evaluasi streaming">
+    <div>
+      <h2>Form Evaluasi Streaming</h2>
+      <p>Isi evaluasi per jadwal misa. Jadwal yang sudah diisi tidak akan muncul lagi.</p>
+    </div>
+  </section>
+
+  <div class="breadcrumb-wrap">
+    <div class="container">
+      <ol class="breadcrumb" aria-label="Breadcrumb">
+        <li><a href="home.html">Beranda</a></li>
+        <li aria-current="page">Form Evaluasi Streaming</li>
+      </ol>
+    </div>
+  </div>
+
+  <main class="container content">
+    <p class="notice">Halaman ini sengaja tidak ditampilkan di menu utama. Akses melalui URL manual: form-evaluasi-streaming.html</p>
+
+    <section class="select-card" aria-label="Pilih jadwal untuk evaluasi">
+      <h3 class="select-head">1. Pilih Jadwal Yang Belum Diisi</h3>
+      <div class="select-grid">
+        <div class="field">
+          <label for="scheduleSelect">Tanggal - Jam Misa</label>
+          <select id="scheduleSelect"></select>
+        </div>
+        <button id="openFormBtn" class="btn-primary" type="button">Isi Evaluasi</button>
+      </div>
+      <div id="sessionList" class="session-list"></div>
+    </section>
+
+    <section id="statusCard" class="status-card" aria-live="polite"></section>
+
+    <section id="evaluationFormCard" class="form-card" aria-label="Form evaluasi streaming">
+      <h3 id="formTitle" class="form-title">2. Form Evaluasi</h3>
+      <p id="formSub" class="form-sub"></p>
+
+      <form id="evaluationForm">
+        <div class="row-3">
+          <div class="field">
+            <label for="misaDate">Tanggal Misa</label>
+            <input id="misaDate" type="date" required>
+          </div>
+          <div class="field">
+            <label for="misaTime">Jam Misa</label>
+            <input id="misaTime" type="time" required>
+          </div>
+          <div class="field">
+            <label for="misaType">Jenis Misa</label>
+            <select id="misaType" required>
+              <option value="Biasa">Misa Biasa</option>
+              <option value="Hari Raya">Misa Hari Raya</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="roles-note">Daftar petugas diambil dari data jadwal tugas dan tetap bisa diganti jika ada tukeran petugas.</div>
+
+        <div class="row-3">
+          <div class="field">
+            <label for="operatorName">Operator Bertugas</label>
+            <input id="operatorName" type="text" required>
+          </div>
+          <div class="field">
+            <label for="cameraName">Kameramen Bertugas</label>
+            <input id="cameraName" type="text" required>
+          </div>
+          <div class="field">
+            <label for="supervisorName">Supervisor Bertugas</label>
+            <input id="supervisorName" type="text" required>
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label for="evalName">Nama Petugas Pengisi Evaluasi</label>
+            <input id="evalName" type="text" required>
+          </div>
+          <div class="field">
+            <label for="evalRole">Role Pengisi Evaluasi</label>
+            <select id="evalRole" required>
+              <option value="Operator">Operator</option>
+              <option value="Kameramen">Kameramen</option>
+              <option value="Supervisor">Supervisor</option>
+              <option value="Petugas Tambahan">Petugas Tambahan</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="extraStaff">Petugas Tambahan (jika ada)</label>
+          <input id="extraStaff" type="text" placeholder="Contoh: Budi (Audio), Sinta (Dokumentasi)">
+        </div>
+
+        <div class="field">
+          <label>Evaluasi Per Petugas (otomatis sesuai jumlah petugas)</label>
+          <div class="staff-eval-wrap">
+            <p class="staff-eval-head">Jika petugas ada 3 orang, maka kolom evaluasi akan tampil 3 kolom. Ubah nama petugas bila tukeran, kolom evaluasi akan menyesuaikan.</p>
+            <div id="staffEvalGrid" class="staff-eval-grid"></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="technicalIssue">Kendala Teknis Selama Streaming</label>
+          <textarea id="technicalIssue" placeholder="Tulis kendala teknis: audio, kamera, koneksi, software, dll."></textarea>
+        </div>
+
+        <div class="field">
+          <label for="liturgyIssue">Kendala Misa Non-Teknis (di luar teknis)</label>
+          <textarea id="liturgyIssue" placeholder="Tulis kendala non-teknis: alur misa, koordinasi, perubahan petugas mendadak, dll."></textarea>
+        </div>
+
+        <div class="field">
+          <label>Checklist Kondisi Pelayanan</label>
+          <div class="check-wrap">
+            <label><input type="checkbox" id="checkStream"> Siaran berjalan sampai akhir</label>
+            <label><input type="checkbox" id="checkCoord"> Koordinasi tim berjalan baik</label>
+            <label><input type="checkbox" id="checkArchive"> Rekaman tersimpan dengan benar</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="finalNote">Catatan Penutup / Rekomendasi</label>
+          <textarea id="finalNote" placeholder="Catatan untuk perbaikan misa berikutnya"></textarea>
+        </div>
+
+        <div class="action-row">
+          <button class="btn-primary" type="submit">Simpan Evaluasi</button>
+          <button id="cancelBtn" class="btn" type="button">Batal</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-main">
+      <div class="container footer-grid">
+        <section class="footer-col" aria-label="Identitas Crembo">
+          <div class="footer-brand">
+            <img class="footer-logo" src="logo crembo hitam.png" alt="Logo Crembo Media">
+            <div>
+              <h4 class="footer-title">Crew Multimedia Baciro</h4>
+              <p class="footer-sub">Paroki Kristus Raja Baciro - Yogyakarta</p>
+            </div>
+          </div>
+          <p class="footer-sub">Platform informasi, jadwal streaming, agenda, pengumuman, dan form pendaftaran komunitas.</p>
+        </section>
+        <section class="footer-col" aria-label="Kontak">
+          <h4 class="footer-title">Kontak</h4>
+          <ul class="contact-list">
+            <li><strong>Email</strong> : crembomedia@example.com</li>
+            <li><strong>Telepon</strong> : 08xx-xxxx-xxxx</li>
+            <li><strong>Alamat</strong> : Jl. Melati Wetan 47, Baciro, Yogyakarta</li>
+          </ul>
+        </section>
+        <section class="footer-col" aria-label="Media sosial">
+          <h4 class="footer-title">Media Sosial</h4>
+          <ul class="social-list">
+            <li class="social-item"><span class="social-dot">IG</span><span>@crembomedia</span></li>
+            <li class="social-item"><span class="social-dot">YT</span><span>Crembo Media Official</span></li>
+            <li class="social-item"><span class="social-dot">WA</span><span>Admin Pelayanan Multimedia</span></li>
+          </ul>
+        </section>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">&copy; 2026 Crew Multimedia Baciro - Low Fidelity Wireframe</div>
+    </div>
+  </footer>
+
+  <script>
+    const STORAGE_KEY = "crembo-evaluasi-streaming";
+
+    const schedules = [
+      {
+        id: "normal-2026-03-27-1800",
+        date: "2026-03-27",
+        time: "18:00",
+        type: "Biasa",
+        title: "Misa Jumat Biasa",
+        team: { operator: "Rikha", camera: "Jeni", supervisor: "Tyas" }
+      },
+      {
+        id: "normal-2026-03-28-1800",
+        date: "2026-03-28",
+        time: "18:00",
+        type: "Biasa",
+        title: "Misa Sabtu Sore",
+        team: { operator: "Lisa", camera: "Evan", supervisor: "Jose" }
+      },
+      {
+        id: "raya-2026-03-29-0800",
+        date: "2026-03-29",
+        time: "08:00",
+        type: "Hari Raya",
+        title: "Minggu Palma - Sesi Pagi",
+        team: { operator: "Rossa", camera: "Aurel", supervisor: "Asha" }
+      },
+      {
+        id: "raya-2026-03-29-1700",
+        date: "2026-03-29",
+        time: "17:00",
+        type: "Hari Raya",
+        title: "Minggu Palma - Sesi Sore",
+        team: { operator: "Rikha", camera: "Jeni", supervisor: "Tyas" }
+      },
+      {
+        id: "normal-2026-03-30-1800",
+        date: "2026-03-30",
+        time: "18:00",
+        type: "Biasa",
+        title: "Misa Senin Biasa",
+        team: { operator: "Lisa", camera: "Evan", supervisor: "Jose" }
+      }
+    ];
+
+    const topHeader = document.getElementById("topHeader");
+    const searchForm = document.getElementById("searchForm");
+    const searchInput = document.getElementById("searchInput");
+
+    const scheduleSelect = document.getElementById("scheduleSelect");
+    const openFormBtn = document.getElementById("openFormBtn");
+    const sessionList = document.getElementById("sessionList");
+
+    const statusCard = document.getElementById("statusCard");
+    const evaluationFormCard = document.getElementById("evaluationFormCard");
+    const formTitle = document.getElementById("formTitle");
+    const formSub = document.getElementById("formSub");
+    const evaluationForm = document.getElementById("evaluationForm");
+    const cancelBtn = document.getElementById("cancelBtn");
+
+    const misaDate = document.getElementById("misaDate");
+    const misaTime = document.getElementById("misaTime");
+    const misaType = document.getElementById("misaType");
+
+    const operatorName = document.getElementById("operatorName");
+    const cameraName = document.getElementById("cameraName");
+    const supervisorName = document.getElementById("supervisorName");
+
+    const evalName = document.getElementById("evalName");
+    const evalRole = document.getElementById("evalRole");
+    const extraStaff = document.getElementById("extraStaff");
+    const staffEvalGrid = document.getElementById("staffEvalGrid");
+
+    const technicalIssue = document.getElementById("technicalIssue");
+    const liturgyIssue = document.getElementById("liturgyIssue");
+    const finalNote = document.getElementById("finalNote");
+
+    const checkStream = document.getElementById("checkStream");
+    const checkCoord = document.getElementById("checkCoord");
+    const checkArchive = document.getElementById("checkArchive");
+
+    let selectedScheduleId = "";
+
+    function syncStickyOffset() {
+      const headerHeight = topHeader ? topHeader.offsetHeight : 118;
+      document.documentElement.style.setProperty("--header-h", headerHeight + "px");
+    }
+
+    function readStoredEvaluations() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          return {};
+        }
+        return JSON.parse(raw);
+      } catch (err) {
+        return {};
+      }
+    }
+
+    function writeStoredEvaluations(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function getAvailableSchedules() {
+      const saved = readStoredEvaluations();
+      return schedules.filter(function (item) {
+        return !saved[item.id];
+      });
+    }
+
+    function formatDate(dateStr) {
+      const date = new Date(dateStr + "T00:00:00");
+      return date.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+    }
+
+    function setStatus(text, success) {
+      statusCard.textContent = text;
+      statusCard.classList.add("show");
+      if (success) {
+        statusCard.style.background = "var(--ok-bg)";
+        statusCard.style.borderColor = "var(--ok-line)";
+        statusCard.style.color = "#1e5a28";
+      } else {
+        statusCard.style.background = "var(--warn-bg)";
+        statusCard.style.borderColor = "var(--warn-line)";
+        statusCard.style.color = "#6b4d18";
+      }
+    }
+
+    function resetFormState() {
+      evaluationForm.reset();
+      evaluationFormCard.classList.remove("show");
+      selectedScheduleId = "";
+      staffEvalGrid.innerHTML = "";
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function parseAdditionalStaff(value) {
+      return value
+        .split(",")
+        .map(function (name) { return name.trim(); })
+        .filter(function (name) { return name.length > 0; });
+    }
+
+    function getCurrentStaffList() {
+      const baseStaff = [
+        operatorName.value.trim(),
+        cameraName.value.trim(),
+        supervisorName.value.trim()
+      ];
+
+      const allStaff = baseStaff.concat(parseAdditionalStaff(extraStaff.value));
+      const unique = [];
+
+      allStaff.forEach(function (name) {
+        if (!name) {
+          return;
+        }
+        if (unique.indexOf(name) === -1) {
+          unique.push(name);
+        }
+      });
+
+      return unique;
+    }
+
+    function renderStaffEvaluationFields() {
+      const staffList = getCurrentStaffList();
+      staffEvalGrid.innerHTML = "";
+
+      if (staffList.length === 0) {
+        staffEvalGrid.innerHTML = '<p class="staff-eval-empty">Belum ada nama petugas. Isi nama petugas untuk memunculkan kolom evaluasi.</p>';
+        return;
+      }
+
+      staffList.forEach(function (staffName, index) {
+        const card = document.createElement("article");
+        card.className = "staff-eval-item";
+        card.innerHTML =
+          '<h4>' + escapeHtml(staffName) + '</h4>' +
+          '<div class="field">' +
+            '<label for="staffRating-' + index + '">Penilaian Singkat</label>' +
+            '<select id="staffRating-' + index + '" class="staff-rating" data-staff-name="' + escapeHtml(staffName) + '" required>' +
+              '<option value="">Pilih penilaian</option>' +
+              '<option value="Sangat Baik">Sangat Baik</option>' +
+              '<option value="Baik">Baik</option>' +
+              '<option value="Cukup">Cukup</option>' +
+              '<option value="Perlu Pendampingan">Perlu Pendampingan</option>' +
+            '</select>' +
+          '</div>' +
+          '<div class="field">' +
+            '<label for="staffNote-' + index + '">Catatan Per Petugas</label>' +
+            '<textarea id="staffNote-' + index + '" class="staff-note" data-staff-name="' + escapeHtml(staffName) + '" placeholder="Catatan performa ' + escapeHtml(staffName) + '"></textarea>' +
+          '</div>';
+
+        staffEvalGrid.appendChild(card);
+      });
+    }
+
+    function collectStaffEvaluations() {
+      const ratings = Array.from(document.querySelectorAll(".staff-rating"));
+      const notes = Array.from(document.querySelectorAll(".staff-note"));
+
+      return ratings.map(function (ratingEl, index) {
+        const noteEl = notes[index];
+        return {
+          name: ratingEl.dataset.staffName || "",
+          rating: ratingEl.value,
+          note: noteEl ? noteEl.value : ""
+        };
+      });
+    }
+
+    function drawScheduleOptions() {
+      const available = getAvailableSchedules();
+
+      scheduleSelect.innerHTML = "";
+      sessionList.innerHTML = "";
+
+      if (available.length === 0) {
+        scheduleSelect.innerHTML = '<option value="">Semua jadwal sudah dievaluasi</option>';
+        openFormBtn.disabled = true;
+        openFormBtn.classList.remove("btn-primary");
+        openFormBtn.classList.add("btn");
+        sessionList.innerHTML = '<div class="session-item"><strong>Tidak ada jadwal tersisa</strong><small>Semua form evaluasi sudah diisi.</small></div>';
+        resetFormState();
+        return;
+      }
+
+      openFormBtn.disabled = false;
+      openFormBtn.classList.add("btn-primary");
+      openFormBtn.classList.remove("btn");
+
+      available.forEach(function (item, index) {
+        const option = document.createElement("option");
+        option.value = item.id;
+        option.textContent = formatDate(item.date) + " - " + item.time + " WIB - " + item.title;
+        scheduleSelect.appendChild(option);
+
+        const tagClass = item.type === "Hari Raya" ? "tag raya" : "tag";
+        const row = document.createElement("div");
+        row.className = "session-item";
+        row.innerHTML = "<div><strong>" + formatDate(item.date) + " - " + item.time + " WIB</strong><br><small>" + item.title + "</small></div><span class=\"" + tagClass + "\">" + item.type + "</span>";
+        sessionList.appendChild(row);
+
+        if (index === 0) {
+          selectedScheduleId = item.id;
+        }
+      });
+    }
+
+    function getScheduleById(id) {
+      return schedules.find(function (item) { return item.id === id; });
+    }
+
+    function openFormForSelected() {
+      const id = scheduleSelect.value;
+      const schedule = getScheduleById(id);
+
+      if (!schedule) {
+        setStatus("Pilih jadwal yang tersedia terlebih dahulu.", false);
+        return;
+      }
+
+      selectedScheduleId = id;
+      formTitle.textContent = "2. Form Evaluasi - " + schedule.title;
+      formSub.textContent = "Jadwal: " + formatDate(schedule.date) + " | " + schedule.time + " WIB | " + schedule.type;
+
+      misaDate.value = schedule.date;
+      misaTime.value = schedule.time;
+      misaType.value = schedule.type;
+
+      operatorName.value = schedule.team.operator;
+      cameraName.value = schedule.team.camera;
+      supervisorName.value = schedule.team.supervisor;
+
+      evalName.value = "";
+      evalRole.value = "Operator";
+      extraStaff.value = "";
+      technicalIssue.value = "";
+      liturgyIssue.value = "";
+      finalNote.value = "";
+      checkStream.checked = false;
+      checkCoord.checked = false;
+      checkArchive.checked = false;
+
+      renderStaffEvaluationFields();
+
+      evaluationFormCard.classList.add("show");
+      setStatus("Silakan isi evaluasi untuk jadwal terpilih.", true);
+      window.scrollTo({ top: evaluationFormCard.offsetTop - 150, behavior: "smooth" });
+    }
+
+    function saveEvaluation(event) {
+      event.preventDefault();
+
+      if (!selectedScheduleId) {
+        setStatus("Jadwal belum dipilih.", false);
+        return;
+      }
+
+      const schedule = getScheduleById(selectedScheduleId);
+      if (!schedule) {
+        setStatus("Jadwal tidak ditemukan.", false);
+        return;
+      }
+
+      const payload = {
+        scheduleId: selectedScheduleId,
+        date: misaDate.value,
+        time: misaTime.value,
+        misaType: misaType.value,
+        operator: operatorName.value,
+        camera: cameraName.value,
+        supervisor: supervisorName.value,
+        evaluatorName: evalName.value,
+        evaluatorRole: evalRole.value,
+        extraStaff: extraStaff.value,
+        technicalIssue: technicalIssue.value,
+        liturgyIssue: liturgyIssue.value,
+        checklist: {
+          stream: checkStream.checked,
+          coordination: checkCoord.checked,
+          archive: checkArchive.checked
+        },
+        staffEvaluations: collectStaffEvaluations(),
+        finalNote: finalNote.value,
+        submittedAt: new Date().toISOString()
+      };
+
+      const saved = readStoredEvaluations();
+      saved[selectedScheduleId] = payload;
+      writeStoredEvaluations(saved);
+
+      setStatus("Evaluasi untuk " + schedule.title + " berhasil disimpan. Jadwal tersebut tidak ditampilkan lagi.", true);
+
+      drawScheduleOptions();
+      resetFormState();
+    }
+
+    function cancelForm() {
+      resetFormState();
+      setStatus("Pengisian evaluasi dibatalkan.", false);
+    }
+
+    function handleSearchSubmit(event) {
+      event.preventDefault();
+      const keyword = searchInput.value.trim();
+      window.location.href = "search.html?q=" + encodeURIComponent(keyword);
+    }
+
+    syncStickyOffset();
+    window.addEventListener("resize", syncStickyOffset);
+
+    drawScheduleOptions();
+
+    scheduleSelect.addEventListener("change", function () {
+      selectedScheduleId = scheduleSelect.value;
+    });
+
+    openFormBtn.addEventListener("click", openFormForSelected);
+    cancelBtn.addEventListener("click", cancelForm);
+    evaluationForm.addEventListener("submit", saveEvaluation);
+
+    operatorName.addEventListener("input", renderStaffEvaluationFields);
+    cameraName.addEventListener("input", renderStaffEvaluationFields);
+    supervisorName.addEventListener("input", renderStaffEvaluationFields);
+    extraStaff.addEventListener("input", renderStaffEvaluationFields);
+
+    searchForm.addEventListener("submit", handleSearchSubmit);
+  </script>
+</body>
+</html>
