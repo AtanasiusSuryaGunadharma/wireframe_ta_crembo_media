@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Penugasan Petugas Misa - Crembo Media</title>
+  <style>
+    :root {
+      --bg: #ececec;
+      --panel: #ffffff;
+      --panel-2: #f5f5f5;
+      --line: #1f1f1f;
+      --muted: #5b5b5b;
+      --text: #111111;
+      --side-text: #f4f4f4;
+      --radius: 16px;
+      --shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 20% 10%, #f8f8f8 0%, #ececec 38%, #e3e3e3 100%);
+      min-height: 100vh;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #181818 0%, #0f0f0f 100%);
+      color: var(--side-text);
+      border-right: 2px solid var(--line);
+      padding: 18px 14px;
+      overflow-y: auto;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .brand {
+      border: 1px solid #838383;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .brand p {
+      margin: 6px 0 0;
+      color: #cdcdcd;
+      font-size: 0.82rem;
+    }
+
+    .menu-group {
+      border: 1px solid #656565;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .group-toggle {
+      width: 100%;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      color: var(--side-text);
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 11px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .group-items {
+      display: block;
+      border-top: 1px solid #525252;
+      padding: 6px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .menu-link {
+      display: block;
+      text-decoration: none;
+      color: #e5e5e5;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 0.83rem;
+      margin-bottom: 4px;
+      background: transparent;
+    }
+
+    .menu-link:hover { border-color: #8a8a8a; background: rgba(255, 255, 255, 0.08); }
+
+    .menu-link.active {
+      border-color: #cfcfcf;
+      background: #e9e9e9;
+      color: #151515;
+      font-weight: 700;
+    }
+
+    .side-actions {
+      margin-top: 16px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .side-actions a {
+      text-decoration: none;
+      border: 1px solid #8d8d8d;
+      color: #ebebeb;
+      text-align: center;
+      padding: 9px 10px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+    }
+
+    .main { padding: 16px; }
+
+    .dashboard-headline-bar {
+      border: 1px solid #cfcfcf;
+      background: #f3f3f3;
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .dashboard-headline-bar h1 {
+      margin: 0;
+      font-size: clamp(1.15rem, 2vw, 1.7rem);
+      font-weight: 700;
+      color: #1c1f27;
+    }
+
+    .head-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: #374151;
+      font-size: clamp(0.84rem, 1.6vw, 0.95rem);
+      font-weight: 600;
+    }
+
+    .world-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid #6b7280;
+      background: #ffffff;
+      color: #374151;
+      text-decoration: none;
+    }
+
+    .panel {
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .panel-head {
+      padding: 12px 14px;
+      border-bottom: 1px solid #c8c8c8;
+      background: var(--panel-2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 1.02rem;
+    }
+
+    .panel-body { padding: 12px; }
+
+    .helper {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .chip-toggle {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .chip-toggle button {
+      border: 0;
+      background: #f2f2f2;
+      padding: 6px 11px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .chip-toggle button.active {
+      background: #111;
+      color: #fff;
+    }
+
+    .table-wrap {
+      margin-top: 12px;
+      overflow-x: auto;
+      border: 1px solid #cbcbcb;
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1080px;
+      font-size: 0.84rem;
+      background: #fff;
+    }
+
+    th,
+    td {
+      border: 1px solid #cbcbcb;
+      padding: 8px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #efefef;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .slot {
+      display: grid;
+      gap: 6px;
+      min-width: 150px;
+    }
+
+    select,
+    button,
+    input {
+      font: inherit;
+      border: 1px solid #cbcbcb;
+      border-radius: 6px;
+      padding: 6px 8px;
+      background: #fff;
+    }
+
+    .tag {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 0.75rem;
+      border: 1px solid #9f9f9f;
+      background: #f6f6f6;
+    }
+
+    .tag.empty {
+      border-color: #adadad;
+      color: #4b4b4b;
+      background: #efefef;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: #111;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .btn.secondary {
+      background: #f7f7f7;
+      color: #222;
+    }
+
+    .btn.danger {
+      background: #222;
+      color: #fff;
+    }
+
+    .footer-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .swap-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+      margin-top: 10px;
+    }
+
+    .field { display: grid; gap: 5px; }
+
+    label {
+      font-size: 0.8rem;
+      color: #3d3d3d;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    @media (max-width: 1080px) {
+      .layout { grid-template-columns: 1fr; }
+      .swap-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Sidebar penugasan misa">
+      <div class="brand">
+        <h1>Crembo Media Panel</h1>
+        <p>Modul penugasan petugas misa</p>
+      </div>
+
+      <div class="menu-group">
+        <button class="group-toggle" type="button">Tugas Streaming <span>-</span></button>
+        <div class="group-items">
+          <a class="menu-link" href="dashboard.html?role=admin">Dashboard Utama</a>
+          <a class="menu-link" href="registrasi-tugas-misa-besar.html">Registrasi Tugas Misa Besar</a>
+          <a class="menu-link active" href="penugasan-petugas-misa.html">Penugasan Petugas Misa</a>
+          <a class="menu-link" href="jadwal-streaming.html">Jadwal Streaming</a>
+          <a class="menu-link" href="form-evaluasi-streaming.html">Form Evaluasi Streaming</a>
+        </div>
+      </div>
+
+      <div class="side-actions">
+        <a href="dashboard.html?role=admin">Kembali ke Dashboard</a>
+        <a href="home.html?session=active">Kembali ke Home</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="dashboard-headline-bar" aria-label="Header modul penugasan">
+        <h1>Penugasan Petugas Misa</h1>
+        <div class="head-meta">
+          <span id="liveDateTime">-</span>
+          <a class="world-link" href="home.html?session=active" title="Kembali ke Home (tetap login)">●</a>
+        </div>
+      </header>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Tabel Penugasan</h2>
+          <div class="chip-toggle" aria-label="Pilih jenis misa">
+            <button id="modeBiasa" class="active" type="button">Misa Biasa</button>
+            <button id="modeBesar" type="button">Misa Besar</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <p class="helper">Admin dapat isi slot kosong, mengganti petugas, dan menghapus petugas yang sudah terdaftar pada jadwal.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nama Misa</th>
+                  <th>Tanggal</th>
+                  <th>Jam</th>
+                  <th>DP</th>
+                  <th>OP</th>
+                  <th>Kamera</th>
+                  <th>Supervisor</th>
+                  <th>Fotografer</th>
+                </tr>
+              </thead>
+              <tbody id="assignmentRows"></tbody>
+            </table>
+          </div>
+
+          <div class="footer-actions">
+            <button class="btn secondary" type="button">Simpan Perubahan</button>
+            <button class="btn" type="button">Publish Penugasan</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Tukar Petugas Antar Role</h2>
+        </div>
+        <div class="panel-body">
+          <div class="swap-grid">
+            <div class="field">
+              <label for="swapSchedule">Jadwal</label>
+              <select id="swapSchedule"></select>
+            </div>
+            <div class="field">
+              <label for="swapRoleA">Role A</label>
+              <select id="swapRoleA">
+                <option value="dp">DP</option>
+                <option value="op">OP</option>
+                <option value="kamera">Kamera</option>
+                <option value="supervisor">Supervisor</option>
+                <option value="fotografer">Fotografer</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="swapRoleB">Role B</label>
+              <select id="swapRoleB">
+                <option value="op">OP</option>
+                <option value="dp">DP</option>
+                <option value="kamera">Kamera</option>
+                <option value="supervisor">Supervisor</option>
+                <option value="fotografer">Fotografer</option>
+              </select>
+            </div>
+            <button id="swapBtn" class="btn" type="button">Tukar</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const memberOptions = ["", "Rikha", "Jeni", "Tyas", "Lisa", "Evan", "Jose", "Rossa", "Aurel", "Asha", "Bima", "Niko", "Sinta"];
+
+    const schedulesBiasa = [
+      { misa: "Misa Harian Senin", tanggal: "2026-03-30", jam: "17:00", dp: "Rikha", op: "Jeni", kamera: "", supervisor: "Tyas", fotografer: "" },
+      { misa: "Misa Harian Selasa", tanggal: "2026-03-31", jam: "17:00", dp: "", op: "Evan", kamera: "Jose", supervisor: "", fotografer: "Asha" },
+      { misa: "Misa Mingguan", tanggal: "2026-04-05", jam: "08:00", dp: "Lisa", op: "", kamera: "Rossa", supervisor: "Aurel", fotografer: "" }
+    ];
+
+    const schedulesBesar = [
+      { misa: "Misa Kamis Putih", tanggal: "2026-04-02", jam: "18:00", dp: "Rikha", op: "", kamera: "Jeni", supervisor: "Tyas", fotografer: "" },
+      { misa: "Misa Jumat Agung", tanggal: "2026-04-03", jam: "17:30", dp: "Lisa", op: "Evan", kamera: "", supervisor: "Jose", fotografer: "Asha" },
+      { misa: "Misa Vigili Paskah", tanggal: "2026-04-04", jam: "19:00", dp: "", op: "Niko", kamera: "Rossa", supervisor: "", fotografer: "Sinta" }
+    ];
+
+    let currentMode = "biasa";
+    const assignmentRows = document.getElementById("assignmentRows");
+    const swapSchedule = document.getElementById("swapSchedule");
+    const swapRoleA = document.getElementById("swapRoleA");
+    const swapRoleB = document.getElementById("swapRoleB");
+    const swapBtn = document.getElementById("swapBtn");
+    const modeBiasa = document.getElementById("modeBiasa");
+    const modeBesar = document.getElementById("modeBesar");
+
+    function activeSchedules() {
+      return currentMode === "biasa" ? schedulesBiasa : schedulesBesar;
+    }
+
+    function buildMemberSelect(selectedValue, scheduleIndex, roleKey) {
+      const options = memberOptions.map(function (memberName) {
+        const selected = memberName === selectedValue ? " selected" : "";
+        const label = memberName || "-- kosong --";
+        return '<option value="' + memberName + '"' + selected + '>' + label + '</option>';
+      }).join("");
+
+      return '<select class="slot-select" data-index="' + scheduleIndex + '" data-role="' + roleKey + '">' + options + '</select>';
+    }
+
+    function buildRoleCell(schedule, scheduleIndex, roleKey) {
+      const value = schedule[roleKey] || "";
+      const tagClass = value ? "tag" : "tag empty";
+      const tagText = value ? "Terisi: " + value : "Slot kosong";
+
+      return '<div class="slot">' +
+        '<span class="' + tagClass + '">' + tagText + '</span>' +
+        buildMemberSelect(value, scheduleIndex, roleKey) +
+        '<button class="btn danger clear-slot" data-index="' + scheduleIndex + '" data-role="' + roleKey + '" type="button">Hapus</button>' +
+        '</div>';
+    }
+
+    function renderAssignments() {
+      const schedules = activeSchedules();
+      assignmentRows.innerHTML = schedules.map(function (schedule, index) {
+        return '<tr>' +
+          '<td><strong>' + schedule.misa + '</strong></td>' +
+          '<td>' + schedule.tanggal + '</td>' +
+          '<td>' + schedule.jam + '</td>' +
+          '<td>' + buildRoleCell(schedule, index, "dp") + '</td>' +
+          '<td>' + buildRoleCell(schedule, index, "op") + '</td>' +
+          '<td>' + buildRoleCell(schedule, index, "kamera") + '</td>' +
+          '<td>' + buildRoleCell(schedule, index, "supervisor") + '</td>' +
+          '<td>' + buildRoleCell(schedule, index, "fotografer") + '</td>' +
+          '</tr>';
+      }).join("");
+    }
+
+    function renderSwapSchedules() {
+      const schedules = activeSchedules();
+      swapSchedule.innerHTML = schedules.map(function (schedule, index) {
+        return '<option value="' + index + '">' + schedule.misa + ' - ' + schedule.tanggal + ' ' + schedule.jam + '</option>';
+      }).join("");
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      modeBiasa.classList.toggle("active", mode === "biasa");
+      modeBesar.classList.toggle("active", mode === "besar");
+      renderAssignments();
+      renderSwapSchedules();
+    }
+
+    modeBiasa.addEventListener("click", function () { setMode("biasa"); });
+    modeBesar.addEventListener("click", function () { setMode("besar"); });
+
+    assignmentRows.addEventListener("change", function (event) {
+      const select = event.target.closest(".slot-select");
+      if (!select) {
+        return;
+      }
+
+      const index = Number(select.getAttribute("data-index"));
+      const role = select.getAttribute("data-role");
+      activeSchedules()[index][role] = select.value;
+      renderAssignments();
+    });
+
+    assignmentRows.addEventListener("click", function (event) {
+      const button = event.target.closest(".clear-slot");
+      if (!button) {
+        return;
+      }
+
+      const index = Number(button.getAttribute("data-index"));
+      const role = button.getAttribute("data-role");
+      activeSchedules()[index][role] = "";
+      renderAssignments();
+    });
+
+    swapBtn.addEventListener("click", function () {
+      const schedules = activeSchedules();
+      const index = Number(swapSchedule.value);
+      const roleA = swapRoleA.value;
+      const roleB = swapRoleB.value;
+      if (roleA === roleB || Number.isNaN(index) || !schedules[index]) {
+        return;
+      }
+
+      const temp = schedules[index][roleA];
+      schedules[index][roleA] = schedules[index][roleB];
+      schedules[index][roleB] = temp;
+      renderAssignments();
+    });
+
+    function updateLiveDateTime() {
+      const now = new Date();
+      const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+      const day = dayNames[now.getDay()];
+      const date = String(now.getDate()).padStart(2, "0");
+      const month = monthNames[now.getMonth()];
+      const year = now.getFullYear();
+      const hour = String(now.getHours()).padStart(2, "0");
+      const minute = String(now.getMinutes()).padStart(2, "0");
+      const second = String(now.getSeconds()).padStart(2, "0");
+      document.getElementById("liveDateTime").textContent = day + ", " + date + " " + month + " " + year + " " + hour + ":" + minute + ":" + second;
+    }
+
+    setMode("biasa");
+    updateLiveDateTime();
+    setInterval(updateLiveDateTime, 1000);
+  </script>
+</body>
+</html>
