@@ -697,7 +697,11 @@
         };
 
         localStorage.setItem("crembo-login-session", JSON.stringify(sessionPayload));
-        window.location.href = "dashboard.html?role=" + encodeURIComponent(role);
+        if (role === "anggota") {
+          window.location.href = "dashboard-anggota.html?role=" + encodeURIComponent(role);
+        } else {
+          window.location.href = "dashboard.html?role=" + encodeURIComponent(role);
+        }
       });
     });
 
