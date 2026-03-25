@@ -3,82 +3,602 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dashboard - Crembo Media</title>
+  <title>Dashboard Admin - Crembo Media</title>
   <style>
+    :root {
+      --bg: #ececec;
+      --panel: #ffffff;
+      --panel-2: #f5f5f5;
+      --line: #1f1f1f;
+      --muted: #5b5b5b;
+      --text: #111111;
+      --side: #111111;
+      --side-text: #f4f4f4;
+      --radius: 16px;
+      --shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+    }
+
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: #ffffff;
-      color: #141414;
-    }
-    .wrap {
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 10%, #f8f8f8 0%, #ececec 38%, #e3e3e3 100%);
       min-height: 100vh;
+    }
+
+    .layout {
       display: grid;
-      place-items: center;
-      padding: 20px;
+      grid-template-columns: 300px 1fr;
+      min-height: 100vh;
     }
-    .card {
-      width: min(760px, 96vw);
-      border: 2px solid #1f1f1f;
-      background: #fff;
-      padding: 20px;
-      text-align: center;
+
+    .sidebar {
+      background: linear-gradient(180deg, #181818 0%, #0f0f0f 100%);
+      color: var(--side-text);
+      border-right: 2px solid var(--line);
+      padding: 18px 14px;
+      overflow-y: auto;
+      position: sticky;
+      top: 0;
+      height: 100vh;
     }
-    h1 {
+
+    .brand {
+      border: 1px solid #838383;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .brand h1 {
       margin: 0;
-      font-size: clamp(1.3rem, 3vw, 2rem);
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
-    p {
-      margin: 12px 0 0;
-      color: #4f4f4f;
-      font-size: 0.95rem;
+
+    .brand p {
+      margin: 6px 0 0;
+      color: #cdcdcd;
+      font-size: 0.82rem;
     }
-    .role {
-      display: inline-block;
-      margin-top: 14px;
-      border: 1px solid #1f1f1f;
-      background: #f3f3f3;
-      padding: 8px 12px;
-      font-weight: 600;
+
+    .role-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #ededed;
+      color: #0d0d0d;
+      border: 1px solid #0d0d0d;
+      font-size: 0.78rem;
+      font-weight: 700;
     }
-    .actions {
-      margin-top: 18px;
+
+    .menu-group {
+      border: 1px solid #656565;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .group-toggle {
+      width: 100%;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      color: var(--side-text);
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 11px 12px;
+      cursor: pointer;
       display: flex;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
     }
-    .btn {
-      border: 1px solid #1f1f1f;
-      background: #fff;
-      color: #111;
-      padding: 9px 12px;
+
+    .group-toggle:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .group-items {
+      display: none;
+      border-top: 1px solid #525252;
+      padding: 6px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .menu-group.open .group-items {
+      display: block;
+    }
+
+    .menu-link {
+      display: block;
       text-decoration: none;
-      font-size: 0.9rem;
+      color: #e5e5e5;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 0.83rem;
+      margin-bottom: 4px;
+      background: transparent;
     }
-    .btn:hover {
+
+    .menu-link:hover {
+      border-color: #8a8a8a;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .menu-link.active {
+      border-color: #cfcfcf;
+      background: #e9e9e9;
+      color: #151515;
+      font-weight: 700;
+    }
+
+    .side-actions {
+      margin-top: 16px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .side-actions a {
+      text-decoration: none;
+      border: 1px solid #8d8d8d;
+      color: #ebebeb;
+      text-align: center;
+      padding: 9px 10px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+    }
+
+    .side-actions a:hover {
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .main {
+      padding: 16px;
+    }
+
+    .topbar {
+      border: 2px solid var(--line);
+      background: linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .mobile-toggle {
+      display: none;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      cursor: pointer;
+    }
+
+    .headline {
+      margin: 0;
+      font-size: clamp(1.05rem, 2.5vw, 1.5rem);
+    }
+
+    .subhead {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .quick-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      justify-content: flex-end;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      background: #f8f8f8;
+      padding: 6px 9px;
+      font-size: 0.74rem;
+      border-radius: 999px;
+      color: #343434;
+    }
+
+    .chip strong {
+      color: #0f0f0f;
+    }
+
+    .cards {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #ffffff 0%, #f3f3f3 100%);
+      padding: 12px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+    }
+
+    .metric p {
+      margin: 0;
+      color: #616161;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .metric h3 {
+      margin: 8px 0 0;
+      font-size: 1.45rem;
+      line-height: 1;
+    }
+
+    .content-grid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 12px;
+    }
+
+    .panel {
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 12px 14px;
+      border-bottom: 1px solid #c8c8c8;
+      background: var(--panel-2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 0.96rem;
+    }
+
+    .panel-body {
+      padding: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    th,
+    td {
+      border: 1px solid #cbcbcb;
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
       background: #efefef;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .status {
+      display: inline-block;
+      border: 1px solid #2b2b2b;
+      border-radius: 999px;
+      padding: 2px 7px;
+      font-size: 0.7rem;
+      background: #fafafa;
+      white-space: nowrap;
+    }
+
+    .todo-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+    }
+
+    .todo-item {
+      border: 1px solid #b7b7b7;
+      background: #fafafa;
+      border-radius: 10px;
+      padding: 9px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .todo-item strong {
+      font-size: 0.87rem;
+    }
+
+    .todo-item small {
+      color: #5c5c5c;
+      font-size: 0.76rem;
+    }
+
+    .role-note {
+      margin-top: 12px;
+      border: 1px dashed #4a4a4a;
+      background: #f7f7f7;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 0.82rem;
+      color: #353535;
+    }
+
+    @media (max-width: 1080px) {
+      .cards {
+        grid-template-columns: repeat(2, minmax(150px, 1fr));
+      }
+
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+        position: static;
+        height: auto;
+      }
+
+      .sidebar.show {
+        display: block;
+      }
+
+      .mobile-toggle {
+        display: inline-block;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .quick-filter {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .cards {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <section class="card" aria-label="Dashboard prototype">
-      <h1>Dashboard Prototype</h1>
-      <p>Halaman dashboard sementara (putih) untuk demo login role.</p>
-      <div id="roleBadge" class="role">Role: -</div>
-      <div class="actions">
-        <a class="btn" href="home.html">Kembali ke Beranda</a>
-        <a class="btn" href="login.html">Keluar / Login Ulang</a>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar" aria-label="Sidebar dashboard">
+      <div class="brand">
+        <h1>Crembo Media Panel</h1>
+        <p>Prototype dashboard admin dan super admin</p>
+        <span id="roleBadge" class="role-chip">Role: -</span>
       </div>
-    </section>
-  </main>
+
+      <div class="menu-group open">
+        <button class="group-toggle" type="button">Ringkasan <span>-</span></button>
+        <div class="group-items">
+          <a class="menu-link active" href="#">Dashboard Utama</a>
+          <a class="menu-link" href="#">Profil Saya</a>
+        </div>
+      </div>
+
+      <div class="menu-group open">
+        <button class="group-toggle" type="button">Tugas Streaming <span>-</span></button>
+        <div class="group-items">
+          <a class="menu-link" href="#">Jadwal Streaming / Multimedia</a>
+          <a class="menu-link" href="#">Registrasi Tugas Misa Besar</a>
+          <a class="menu-link" href="#">Penugasan Petugas Misa</a>
+          <a class="menu-link" href="#">Monitoring Tugas Anggota</a>
+          <a class="menu-link" href="#">Form Evaluasi Streaming</a>
+        </div>
+      </div>
+
+      <div class="menu-group">
+        <button class="group-toggle" type="button">Inventaris & Peminjaman <span>+</span></button>
+        <div class="group-items">
+          <a class="menu-link" href="#">Data Inventaris Barang</a>
+          <a class="menu-link" href="#">Persetujuan Peminjaman</a>
+          <a class="menu-link" href="#">Pengembalian Barang</a>
+          <a class="menu-link" href="#">Riwayat Peminjaman</a>
+        </div>
+      </div>
+
+      <div class="menu-group">
+        <button class="group-toggle" type="button">Informasi & Publikasi <span>+</span></button>
+        <div class="group-items">
+          <a class="menu-link" href="#">Pengumuman</a>
+          <a class="menu-link" href="#">Agenda Kegiatan</a>
+          <a class="menu-link" href="#">Form Pendaftaran</a>
+        </div>
+      </div>
+
+      <div class="menu-group">
+        <button class="group-toggle" type="button">Keanggotaan <span>+</span></button>
+        <div class="group-items" id="anggotaMenu"></div>
+      </div>
+
+      <div class="menu-group">
+        <button class="group-toggle" type="button">Sistem <span>+</span></button>
+        <div class="group-items">
+          <a class="menu-link" href="#">Log Aktivitas</a>
+          <a class="menu-link" href="#">Notifikasi Sistem</a>
+          <a class="menu-link" href="#">Manajemen Password</a>
+        </div>
+      </div>
+
+      <div class="side-actions">
+        <a href="home.html">Kembali ke Beranda</a>
+        <a href="login.html">Keluar Dashboard</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <button id="mobileSidebarBtn" class="mobile-toggle" type="button">Menu</button>
+          <h2 class="headline">Dashboard Operasional Crembo Media</h2>
+          <p class="subhead">Menu mengikuti daftar fungsionalitas: streaming, inventaris, publikasi, anggota, log, dan notifikasi.</p>
+        </div>
+        <div class="quick-filter" aria-label="Role rule summary">
+          <span class="chip"><strong id="logScopeChip">Log:</strong> -</span>
+          <span class="chip"><strong id="memberScopeChip">Anggota:</strong> -</span>
+          <span class="chip"><strong>Request:</strong> Peminjaman barang & tugas misa besar</span>
+        </div>
+      </header>
+
+      <section class="cards" aria-label="Ringkasan metrik">
+        <article class="metric">
+          <p>Jadwal minggu ini</p>
+          <h3>14</h3>
+        </article>
+        <article class="metric">
+          <p>Permintaan peminjaman</p>
+          <h3>6</h3>
+        </article>
+        <article class="metric">
+          <p>Evaluasi belum diisi</p>
+          <h3>3</h3>
+        </article>
+        <article class="metric">
+          <p>Agenda aktif</p>
+          <h3>4</h3>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel">
+          <header class="panel-head">
+            <h2>Aktivitas Terbaru</h2>
+            <span class="status" id="logRuleStatus">Aturan log</span>
+          </header>
+          <div class="panel-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Pengguna</th>
+                  <th>Modul</th>
+                  <th>Aktivitas</th>
+                </tr>
+              </thead>
+              <tbody id="logRows">
+                <tr>
+                  <td>08:10</td>
+                  <td>admin_andi</td>
+                  <td>Peminjaman</td>
+                  <td>Menyetujui permintaan mixer audio</td>
+                </tr>
+                <tr>
+                  <td>09:25</td>
+                  <td>anggota_sinta</td>
+                  <td>Streaming</td>
+                  <td>Request tukar jadwal operator</td>
+                </tr>
+                <tr>
+                  <td>11:02</td>
+                  <td>admin_andi</td>
+                  <td>Pengumuman</td>
+                  <td>Publish pengumuman jadwal latihan</td>
+                </tr>
+                <tr>
+                  <td>13:44</td>
+                  <td>anggota_rafa</td>
+                  <td>Status Anggota</td>
+                  <td>Ajukan perubahan status nonaktif</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel">
+          <header class="panel-head">
+            <h2>Prioritas Hari Ini</h2>
+            <span class="status">Need Action</span>
+          </header>
+          <div class="panel-body">
+            <ul class="todo-list">
+              <li class="todo-item">
+                <strong>Validasi 2 pengajuan peminjaman barang</strong>
+                <small>Modul: Pengajuan Peminjaman Barang</small>
+              </li>
+              <li class="todo-item">
+                <strong>Review evaluasi misa pukul 17:00</strong>
+                <small>Modul: Form Evaluasi Streaming / Misa</small>
+              </li>
+              <li class="todo-item">
+                <strong>Update agenda publik minggu depan</strong>
+                <small>Modul: Manajemen Agenda Kegiatan</small>
+              </li>
+              <li class="todo-item">
+                <strong id="memberTaskTitle">Proses permintaan status anggota</strong>
+                <small id="memberTaskDesc">Modul: Manajemen Data Anggota</small>
+              </li>
+            </ul>
+
+            <div id="roleNote" class="role-note"></div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
 
   <script>
-    const roleBadge = document.getElementById("roleBadge");
     const params = new URLSearchParams(window.location.search);
-    const role = params.get("role") || "anggota";
+    const storedSessionRaw = localStorage.getItem("crembo-login-session");
+    let storedRole = "";
+
+    if (storedSessionRaw) {
+      try {
+        const sessionObj = JSON.parse(storedSessionRaw);
+        storedRole = sessionObj && sessionObj.role ? sessionObj.role : "";
+      } catch (error) {
+        storedRole = "";
+      }
+    }
+
+    const role = params.get("role") || storedRole || "admin";
+
+    const roleBadge = document.getElementById("roleBadge");
+    const anggotaMenu = document.getElementById("anggotaMenu");
+    const logRows = document.getElementById("logRows");
+    const roleNote = document.getElementById("roleNote");
+    const logRuleStatus = document.getElementById("logRuleStatus");
+    const logScopeChip = document.getElementById("logScopeChip");
+    const memberScopeChip = document.getElementById("memberScopeChip");
+    const memberTaskTitle = document.getElementById("memberTaskTitle");
+    const memberTaskDesc = document.getElementById("memberTaskDesc");
 
     function formatRole(value) {
       if (value === "super_admin") {
@@ -90,7 +610,81 @@
       return "Anggota";
     }
 
+    function renderMemberMenu(currentRole) {
+      const baseItems = [
+        "Data Anggota",
+        "Permintaan Status Aktif / Nonaktif",
+        "Profil Anggota"
+      ];
+
+      const extraSuperAdmin = [
+        "Kelola Data Admin",
+        "Audit Perubahan Role"
+      ];
+
+      const list = currentRole === "super_admin"
+        ? baseItems.concat(extraSuperAdmin)
+        : baseItems;
+
+      anggotaMenu.innerHTML = list
+        .map(function (item, index) {
+          const activeClass = index === 0 ? " active" : "";
+          return '<a class="menu-link' + activeClass + '" href="#">' + item + "</a>";
+        })
+        .join("");
+    }
+
+    function renderRoleNote(currentRole) {
+      if (currentRole === "super_admin") {
+        roleNote.textContent = "Akses Super Admin: dapat mengelola seluruh data anggota dan admin, serta melihat seluruh log aktivitas sistem termasuk aktivitas admin lain.";
+        logRuleStatus.textContent = "Log: seluruh pengguna";
+        logScopeChip.textContent = "Log: semua pengguna (anggota + admin + super admin)";
+        memberScopeChip.textContent = "Anggota: kelola anggota + admin";
+        memberTaskTitle.textContent = "Verifikasi perubahan role admin";
+        memberTaskDesc.textContent = "Modul: Kelola Data Admin & Audit Role";
+      } else {
+        roleNote.textContent = "Akses Admin: dapat mengelola data anggota, memproses permintaan status anggota, dan melihat log milik sendiri + seluruh anggota. Log admin lain tidak ditampilkan.";
+        logRuleStatus.textContent = "Log: admin sendiri + anggota";
+        logScopeChip.textContent = "Log: admin sendiri dan anggota";
+        memberScopeChip.textContent = "Anggota: kelola anggota";
+        memberTaskTitle.textContent = "Proses permintaan status anggota";
+        memberTaskDesc.textContent = "Modul: Manajemen Data Anggota";
+      }
+    }
+
+    function renderLogs(currentRole) {
+      if (currentRole !== "super_admin") {
+        return;
+      }
+
+      const extra = document.createElement("tr");
+      extra.innerHTML = "<td>15:05</td><td>admin_maria</td><td>Anggota</td><td>Mengubah status anggota menjadi aktif</td>";
+      logRows.appendChild(extra);
+
+      const extra2 = document.createElement("tr");
+      extra2.innerHTML = "<td>16:40</td><td>super_admin_lia</td><td>Log Sistem</td><td>Mengekspor audit aktivitas bulanan</td>";
+      logRows.appendChild(extra2);
+    }
+
     roleBadge.textContent = "Role: " + formatRole(role);
+    renderMemberMenu(role);
+    renderRoleNote(role);
+    renderLogs(role);
+
+    document.querySelectorAll(".group-toggle").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const group = button.closest(".menu-group");
+        group.classList.toggle("open");
+        const marker = button.querySelector("span");
+        marker.textContent = group.classList.contains("open") ? "-" : "+";
+      });
+    });
+
+    const mobileSidebarBtn = document.getElementById("mobileSidebarBtn");
+    const sidebar = document.getElementById("sidebar");
+    mobileSidebarBtn.addEventListener("click", function () {
+      sidebar.classList.toggle("show");
+    });
   </script>
 </body>
 </html>
