@@ -572,10 +572,16 @@
       <div class="menu-group">
         <button class="group-toggle" type="button">Informasi & Publikasi <span>+</span></button>
         <div class="group-items">
+          <a class="menu-link" href="#">Tentang Crembo</a>
           <a class="menu-link" href="#">Pengumuman</a>
           <a class="menu-link" href="#">Agenda Kegiatan</a>
           <a class="menu-link" href="#">Form Pendaftaran</a>
         </div>
+      </div>
+
+      <div class="menu-group open">
+        <button class="group-toggle" type="button">Konten Utama Website <span>-</span></button>
+        <div class="group-items" id="contentMenu"></div>
       </div>
 
       <div class="menu-group">
@@ -618,7 +624,7 @@
         <div>
           <button id="mobileSidebarBtn" class="mobile-toggle" type="button">Menu</button>
           <h2 class="headline">Dashboard Operasional Crembo Media</h2>
-          <p class="subhead">Menu mengikuti daftar fungsionalitas: streaming, inventaris, publikasi, anggota, log, dan notifikasi.</p>
+          <p class="subhead">Menu mengikuti daftar fungsionalitas: streaming, inventaris, konten utama website, publikasi, anggota, log, dan notifikasi.</p>
         </div>
         <div class="quick-filter" aria-label="Role rule summary">
           <span class="chip"><strong id="logScopeChip">Log:</strong> -</span>
@@ -776,6 +782,7 @@
 
     const roleBadge = document.getElementById("roleBadge");
     const anggotaMenu = document.getElementById("anggotaMenu");
+    const contentMenu = document.getElementById("contentMenu");
     const logRows = document.getElementById("logRows");
     const roleNote = document.getElementById("roleNote");
     const logRuleStatus = document.getElementById("logRuleStatus");
@@ -819,6 +826,36 @@
         .join("");
     }
 
+    function renderContentMenu(currentRole) {
+      const baseItems = [
+        "Kelola Carousel Home",
+        "Kelola Konten Tentang Crembo",
+        "Kelola Embed YouTube",
+        "Kelola Embed Google Maps",
+        "Kelola Embed Instagram",
+        "Kelola Jadwal Streaming Home",
+        "Kelola Agenda Home",
+        "Kelola Pengumuman / Berita Home",
+        "Kelola Form Pendaftaran Home"
+      ];
+
+      const extraSuperAdmin = [
+        "Persetujuan Publikasi Konten",
+        "Riwayat Versi Konten Utama"
+      ];
+
+      const list = currentRole === "super_admin"
+        ? baseItems.concat(extraSuperAdmin)
+        : baseItems;
+
+      contentMenu.innerHTML = list
+        .map(function (item, index) {
+          const activeClass = index === 0 ? " active" : "";
+          return '<a class="menu-link' + activeClass + '" href="#">' + item + "</a>";
+        })
+        .join("");
+    }
+
     function renderRoleNote(currentRole) {
       if (currentRole === "super_admin") {
         roleNote.textContent = "Akses Super Admin: dapat mengelola seluruh data anggota dan admin, serta melihat seluruh log aktivitas sistem termasuk aktivitas admin lain.";
@@ -853,6 +890,7 @@
 
     roleBadge.textContent = "Role: " + formatRole(role);
     renderMemberMenu(role);
+    renderContentMenu(role);
     renderRoleNote(role);
     renderLogs(role);
 
