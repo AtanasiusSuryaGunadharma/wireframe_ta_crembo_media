@@ -273,6 +273,91 @@
 
     .field textarea { min-height: 96px; resize: vertical; }
 
+    .combo {
+      position: relative;
+    }
+
+    .combo-trigger {
+      width: 100%;
+      border: 1px solid var(--line-soft);
+      background: #fff;
+      padding: 9px 10px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 0;
+    }
+
+    .combo-trigger::after {
+      content: "▾";
+      float: right;
+      color: #545454;
+      font-size: 0.82rem;
+      margin-top: 2px;
+    }
+
+    .combo-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      border: 1px solid #9f9f9f;
+      background: #fff;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+      z-index: 60;
+      display: none;
+    }
+
+    .combo-panel.show {
+      display: block;
+    }
+
+    .combo-search-box {
+      border-bottom: 1px solid #d2d2d2;
+      padding: 8px;
+      background: #f8f8f8;
+    }
+
+    .combo-search-input {
+      width: 100%;
+      border: 1px solid #b9b9b9;
+      padding: 7px 9px;
+      font-size: 0.86rem;
+      font-family: inherit;
+    }
+
+    .combo-options {
+      max-height: 210px;
+      overflow-y: auto;
+      background: #fff;
+    }
+
+    .combo-option {
+      width: 100%;
+      border: 0;
+      border-bottom: 1px solid #efefef;
+      background: #fff;
+      text-align: left;
+      padding: 8px 10px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border-radius: 0;
+    }
+
+    .combo-option:hover,
+    .combo-option.active {
+      background: #ededed;
+    }
+
+    .combo-empty {
+      margin: 0;
+      padding: 9px 10px;
+      font-size: 0.85rem;
+      color: #666;
+      font-style: italic;
+    }
+
     .row-2,
     .row-3 {
       display: grid;
@@ -406,6 +491,49 @@
       padding: 8px;
     }
 
+    .extra-staff-picker {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .extra-staff-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .extra-staff-empty {
+      margin: 8px 0 0;
+      font-size: 0.84rem;
+      color: #5e5e5e;
+    }
+
+    .extra-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid #bdbdbd;
+      background: #f7f7f7;
+      padding: 4px 8px;
+      font-size: 0.82rem;
+      border-radius: 999px;
+    }
+
+    .extra-chip button {
+      border: 1px solid #8f8f8f;
+      background: #fff;
+      width: 18px;
+      height: 18px;
+      padding: 0;
+      border-radius: 999px;
+      line-height: 1;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
     .action-row {
       margin-top: 12px;
       display: flex;
@@ -496,7 +624,8 @@
       .search { flex: 1 1 230px; }
       .search input { width: 100%; }
       .select-grid,
-      .row-2 { grid-template-columns: 1fr; }
+      .row-2,
+      .extra-staff-picker { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -596,22 +725,58 @@
         <div class="row-3">
           <div class="field">
             <label for="operatorName">Operator Bertugas</label>
-            <input id="operatorName" type="text" required>
+            <div class="combo" data-combo="operator">
+              <button class="combo-trigger" type="button" data-combo-trigger="operator" aria-expanded="false">Pilih operator...</button>
+              <div class="combo-panel" data-combo-panel="operator">
+                <div class="combo-search-box">
+                  <input class="combo-search-input" type="search" placeholder="Cari anggota..." data-combo-search="operator">
+                </div>
+                <div class="combo-options" data-combo-options="operator"></div>
+              </div>
+            </div>
+            <input id="operatorName" type="hidden">
           </div>
           <div class="field">
             <label for="cameraName">Kameramen Bertugas</label>
-            <input id="cameraName" type="text" required>
+            <div class="combo" data-combo="camera">
+              <button class="combo-trigger" type="button" data-combo-trigger="camera" aria-expanded="false">Pilih kameramen...</button>
+              <div class="combo-panel" data-combo-panel="camera">
+                <div class="combo-search-box">
+                  <input class="combo-search-input" type="search" placeholder="Cari anggota..." data-combo-search="camera">
+                </div>
+                <div class="combo-options" data-combo-options="camera"></div>
+              </div>
+            </div>
+            <input id="cameraName" type="hidden">
           </div>
           <div class="field">
             <label for="supervisorName">Supervisor Bertugas</label>
-            <input id="supervisorName" type="text" required>
+            <div class="combo" data-combo="supervisor">
+              <button class="combo-trigger" type="button" data-combo-trigger="supervisor" aria-expanded="false">Pilih supervisor...</button>
+              <div class="combo-panel" data-combo-panel="supervisor">
+                <div class="combo-search-box">
+                  <input class="combo-search-input" type="search" placeholder="Cari anggota..." data-combo-search="supervisor">
+                </div>
+                <div class="combo-options" data-combo-options="supervisor"></div>
+              </div>
+            </div>
+            <input id="supervisorName" type="hidden">
           </div>
         </div>
 
         <div class="row-2">
           <div class="field">
             <label for="evalName">Nama Petugas Pengisi Evaluasi</label>
-            <input id="evalName" type="text" required>
+            <div class="combo" data-combo="eval">
+              <button class="combo-trigger" type="button" data-combo-trigger="eval" aria-expanded="false">Pilih pengisi evaluasi...</button>
+              <div class="combo-panel" data-combo-panel="eval">
+                <div class="combo-search-box">
+                  <input class="combo-search-input" type="search" placeholder="Cari anggota..." data-combo-search="eval">
+                </div>
+                <div class="combo-options" data-combo-options="eval"></div>
+              </div>
+            </div>
+            <input id="evalName" type="hidden">
           </div>
           <div class="field">
             <label for="evalRole">Role Pengisi Evaluasi</label>
@@ -626,8 +791,23 @@
         </div>
 
         <div class="field">
-          <label for="extraStaff">Petugas Tambahan (jika ada)</label>
-          <input id="extraStaff" type="text" placeholder="Contoh: Budi (Audio), Sinta (Dokumentasi)">
+          <label for="extraStaffInput">Petugas Tambahan (jika ada)</label>
+          <div class="extra-staff-picker">
+            <div class="combo" data-combo="extra">
+              <button class="combo-trigger" type="button" data-combo-trigger="extra" aria-expanded="false">Pilih anggota tambahan...</button>
+              <div class="combo-panel" data-combo-panel="extra">
+                <div class="combo-search-box">
+                  <input class="combo-search-input" type="search" placeholder="Cari anggota..." data-combo-search="extra">
+                </div>
+                <div class="combo-options" data-combo-options="extra"></div>
+              </div>
+            </div>
+            <input id="extraStaffInput" type="hidden">
+            <button id="addExtraStaffBtn" class="btn" type="button">Tambah</button>
+          </div>
+          <input id="extraStaff" type="hidden">
+          <div id="extraStaffChips" class="extra-staff-chips" aria-live="polite"></div>
+          <p id="extraStaffEmpty" class="extra-staff-empty">Belum ada petugas tambahan dipilih.</p>
         </div>
 
         <div class="field">
@@ -708,6 +888,7 @@
 
   <script>
     const STORAGE_KEY = "crembo-evaluasi-streaming";
+    const ACTIVE_MEMBER_STORAGE_KEY = "crembo-active-members";
 
     const schedules = [
       {
@@ -752,6 +933,11 @@
       }
     ];
 
+    const fallbackActiveMembers = [
+      "Rikha", "Jeni", "Tyas", "Lisa", "Evan", "Jose", "Rossa", "Aurel", "Asha",
+      "Andre", "Bima", "Chandra", "Dian", "Elin", "Ferry", "Gita", "Hana"
+    ];
+
     const topHeader = document.getElementById("topHeader");
     const searchForm = document.getElementById("searchForm");
     const searchInput = document.getElementById("searchInput");
@@ -777,7 +963,11 @@
 
     const evalName = document.getElementById("evalName");
     const evalRole = document.getElementById("evalRole");
+    const extraStaffInput = document.getElementById("extraStaffInput");
+    const addExtraStaffBtn = document.getElementById("addExtraStaffBtn");
     const extraStaff = document.getElementById("extraStaff");
+    const extraStaffChips = document.getElementById("extraStaffChips");
+    const extraStaffEmpty = document.getElementById("extraStaffEmpty");
     const staffEvalGrid = document.getElementById("staffEvalGrid");
 
     const technicalIssue = document.getElementById("technicalIssue");
@@ -789,6 +979,16 @@
     const checkArchive = document.getElementById("checkArchive");
 
     let selectedScheduleId = "";
+    let activeMembers = [];
+    let selectedExtraStaff = [];
+
+    const comboConfig = {
+      operator: { hiddenInput: operatorName, placeholder: "Pilih operator...", allowEmpty: false },
+      camera: { hiddenInput: cameraName, placeholder: "Pilih kameramen...", allowEmpty: false },
+      supervisor: { hiddenInput: supervisorName, placeholder: "Pilih supervisor...", allowEmpty: false },
+      eval: { hiddenInput: evalName, placeholder: "Pilih pengisi evaluasi...", allowEmpty: false },
+      extra: { hiddenInput: extraStaffInput, placeholder: "Pilih anggota tambahan...", allowEmpty: true }
+    };
 
     function syncStickyOffset() {
       const headerHeight = topHeader ? topHeader.offsetHeight : 118;
@@ -809,6 +1009,206 @@
 
     function writeStoredEvaluations(data) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function normalizeName(value) {
+      return String(value || "").trim();
+    }
+
+    function readActiveMembers() {
+      try {
+        const raw = localStorage.getItem(ACTIVE_MEMBER_STORAGE_KEY);
+        if (!raw) {
+          return [];
+        }
+
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) {
+          return [];
+        }
+
+        return parsed.map(function (item) {
+          if (typeof item === "string") {
+            return { name: item, isActive: true };
+          }
+
+          return {
+            name: item && item.name ? String(item.name) : "",
+            isActive: item && item.status ? String(item.status).toLowerCase() === "aktif" : item && item.isActive !== false
+          };
+        });
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function initActiveMembers() {
+      const fromStorage = readActiveMembers()
+        .filter(function (item) { return item.isActive; })
+        .map(function (item) { return normalizeName(item.name); })
+        .filter(function (name) { return name.length > 0; });
+
+      const fromSchedules = [];
+      schedules.forEach(function (item) {
+        fromSchedules.push(item.team.operator, item.team.camera, item.team.supervisor);
+      });
+
+      const merged = fromStorage.concat(fromSchedules, fallbackActiveMembers).filter(function (name) {
+        return normalizeName(name).length > 0;
+      });
+
+      const unique = [];
+      merged.forEach(function (name) {
+        const clean = normalizeName(name);
+        const exists = unique.some(function (memberName) {
+          return memberName.toLowerCase() === clean.toLowerCase();
+        });
+
+        if (!exists) {
+          unique.push(clean);
+        }
+      });
+
+      unique.sort(function (a, b) {
+        return a.localeCompare(b, "id", { sensitivity: "base" });
+      });
+
+      activeMembers = unique;
+    }
+
+    function comboEl(part, key) {
+      return document.querySelector('[data-combo-' + part + '="' + key + '"]');
+    }
+
+    function setComboValue(key, value) {
+      const config = comboConfig[key];
+      const clean = normalizeName(value);
+      const trigger = comboEl("trigger", key);
+
+      config.hiddenInput.value = clean;
+      trigger.textContent = clean || config.placeholder;
+    }
+
+    function renderComboOptions(key, query) {
+      const config = comboConfig[key];
+      const optionsWrap = comboEl("options", key);
+      const cleanQuery = normalizeName(query).toLowerCase();
+      const selected = normalizeName(config.hiddenInput.value);
+
+      const filtered = activeMembers.filter(function (name) {
+        return !cleanQuery || name.toLowerCase().indexOf(cleanQuery) !== -1;
+      });
+
+      let html = "";
+      if (config.allowEmpty) {
+        html += '<button class="combo-option' + (selected ? '' : ' active') + '" type="button" data-combo-value="" data-combo-key="' + key + '">-- kosong --</button>';
+      }
+
+      filtered.forEach(function (name) {
+        const activeClass = name.toLowerCase() === selected.toLowerCase() ? " active" : "";
+        html += '<button class="combo-option' + activeClass + '" type="button" data-combo-value="' + escapeHtml(name) + '" data-combo-key="' + key + '">' + escapeHtml(name) + '</button>';
+      });
+
+      if (!filtered.length) {
+        html += '<p class="combo-empty">Nama anggota tidak ditemukan.</p>';
+      }
+
+      optionsWrap.innerHTML = html;
+    }
+
+    function closeCombo(key) {
+      const panel = comboEl("panel", key);
+      const trigger = comboEl("trigger", key);
+      panel.classList.remove("show");
+      trigger.setAttribute("aria-expanded", "false");
+    }
+
+    function closeAllCombos(exceptKey) {
+      Object.keys(comboConfig).forEach(function (key) {
+        if (exceptKey && key === exceptKey) {
+          return;
+        }
+        closeCombo(key);
+      });
+    }
+
+    function openCombo(key) {
+      closeAllCombos(key);
+      const panel = comboEl("panel", key);
+      const trigger = comboEl("trigger", key);
+      const searchInput = comboEl("search", key);
+
+      panel.classList.add("show");
+      trigger.setAttribute("aria-expanded", "true");
+      renderComboOptions(key, searchInput.value);
+      searchInput.focus();
+    }
+
+    function refreshComboSelections() {
+      Object.keys(comboConfig).forEach(function (key) {
+        setComboValue(key, comboConfig[key].hiddenInput.value);
+      });
+    }
+
+    function isActiveMemberName(name) {
+      const clean = normalizeName(name);
+      return activeMembers.some(function (memberName) {
+        return memberName.toLowerCase() === clean.toLowerCase();
+      });
+    }
+
+    function syncExtraStaffHiddenInput() {
+      extraStaff.value = selectedExtraStaff.join(", ");
+    }
+
+    function renderExtraStaffChips() {
+      extraStaffChips.innerHTML = "";
+
+      if (selectedExtraStaff.length === 0) {
+        extraStaffEmpty.style.display = "block";
+        syncExtraStaffHiddenInput();
+        return;
+      }
+
+      extraStaffEmpty.style.display = "none";
+
+      selectedExtraStaff.forEach(function (name) {
+        const chip = document.createElement("span");
+        chip.className = "extra-chip";
+        chip.innerHTML = '<span>' + escapeHtml(name) + '</span><button type="button" data-remove-name="' + escapeHtml(name) + '" aria-label="Hapus petugas tambahan ' + escapeHtml(name) + '">x</button>';
+        extraStaffChips.appendChild(chip);
+      });
+
+      syncExtraStaffHiddenInput();
+    }
+
+    function addExtraStaff() {
+      const pickedName = normalizeName(extraStaffInput.value);
+      if (!pickedName) {
+        setStatus("Pilih petugas tambahan dulu dari dropdown.", false);
+        return;
+      }
+
+      if (!isActiveMemberName(pickedName)) {
+        setStatus("Nama petugas tambahan harus dipilih dari daftar anggota aktif.", false);
+        return;
+      }
+
+      const exists = selectedExtraStaff.some(function (name) {
+        return name.toLowerCase() === pickedName.toLowerCase();
+      });
+
+      if (exists) {
+        setStatus("Petugas tambahan tersebut sudah dipilih.", false);
+        return;
+      }
+
+      selectedExtraStaff.push(pickedName);
+      setComboValue("extra", "");
+      comboEl("search", "extra").value = "";
+      renderComboOptions("extra", "");
+      renderExtraStaffChips();
+      renderStaffEvaluationFields();
     }
 
     function getAvailableSchedules() {
@@ -841,7 +1241,9 @@
       evaluationForm.reset();
       evaluationFormCard.classList.remove("show");
       selectedScheduleId = "";
+      selectedExtraStaff = [];
       staffEvalGrid.innerHTML = "";
+      renderExtraStaffChips();
     }
 
     function escapeHtml(text) {
@@ -853,13 +1255,6 @@
         .replace(/'/g, "&#039;");
     }
 
-    function parseAdditionalStaff(value) {
-      return value
-        .split(",")
-        .map(function (name) { return name.trim(); })
-        .filter(function (name) { return name.length > 0; });
-    }
-
     function getCurrentStaffList() {
       const baseStaff = [
         operatorName.value.trim(),
@@ -867,7 +1262,7 @@
         supervisorName.value.trim()
       ];
 
-      const allStaff = baseStaff.concat(parseAdditionalStaff(extraStaff.value));
+      const allStaff = baseStaff.concat(selectedExtraStaff);
       const unique = [];
 
       allStaff.forEach(function (name) {
@@ -992,9 +1387,15 @@
       cameraName.value = schedule.team.camera;
       supervisorName.value = schedule.team.supervisor;
 
-      evalName.value = "";
+      evalName.value = schedule.team.operator;
       evalRole.value = "Operator";
-      extraStaff.value = "";
+      selectedExtraStaff = [];
+      extraStaffInput.value = "";
+      comboEl("search", "operator").value = "";
+      comboEl("search", "camera").value = "";
+      comboEl("search", "supervisor").value = "";
+      comboEl("search", "eval").value = "";
+      comboEl("search", "extra").value = "";
       technicalIssue.value = "";
       liturgyIssue.value = "";
       finalNote.value = "";
@@ -1002,6 +1403,9 @@
       checkCoord.checked = false;
       checkArchive.checked = false;
 
+      refreshComboSelections();
+      renderComboOptions("extra", "");
+      renderExtraStaffChips();
       renderStaffEvaluationFields();
 
       evaluationFormCard.classList.add("show");
@@ -1011,6 +1415,11 @@
 
     function saveEvaluation(event) {
       event.preventDefault();
+
+      if (!operatorName.value || !cameraName.value || !supervisorName.value || !evalName.value) {
+        setStatus("Lengkapi pilihan petugas (operator, kameramen, supervisor, dan pengisi evaluasi).", false);
+        return;
+      }
 
       if (!selectedScheduleId) {
         setStatus("Jadwal belum dipilih.", false);
@@ -1033,7 +1442,7 @@
         supervisor: supervisorName.value,
         evaluatorName: evalName.value,
         evaluatorRole: evalRole.value,
-        extraStaff: extraStaff.value,
+        extraStaff: selectedExtraStaff.slice(),
         technicalIssue: technicalIssue.value,
         liturgyIssue: liturgyIssue.value,
         checklist: {
@@ -1070,6 +1479,12 @@
     syncStickyOffset();
     window.addEventListener("resize", syncStickyOffset);
 
+    initActiveMembers();
+    refreshComboSelections();
+    Object.keys(comboConfig).forEach(function (key) {
+      renderComboOptions(key, "");
+    });
+
     drawScheduleOptions();
 
     scheduleSelect.addEventListener("change", function () {
@@ -1080,10 +1495,73 @@
     cancelBtn.addEventListener("click", cancelForm);
     evaluationForm.addEventListener("submit", saveEvaluation);
 
-    operatorName.addEventListener("input", renderStaffEvaluationFields);
-    cameraName.addEventListener("input", renderStaffEvaluationFields);
-    supervisorName.addEventListener("input", renderStaffEvaluationFields);
-    extraStaff.addEventListener("input", renderStaffEvaluationFields);
+    addExtraStaffBtn.addEventListener("click", addExtraStaff);
+
+    Object.keys(comboConfig).forEach(function (key) {
+      const trigger = comboEl("trigger", key);
+      const searchInput = comboEl("search", key);
+      const optionsWrap = comboEl("options", key);
+
+      trigger.addEventListener("click", function () {
+        const panel = comboEl("panel", key);
+        if (panel.classList.contains("show")) {
+          closeCombo(key);
+          return;
+        }
+        openCombo(key);
+      });
+
+      searchInput.addEventListener("input", function () {
+        renderComboOptions(key, searchInput.value);
+      });
+
+      optionsWrap.addEventListener("click", function (event) {
+        const option = event.target.closest(".combo-option");
+        if (!option) {
+          return;
+        }
+
+        setComboValue(key, option.getAttribute("data-combo-value") || "");
+        closeCombo(key);
+
+        if (key === "operator") {
+          if (evalRole.value === "Operator" || !evalName.value) {
+            setComboValue("eval", operatorName.value);
+          }
+          renderStaffEvaluationFields();
+        }
+
+        if (key === "camera" || key === "supervisor") {
+          renderStaffEvaluationFields();
+        }
+      });
+    });
+
+    document.addEventListener("click", function (event) {
+      const comboRoot = event.target.closest(".combo");
+      if (!comboRoot) {
+        closeAllCombos();
+      }
+    });
+
+    extraStaffChips.addEventListener("click", function (event) {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) {
+        return;
+      }
+
+      const removeName = normalizeName(target.dataset.removeName || "");
+      if (!removeName) {
+        return;
+      }
+
+      selectedExtraStaff = selectedExtraStaff.filter(function (name) {
+        return name.toLowerCase() !== removeName.toLowerCase();
+      });
+
+      renderExtraStaffChips();
+      renderStaffEvaluationFields();
+    });
 
     searchForm.addEventListener("submit", handleSearchSubmit);
   </script>

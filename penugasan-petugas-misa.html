@@ -264,6 +264,90 @@
       min-width: 150px;
     }
 
+    .slot-combo {
+      position: relative;
+    }
+
+    .slot-trigger {
+      width: 100%;
+      text-align: left;
+      border: 1px solid #cbcbcb;
+      border-radius: 6px;
+      padding: 6px 8px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.84rem;
+    }
+
+    .slot-trigger::after {
+      content: "▾";
+      float: right;
+      color: #5c5c5c;
+      font-size: 0.76rem;
+      margin-top: 2px;
+    }
+
+    .slot-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      border: 1px solid #a7a7a7;
+      border-radius: 6px;
+      background: #fff;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
+      z-index: 40;
+      display: none;
+    }
+
+    .slot-panel.show {
+      display: block;
+    }
+
+    .slot-search-box {
+      padding: 7px;
+      border-bottom: 1px solid #dddddd;
+      background: #f7f7f7;
+    }
+
+    .slot-search-input {
+      width: 100%;
+      border: 1px solid #b9b9b9;
+      border-radius: 4px;
+      padding: 6px 7px;
+      font-size: 0.82rem;
+    }
+
+    .slot-options {
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .slot-option {
+      width: 100%;
+      border: 0;
+      border-bottom: 1px solid #f0f0f0;
+      border-radius: 0;
+      background: #fff;
+      text-align: left;
+      padding: 7px 8px;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    .slot-option:hover,
+    .slot-option.active {
+      background: #ebebeb;
+    }
+
+    .slot-empty {
+      margin: 0;
+      padding: 8px;
+      font-size: 0.78rem;
+      color: #666;
+      font-style: italic;
+    }
+
     select,
     button,
     input {
@@ -447,7 +531,7 @@
   </div>
 
   <script>
-    const memberOptions = ["", "Rikha", "Jeni", "Tyas", "Lisa", "Evan", "Jose", "Rossa", "Aurel", "Asha", "Bima", "Niko", "Sinta"];
+    const memberOptions = ["Rikha", "Jeni", "Tyas", "Lisa", "Evan", "Jose", "Rossa", "Aurel", "Asha", "Bima", "Niko", "Sinta"];
 
     const schedulesBiasa = [
       { misa: "Misa Harian Senin", tanggal: "2026-03-30", jam: "17:00", dp: "Rikha", op: "Jeni", kamera: "", supervisor: "Tyas", fotografer: "" },
@@ -470,18 +554,34 @@
     const modeBiasa = document.getElementById("modeBiasa");
     const modeBesar = document.getElementById("modeBesar");
 
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function normalizeName(value) {
+      return String(value || "").trim();
+    }
+
     function activeSchedules() {
       return currentMode === "biasa" ? schedulesBiasa : schedulesBesar;
     }
 
     function buildMemberSelect(selectedValue, scheduleIndex, roleKey) {
-      const options = memberOptions.map(function (memberName) {
-        const selected = memberName === selectedValue ? " selected" : "";
-        const label = memberName || "-- kosong --";
-        return '<option value="' + memberName + '"' + selected + '>' + label + '</option>';
-      }).join("");
+      const clean = normalizeName(selectedValue);
+      const label = clean || "-- kosong --";
 
-      return '<select class="slot-select" data-index="' + scheduleIndex + '" data-role="' + roleKey + '">' + options + '</select>';
+      return '<div class="slot-combo" data-index="' + scheduleIndex + '" data-role="' + roleKey + '">' +
+        '<button class="slot-trigger" type="button" aria-expanded="false">' + escapeHtml(label) + '</button>' +
+        '<div class="slot-panel">' +
+          '<div class="slot-search-box"><input class="slot-search-input" type="search" placeholder="Cari anggota..."></div>' +
+          '<div class="slot-options"></div>' +
+        '</div>' +
+      '</div>';
     }
 
     function buildRoleCell(schedule, scheduleIndex, roleKey) {
@@ -510,6 +610,52 @@
           '<td>' + buildRoleCell(schedule, index, "fotografer") + '</td>' +
           '</tr>';
       }).join("");
+
+      initSlotCombos();
+    }
+
+    function renderSlotOptions(comboEl, query) {
+      const scheduleIndex = Number(comboEl.getAttribute("data-index"));
+      const roleKey = comboEl.getAttribute("data-role");
+      const selectedValue = normalizeName(activeSchedules()[scheduleIndex][roleKey]);
+      const optionsWrap = comboEl.querySelector(".slot-options");
+      const cleanQuery = normalizeName(query).toLowerCase();
+
+      const filtered = memberOptions.filter(function (name) {
+        return !cleanQuery || name.toLowerCase().indexOf(cleanQuery) !== -1;
+      });
+
+      let html = '<button class="slot-option' + (selectedValue ? '' : ' active') + '" type="button" data-value="">-- kosong --</button>';
+
+      filtered.forEach(function (name) {
+        const activeClass = name.toLowerCase() === selectedValue.toLowerCase() ? " active" : "";
+        html += '<button class="slot-option' + activeClass + '" type="button" data-value="' + escapeHtml(name) + '">' + escapeHtml(name) + '</button>';
+      });
+
+      if (!filtered.length) {
+        html += '<p class="slot-empty">Nama anggota tidak ditemukan.</p>';
+      }
+
+      optionsWrap.innerHTML = html;
+    }
+
+    function closeAllSlotPanels(exceptCombo) {
+      assignmentRows.querySelectorAll(".slot-combo").forEach(function (comboEl) {
+        if (exceptCombo && comboEl === exceptCombo) {
+          return;
+        }
+
+        const panel = comboEl.querySelector(".slot-panel");
+        const trigger = comboEl.querySelector(".slot-trigger");
+        panel.classList.remove("show");
+        trigger.setAttribute("aria-expanded", "false");
+      });
+    }
+
+    function initSlotCombos() {
+      assignmentRows.querySelectorAll(".slot-combo").forEach(function (comboEl) {
+        renderSlotOptions(comboEl, "");
+      });
     }
 
     function renderSwapSchedules() {
@@ -530,16 +676,45 @@
     modeBiasa.addEventListener("click", function () { setMode("biasa"); });
     modeBesar.addEventListener("click", function () { setMode("besar"); });
 
-    assignmentRows.addEventListener("change", function (event) {
-      const select = event.target.closest(".slot-select");
-      if (!select) {
+    assignmentRows.addEventListener("click", function (event) {
+      const trigger = event.target.closest(".slot-trigger");
+      if (trigger) {
+        const comboEl = trigger.closest(".slot-combo");
+        const panel = comboEl.querySelector(".slot-panel");
+        const searchInput = comboEl.querySelector(".slot-search-input");
+        const willOpen = !panel.classList.contains("show");
+
+        closeAllSlotPanels(comboEl);
+        panel.classList.toggle("show", willOpen);
+        trigger.setAttribute("aria-expanded", willOpen ? "true" : "false");
+        if (willOpen) {
+          renderSlotOptions(comboEl, searchInput.value);
+          searchInput.focus();
+        }
         return;
       }
 
-      const index = Number(select.getAttribute("data-index"));
-      const role = select.getAttribute("data-role");
-      activeSchedules()[index][role] = select.value;
-      renderAssignments();
+      const option = event.target.closest(".slot-option");
+      if (option) {
+        const comboEl = option.closest(".slot-combo");
+        const index = Number(comboEl.getAttribute("data-index"));
+        const role = comboEl.getAttribute("data-role");
+        const picked = option.getAttribute("data-value") || "";
+
+        activeSchedules()[index][role] = picked;
+        renderAssignments();
+        return;
+      }
+    });
+
+    assignmentRows.addEventListener("input", function (event) {
+      const searchInput = event.target.closest(".slot-search-input");
+      if (!searchInput) {
+        return;
+      }
+
+      const comboEl = searchInput.closest(".slot-combo");
+      renderSlotOptions(comboEl, searchInput.value);
     });
 
     assignmentRows.addEventListener("click", function (event) {
@@ -552,6 +727,13 @@
       const role = button.getAttribute("data-role");
       activeSchedules()[index][role] = "";
       renderAssignments();
+    });
+
+    document.addEventListener("click", function (event) {
+      const comboRoot = event.target.closest(".slot-combo");
+      if (!comboRoot) {
+        closeAllSlotPanels();
+      }
     });
 
     swapBtn.addEventListener("click", function () {

@@ -232,10 +232,95 @@
 
     .role-adder {
       display: grid;
-      grid-template-columns: 1fr auto auto;
+      grid-template-columns: 1fr 1fr auto auto;
       gap: 10px;
       align-items: end;
       margin-top: 10px;
+    }
+
+    .member-combo {
+      position: relative;
+      min-width: 190px;
+    }
+
+    .member-trigger {
+      width: 100%;
+      text-align: left;
+      border: 1px solid #cbcbcb;
+      border-radius: 6px;
+      padding: 8px 9px;
+      background: #fff;
+      font-size: 0.84rem;
+      cursor: pointer;
+    }
+
+    .member-trigger::after {
+      content: "▾";
+      float: right;
+      color: #5b5b5b;
+      font-size: 0.76rem;
+      margin-top: 2px;
+    }
+
+    .member-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      border: 1px solid #ababab;
+      border-radius: 6px;
+      background: #fff;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+      z-index: 40;
+      display: none;
+    }
+
+    .member-panel.show {
+      display: block;
+    }
+
+    .member-search-wrap {
+      border-bottom: 1px solid #dddddd;
+      padding: 7px;
+      background: #f7f7f7;
+    }
+
+    .member-search {
+      width: 100%;
+      border: 1px solid #b8b8b8;
+      border-radius: 4px;
+      padding: 6px 7px;
+      font-size: 0.82rem;
+    }
+
+    .member-options {
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .member-option {
+      width: 100%;
+      border: 0;
+      border-bottom: 1px solid #f0f0f0;
+      border-radius: 0;
+      background: #fff;
+      text-align: left;
+      padding: 7px 8px;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    .member-option:hover,
+    .member-option.active {
+      background: #ebebeb;
+    }
+
+    .member-empty {
+      margin: 0;
+      padding: 8px;
+      font-size: 0.78rem;
+      color: #686868;
+      font-style: italic;
     }
 
     .btn {
@@ -377,7 +462,12 @@
                 <option value="Lighting">Lighting</option>
               </select>
             </div>
+            <div class="field">
+              <label for="customRoleInput">Role Manual (Custom)</label>
+              <input id="customRoleInput" type="text" placeholder="Contoh: Drone Pilot">
+            </div>
             <button id="addRoleBtn" class="btn" type="button">+ Tambah Role</button>
+            <button id="addCustomRoleBtn" class="btn secondary" type="button">+ Tambah Role Custom</button>
             <button id="addDefaultRolesBtn" class="btn secondary" type="button">+ Paket Standar</button>
           </div>
 
@@ -411,34 +501,108 @@
 
     const rolesBody = document.getElementById("rolesBody");
     const roleSelect = document.getElementById("roleSelect");
+    const customRoleInput = document.getElementById("customRoleInput");
     const addRoleBtn = document.getElementById("addRoleBtn");
+    const addCustomRoleBtn = document.getElementById("addCustomRoleBtn");
     const addDefaultRolesBtn = document.getElementById("addDefaultRolesBtn");
 
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function normalizeRoleName(value) {
+      return String(value || "").trim();
+    }
+
     function createMemberSelect() {
-      return '<select><option value="">-- pilih anggota --</option>' +
-        memberOptions.map(function (name) { return '<option>' + name + '</option>'; }).join("") +
-        '</select>';
+      return '<div class="member-combo">' +
+        '<button class="member-trigger" type="button" data-value="" aria-expanded="false">-- pilih anggota --</button>' +
+        '<div class="member-panel">' +
+          '<div class="member-search-wrap"><input class="member-search" type="search" placeholder="Cari anggota..."></div>' +
+          '<div class="member-options"></div>' +
+        '</div>' +
+        '<input class="member-hidden" type="hidden" value="">' +
+      '</div>';
+    }
+
+    function setMemberComboValue(comboEl, value) {
+      const clean = String(value || "").trim();
+      const trigger = comboEl.querySelector(".member-trigger");
+      const hidden = comboEl.querySelector(".member-hidden");
+
+      hidden.value = clean;
+      trigger.textContent = clean || "-- pilih anggota --";
+      trigger.setAttribute("data-value", clean);
+    }
+
+    function renderMemberComboOptions(comboEl, query) {
+      const optionsWrap = comboEl.querySelector(".member-options");
+      const selected = comboEl.querySelector(".member-hidden").value.trim().toLowerCase();
+      const cleanQuery = String(query || "").trim().toLowerCase();
+
+      const filtered = memberOptions.filter(function (name) {
+        return !cleanQuery || name.toLowerCase().indexOf(cleanQuery) !== -1;
+      });
+
+      let html = '<button class="member-option' + (selected ? '' : ' active') + '" type="button" data-value="">-- kosong --</button>';
+
+      filtered.forEach(function (name) {
+        const activeClass = name.toLowerCase() === selected ? " active" : "";
+        html += '<button class="member-option' + activeClass + '" type="button" data-value="' + escapeHtml(name) + '">' + escapeHtml(name) + '</button>';
+      });
+
+      if (!filtered.length) {
+        html += '<p class="member-empty">Nama anggota tidak ditemukan.</p>';
+      }
+
+      optionsWrap.innerHTML = html;
+    }
+
+    function closeAllMemberPanels(exceptCombo) {
+      rolesBody.querySelectorAll(".member-combo").forEach(function (comboEl) {
+        if (exceptCombo && comboEl === exceptCombo) {
+          return;
+        }
+
+        const panel = comboEl.querySelector(".member-panel");
+        const trigger = comboEl.querySelector(".member-trigger");
+        panel.classList.remove("show");
+        trigger.setAttribute("aria-expanded", "false");
+      });
+    }
+
+    function initRoleRowCombos() {
+      rolesBody.querySelectorAll(".member-combo").forEach(function (comboEl) {
+        renderMemberComboOptions(comboEl, "");
+      });
     }
 
     function addRole(roleName) {
-      if (!roleName) {
+      const cleanRoleName = normalizeRoleName(roleName);
+      if (!cleanRoleName) {
         return;
       }
 
       const existingRoles = Array.from(rolesBody.querySelectorAll("tr td:first-child")).map(function (cell) {
-        return cell.textContent.trim();
+        return cell.textContent.trim().toLowerCase();
       });
 
-      if (existingRoles.indexOf(roleName) !== -1) {
+      if (existingRoles.indexOf(cleanRoleName.toLowerCase()) !== -1) {
         return;
       }
 
       const row = document.createElement("tr");
-      row.innerHTML = "<td>" + roleName + "</td>" +
+      row.innerHTML = "<td>" + escapeHtml(cleanRoleName) + "</td>" +
         "<td>" + createMemberSelect() + "</td>" +
         "<td><input type=\"text\" placeholder=\"Opsional\"></td>" +
         "<td><button type=\"button\" class=\"btn danger remove-role\">Hapus</button></td>";
       rolesBody.appendChild(row);
+      initRoleRowCombos();
     }
 
     addRoleBtn.addEventListener("click", function () {
@@ -446,11 +610,49 @@
       roleSelect.value = "";
     });
 
+    addCustomRoleBtn.addEventListener("click", function () {
+      addRole(customRoleInput.value);
+      customRoleInput.value = "";
+    });
+
+    customRoleInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        addRole(customRoleInput.value);
+        customRoleInput.value = "";
+      }
+    });
+
     addDefaultRolesBtn.addEventListener("click", function () {
       ["DP", "OP", "Kamera", "Supervisor", "Fotografer"].forEach(addRole);
     });
 
     rolesBody.addEventListener("click", function (event) {
+      const trigger = event.target.closest(".member-trigger");
+      if (trigger) {
+        const comboEl = trigger.closest(".member-combo");
+        const panel = comboEl.querySelector(".member-panel");
+        const searchInput = comboEl.querySelector(".member-search");
+        const willOpen = !panel.classList.contains("show");
+
+        closeAllMemberPanels(comboEl);
+        panel.classList.toggle("show", willOpen);
+        trigger.setAttribute("aria-expanded", willOpen ? "true" : "false");
+        if (willOpen) {
+          renderMemberComboOptions(comboEl, searchInput.value);
+          searchInput.focus();
+        }
+        return;
+      }
+
+      const option = event.target.closest(".member-option");
+      if (option) {
+        const comboEl = option.closest(".member-combo");
+        setMemberComboValue(comboEl, option.getAttribute("data-value") || "");
+        closeAllMemberPanels();
+        return;
+      }
+
       const button = event.target.closest(".remove-role");
       if (!button) {
         return;
@@ -458,6 +660,23 @@
       const row = button.closest("tr");
       if (row) {
         row.remove();
+      }
+    });
+
+    rolesBody.addEventListener("input", function (event) {
+      const searchInput = event.target.closest(".member-search");
+      if (!searchInput) {
+        return;
+      }
+
+      const comboEl = searchInput.closest(".member-combo");
+      renderMemberComboOptions(comboEl, searchInput.value);
+    });
+
+    document.addEventListener("click", function (event) {
+      const inCombo = event.target.closest(".member-combo");
+      if (!inCombo) {
+        closeAllMemberPanels();
       }
     });
 
