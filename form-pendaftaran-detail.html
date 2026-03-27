@@ -159,8 +159,8 @@
   <section class="hero" aria-label="Header detail form pendaftaran">
     <div>
       <span class="badge">Form Pendaftaran</span>
-      <h2>Open Recruitment Crew Multimedia</h2>
-      <div class="hero-meta">Batas pengisian: 05 April 2026</div>
+      <h2 id="heroTitle">Detail Form Pendaftaran</h2>
+      <div id="heroMeta" class="hero-meta">Memuat data form...</div>
     </div>
   </section>
 
@@ -169,86 +169,19 @@
       <ol class="breadcrumb" aria-label="Breadcrumb">
         <li><a href="home.html">Beranda</a></li>
         <li><a href="form-pendaftaran.html">Form Pendaftaran</a></li>
-        <li aria-current="page">Detail Form</li>
+        <li id="breadcrumbCurrent" aria-current="page">Detail Form</li>
       </ol>
     </div>
   </div>
 
   <main class="container content">
     <section class="form-card" aria-label="Detail form pendaftaran">
-      <h3>Form Pendaftaran Open Recruitment</h3>
-      <p class="form-desc">Isi data berikut seperti pengisian Google Form. Kolom bertanda bintang wajib diisi.</p>
+      <h3 id="formTitle">Form Pendaftaran</h3>
+      <p id="formDesc" class="form-desc">Isi data berikut seperti pengisian Google Form. Kolom bertanda bintang wajib diisi.</p>
 
-      <form class="input-grid">
-        <div class="field">
-          <label class="required" for="nama">Nama Lengkap</label>
-          <input id="nama" type="text" placeholder="Masukkan nama lengkap">
-        </div>
+      <div id="accessInfo" class="form-desc" style="margin-top:-4px;"></div>
 
-        <div class="row-2">
-          <div class="field">
-            <label class="required" for="email">Email</label>
-            <input id="email" type="email" placeholder="nama@email.com">
-          </div>
-          <div class="field">
-            <label class="required" for="telepon">Nomor WhatsApp</label>
-            <input id="telepon" type="tel" placeholder="08xx-xxxx-xxxx">
-          </div>
-        </div>
-
-        <div class="row-2">
-          <div class="field">
-            <label class="required" for="fakultas">Fakultas / Sekolah</label>
-            <input id="fakultas" type="text" placeholder="Contoh: Teknik Industri">
-          </div>
-          <div class="field">
-            <label class="required" for="angkatan">Angkatan</label>
-            <select id="angkatan">
-              <option>Pilih Angkatan</option>
-              <option>2022</option>
-              <option>2023</option>
-              <option>2024</option>
-              <option>2025</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="field">
-          <label class="required">Minat Divisi</label>
-          <div class="radio-group">
-            <label><input type="radio" name="divisi"> Operator Streaming</label>
-            <label><input type="radio" name="divisi"> Kameramen</label>
-            <label><input type="radio" name="divisi"> Editor Konten</label>
-            <label><input type="radio" name="divisi"> Manajemen Media Sosial</label>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Pengalaman yang dimiliki</label>
-          <div class="check-group">
-            <label><input type="checkbox"> Pernah pegang kamera</label>
-            <label><input type="checkbox"> Pernah live streaming</label>
-            <label><input type="checkbox"> Pernah editing video</label>
-            <label><input type="checkbox"> Belum ada pengalaman</label>
-          </div>
-        </div>
-
-        <div class="field">
-          <label class="required" for="alasan">Alasan Bergabung</label>
-          <textarea id="alasan" placeholder="Tulis alasan Anda ingin bergabung dengan Crew Multimedia Baciro"></textarea>
-        </div>
-
-        <div class="field">
-          <label for="portofolio">Link Portofolio (opsional)</label>
-          <input id="portofolio" type="url" placeholder="https://">
-        </div>
-
-        <div class="actions">
-          <button class="btn-primary" type="button">Kirim Form</button>
-          <button class="btn" type="reset">Reset Jawaban</button>
-          <a class="btn" href="form-pendaftaran.html">Kembali ke Daftar Form</a>
-        </div>
-      </form>
+      <form id="dynamicForm" class="input-grid"></form>
     </section>
   </main>
 
@@ -289,13 +222,321 @@
   </footer>
 
   <script>
+    const FORM_STORAGE_KEY = "crembo-registration-forms";
+    const SUBMISSION_STORAGE_KEY = "crembo-registration-submissions";
+    const MEMBER_STORAGE_KEY = "crembo-members";
+    const SESSION_STORAGE_KEY = "crembo-login-session";
+
+    const params = new URLSearchParams(window.location.search);
+    const formId = params.get("id") || "";
+
     const topHeader = document.getElementById("topHeader");
     const searchForm = document.getElementById("searchForm");
     const searchInput = document.getElementById("searchInput");
 
+    const heroTitle = document.getElementById("heroTitle");
+    const heroMeta = document.getElementById("heroMeta");
+    const breadcrumbCurrent = document.getElementById("breadcrumbCurrent");
+    const formTitle = document.getElementById("formTitle");
+    const formDesc = document.getElementById("formDesc");
+    const accessInfo = document.getElementById("accessInfo");
+    const dynamicForm = document.getElementById("dynamicForm");
+
+    let forms = [];
+    let submissions = [];
+    let members = [];
+    let session = null;
+    let currentForm = null;
+
     function syncStickyOffset() {
       const headerHeight = topHeader ? topHeader.offsetHeight : 118;
       document.documentElement.style.setProperty("--header-h", headerHeight + "px");
+    }
+
+    function safeParse(raw) {
+      try {
+        return JSON.parse(raw);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function normalizeMember(item, index) {
+      return {
+        id: String(item && item.id ? item.id : "m-" + index),
+        email: String(item && item.email ? item.email : "").toLowerCase(),
+        phone: String(item && item.phone ? item.phone : "").replace(/\s+/g, ""),
+        status: String(item && item.status ? item.status : "Aktif")
+      };
+    }
+
+    function makeId(prefix) {
+      return prefix + "-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+    }
+
+    function normalizeField(item, index) {
+      return {
+        id: String(item && item.id ? item.id : makeId("field")),
+        label: String(item && item.label ? item.label : "Pertanyaan " + (index + 1)),
+        type: String(item && item.type ? item.type : "text"),
+        required: Boolean(item && item.required),
+        placeholder: String(item && item.placeholder ? item.placeholder : ""),
+        options: Array.isArray(item && item.options) ? item.options.map(String) : []
+      };
+    }
+
+    function normalizeForm(item, index) {
+      return {
+        id: String(item && item.id ? item.id : "form-" + (index + 1)),
+        title: String(item && item.title ? item.title : "Form Pendaftaran"),
+        description: String(item && item.description ? item.description : ""),
+        target: String(item && item.target ? item.target : "public") === "internal" ? "internal" : "public",
+        visibility: String(item && item.visibility ? item.visibility : "visible") === "draft" ? "draft" : "visible",
+        openDate: String(item && item.openDate ? item.openDate : ""),
+        closeDate: String(item && item.closeDate ? item.closeDate : ""),
+        quota: Number.isFinite(Number(item && item.quota)) ? Number(item.quota) : 0,
+        fields: Array.isArray(item && item.fields) ? item.fields.map(normalizeField) : [],
+        updatedAt: String(item && item.updatedAt ? item.updatedAt : new Date().toISOString())
+      };
+    }
+
+    function loadData() {
+      const rawForms = localStorage.getItem(FORM_STORAGE_KEY);
+      const parsedForms = rawForms ? safeParse(rawForms) : null;
+      forms = Array.isArray(parsedForms) ? parsedForms.map(normalizeForm) : [];
+
+      const rawSubmissions = localStorage.getItem(SUBMISSION_STORAGE_KEY);
+      const parsedSubmissions = rawSubmissions ? safeParse(rawSubmissions) : null;
+      submissions = Array.isArray(parsedSubmissions) ? parsedSubmissions : [];
+
+      const rawMembers = localStorage.getItem(MEMBER_STORAGE_KEY);
+      const parsedMembers = rawMembers ? safeParse(rawMembers) : null;
+      members = Array.isArray(parsedMembers) ? parsedMembers.map(normalizeMember) : [];
+
+      const rawSession = localStorage.getItem(SESSION_STORAGE_KEY);
+      const parsedSession = rawSession ? safeParse(rawSession) : null;
+      session = parsedSession && typeof parsedSession === "object" ? parsedSession : null;
+    }
+
+    function countSubmissions(id) {
+      return submissions.filter(function (item) {
+        return item && item.formId === id;
+      }).length;
+    }
+
+    function isRegisteredMember() {
+      if (!session || !session.identifier) {
+        return false;
+      }
+      if (session.role === "admin" || session.role === "super_admin") {
+        return true;
+      }
+
+      const identifier = String(session.identifier || "").toLowerCase();
+      const identifierType = String(session.identifierType || "");
+      return members.some(function (member) {
+        if (String(member.status || "").toLowerCase() !== "aktif") {
+          return false;
+        }
+        if (identifierType === "email") {
+          return member.email === identifier;
+        }
+        if (identifierType === "no_hp") {
+          return member.phone === identifier.replace(/\s+/g, "");
+        }
+        return false;
+      });
+    }
+
+    function formatDate(value) {
+      if (!value) {
+        return "-";
+      }
+      const d = new Date(value + "T00:00:00");
+      if (Number.isNaN(d.getTime())) {
+        return value;
+      }
+      return String(d.getDate()).padStart(2, "0") + " " + ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"][d.getMonth()] + " " + d.getFullYear();
+    }
+
+    function getFormState(item) {
+      const now = new Date();
+      const openDate = item.openDate ? new Date(item.openDate + "T00:00:00") : null;
+      const closeDate = item.closeDate ? new Date(item.closeDate + "T23:59:59") : null;
+      const submissionCount = countSubmissions(item.id);
+
+      if (item.visibility === "draft") {
+        return { open: false, reason: "draft", text: "Form masih draft" };
+      }
+      if (openDate && now < openDate) {
+        return { open: false, reason: "not_open", text: "Form belum dibuka" };
+      }
+      if (closeDate && now > closeDate) {
+        return { open: false, reason: "closed", text: "Form sudah ditutup" };
+      }
+      if (item.quota > 0 && submissionCount >= item.quota) {
+        return { open: false, reason: "quota", text: "Kuota sudah terpenuhi" };
+      }
+      return { open: true, reason: "open", text: "Form aktif" };
+    }
+
+    function renderLocked(message) {
+      dynamicForm.innerHTML = '<div class="field"><p style="margin:0;color:#7f1d1d;font-weight:700;">' + message + '</p><div class="actions"><a class="btn" href="form-pendaftaran.html">Kembali ke daftar form</a></div></div>';
+    }
+
+    function inputHtml(field) {
+      const requiredAttr = field.required ? " required" : "";
+      const placeholder = field.placeholder ? ' placeholder="' + field.placeholder.replace(/\"/g, "&quot;") + '"' : "";
+
+      if (field.type === "textarea") {
+        return '<textarea id="field-' + field.id + '"' + placeholder + requiredAttr + '></textarea>';
+      }
+      if (field.type === "select") {
+        const options = ['<option value="">Pilih jawaban</option>'].concat(field.options.map(function (opt) {
+          return '<option value="' + opt.replace(/\"/g, "&quot;") + '">' + opt + '</option>';
+        })).join("");
+        return '<select id="field-' + field.id + '"' + requiredAttr + '>' + options + '</select>';
+      }
+      if (field.type === "radio") {
+        return '<div class="radio-group">' + field.options.map(function (opt, idx) {
+          return '<label><input type="radio" name="field-' + field.id + '" value="' + opt.replace(/\"/g, "&quot;") + '"' + (field.required && idx === 0 ? " required" : "") + '> ' + opt + '</label>';
+        }).join("") + '</div>';
+      }
+      if (field.type === "checkbox") {
+        return '<div class="check-group">' + field.options.map(function (opt) {
+          return '<label><input type="checkbox" name="field-' + field.id + '" value="' + opt.replace(/\"/g, "&quot;") + '"> ' + opt + '</label>';
+        }).join("") + '</div>';
+      }
+      return '<input id="field-' + field.id + '" type="' + field.type + '"' + placeholder + requiredAttr + '>';
+    }
+
+    function renderForm() {
+      loadData();
+      currentForm = forms.find(function (item) { return item.id === formId; }) || null;
+
+      if (!currentForm) {
+        heroTitle.textContent = "Form tidak ditemukan";
+        heroMeta.textContent = "Periksa kembali daftar form pendaftaran.";
+        breadcrumbCurrent.textContent = "Form Tidak Ditemukan";
+        formTitle.textContent = "Form tidak ditemukan";
+        formDesc.textContent = "Data form tidak tersedia.";
+        accessInfo.textContent = "";
+        renderLocked("Form yang kamu cari tidak ada atau sudah dihapus.");
+        return;
+      }
+
+      const state = getFormState(currentForm);
+      const submissionCount = countSubmissions(currentForm.id);
+
+      heroTitle.textContent = currentForm.title;
+      heroMeta.textContent = "Batas pengisian: " + formatDate(currentForm.closeDate);
+      breadcrumbCurrent.textContent = currentForm.title;
+
+      formTitle.textContent = currentForm.title;
+      formDesc.textContent = currentForm.description || "Isi data berikut sesuai field yang tersedia.";
+      accessInfo.textContent = "Target: " + (currentForm.target === "internal" ? "Internal" : "Umum") + " | Kuota: " + String(submissionCount) + "/" + (currentForm.quota > 0 ? String(currentForm.quota) : "Tak terbatas") + " | Periode: " + formatDate(currentForm.openDate) + " - " + formatDate(currentForm.closeDate);
+
+      if (!state.open) {
+        renderLocked(state.text + ".");
+        return;
+      }
+
+      if (currentForm.target === "internal" && !session) {
+        renderLocked("Form ini khusus internal. Silakan login terlebih dahulu.");
+        return;
+      }
+
+      if (currentForm.target === "internal" && !isRegisteredMember()) {
+        renderLocked("Form ini hanya untuk user internal yang terdaftar dan aktif.");
+        return;
+      }
+
+      const fieldsHtml = currentForm.fields.map(function (field) {
+        const labelClass = field.required ? "required" : "";
+        return '<div class="field">'
+          + '<label class="' + labelClass + '" for="field-' + field.id + '">' + field.label + '</label>'
+          + inputHtml(field)
+          + '</div>';
+      }).join("");
+
+      dynamicForm.innerHTML = fieldsHtml
+        + '<div class="actions">'
+        + '<button class="btn-primary" type="submit">Kirim Form</button>'
+        + '<button class="btn" type="reset">Reset Jawaban</button>'
+        + '<a class="btn" href="form-pendaftaran.html">Kembali ke Daftar Form</a>'
+        + '</div>';
+    }
+
+    function collectAnswer(field) {
+      if (field.type === "radio") {
+        const checked = dynamicForm.querySelector('input[name="field-' + field.id + '"]:checked');
+        return checked ? checked.value : "";
+      }
+      if (field.type === "checkbox") {
+        const checked = Array.from(dynamicForm.querySelectorAll('input[name="field-' + field.id + '"]:checked'));
+        return checked.map(function (item) { return item.value; });
+      }
+      const el = document.getElementById("field-" + field.id);
+      return el ? String(el.value || "").trim() : "";
+    }
+
+    function validateField(field, value) {
+      if (!field.required) {
+        return true;
+      }
+      if (Array.isArray(value)) {
+        return value.length > 0;
+      }
+      return String(value || "").trim().length > 0;
+    }
+
+    function submitForm(event) {
+      event.preventDefault();
+      if (!currentForm) {
+        return;
+      }
+
+      const state = getFormState(currentForm);
+      if (!state.open) {
+        alert(state.text + ".");
+        return;
+      }
+
+      const answers = [];
+      for (const field of currentForm.fields) {
+        const value = collectAnswer(field);
+        if (!validateField(field, value)) {
+          alert('Field "' + field.label + '" wajib diisi.');
+          return;
+        }
+        answers.push({
+          fieldId: field.id,
+          label: field.label,
+          type: field.type,
+          value: value
+        });
+      }
+
+      const payload = {
+        id: makeId("submit"),
+        formId: currentForm.id,
+        submittedAt: new Date().toISOString(),
+        submitter: session ? {
+          identifier: session.identifier || "",
+          identifierType: session.identifierType || "",
+          role: session.role || ""
+        } : {
+          identifier: "public",
+          identifierType: "public",
+          role: "public"
+        },
+        answers: answers
+      };
+
+      submissions.push(payload);
+      localStorage.setItem(SUBMISSION_STORAGE_KEY, JSON.stringify(submissions));
+      alert("Pendaftaran berhasil dikirim.");
+      renderForm();
     }
 
     syncStickyOffset();
@@ -306,7 +547,11 @@
       const keyword = searchInput.value.trim();
       window.location.href = "search.html?q=" + encodeURIComponent(keyword);
     });
-  
+
+    renderForm();
+
+    dynamicForm.addEventListener("submit", submitForm);
+
     (function () {
       const PROFILE_MENU_STORAGE_KEY = "crembo-profile-menu";
       const DEFAULT_PROFILE_MENU = [

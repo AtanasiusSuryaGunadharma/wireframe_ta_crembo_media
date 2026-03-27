@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Manajemen Agenda - Crembo Media</title>
+  <title>Manajemen Form Pendaftaran - Crembo Media</title>
   <style>
     :root {
       --bg: #ececec;
@@ -264,7 +264,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 0.84rem;
-      min-width: 840px;
+      min-width: 960px;
     }
 
     th, td {
@@ -296,13 +296,13 @@
       display: inline-block;
     }
 
-    .status.active {
+    .status.visible {
       background: #dcfce7;
       color: var(--green);
       border-color: #86efac;
     }
 
-    .status.inactive {
+    .status.draft {
       background: #fef3c7;
       color: var(--orange);
       border-color: #fcd34d;
@@ -355,7 +355,7 @@
     <aside class="sidebar" aria-label="Sidebar dashboard">
       <div class="brand">
         <h1>Crembo Media Panel</h1>
-        <p>Kelola pengumuman, kategori, dan publikasi berita</p>
+        <p>Kelola form pendaftaran kegiatan</p>
       </div>
 
       <div class="menu-group">
@@ -363,8 +363,8 @@
         <div class="group-items">
           <a class="menu-link" href="manajemen-profil.html">Profil</a>
           <a class="menu-link" href="kelola-berita.html">Pengumuman</a>
-          <a class="menu-link active" href="manajemen-agenda.html">Agenda Kegiatan</a>
-          <a class="menu-link" href="manajemen-form-pendaftaran.html">Form Pendaftaran</a>
+          <a class="menu-link" href="manajemen-agenda.html">Agenda Kegiatan</a>
+          <a class="menu-link active" href="manajemen-form-pendaftaran.html">Form Pendaftaran</a>
         </div>
       </div>
 
@@ -392,55 +392,59 @@
 
       <header class="headline">
         <div>
-          <h2>Manajemen Agenda</h2>
-          <p>Kelola acara dan kegiatan sekolah.</p>
+          <h2>Manajemen Form Pendaftaran</h2>
+          <p>Buat form seperti Google Form: field dinamis, target internal/umum, kuota, dan periode.</p>
         </div>
-        <a class="btn primary" href="form-agenda.html">+ Tambah Agenda</a>
+        <a class="btn primary" href="builder-form-pendaftaran.html">+ Buat Form Baru</a>
       </header>
 
-      <section class="toolbar" aria-label="Filter agenda">
+      <section class="toolbar" aria-label="Filter form pendaftaran">
         <div class="filters">
-          <input id="searchInput" type="search" placeholder="Cari judul agenda atau lokasi...">
-          <select id="statusFilter">
-            <option value="all">Semua Status</option>
-            <option value="active">Aktif</option>
-            <option value="inactive">Nonaktif</option>
+          <input id="searchInput" type="search" placeholder="Cari judul form...">
+          <select id="targetFilter">
+            <option value="all">Semua Target</option>
+            <option value="public">Umum</option>
+            <option value="internal">Internal</option>
           </select>
         </div>
       </section>
 
-      <section class="table-wrap" aria-label="Tabel agenda">
+      <section class="table-wrap" aria-label="Tabel form pendaftaran">
         <table>
           <thead>
             <tr>
-              <th>Judul</th>
-              <th>Tanggal Mulai</th>
-              <th>Lokasi</th>
-              <th>Status</th>
+              <th>Form</th>
+              <th>Target</th>
+              <th>Periode</th>
+              <th>Kuota</th>
+              <th>Visibilitas</th>
+              <th>Pendaftar</th>
               <th>Aksi</th>
             </tr>
           </thead>
-          <tbody id="agendaRows"></tbody>
+          <tbody id="formRows"></tbody>
         </table>
       </section>
 
-      <div id="emptyState" class="empty" style="display:none;">Belum ada data agenda.</div>
+      <div id="emptyState" class="empty" style="display:none;">Belum ada form pendaftaran.</div>
     </main>
   </div>
 
   <div id="notify" class="notify" role="status" aria-live="polite"></div>
 
   <script>
-    const AGENDA_STORAGE_KEY = "crembo-agendas";
+    const FORM_STORAGE_KEY = "crembo-registration-forms";
+    const SUBMISSION_STORAGE_KEY = "crembo-registration-submissions";
 
     const searchInput = document.getElementById("searchInput");
-    const statusFilter = document.getElementById("statusFilter");
-    const agendaRows = document.getElementById("agendaRows");
+    const targetFilter = document.getElementById("targetFilter");
+    const formRows = document.getElementById("formRows");
     const emptyState = document.getElementById("emptyState");
     const liveDateTime = document.getElementById("liveDateTime");
     const notify = document.getElementById("notify");
 
-    let agendas = [];
+    let forms = [];
+    let submissions = [];
 
     function showNotify(message) {
       notify.textContent = message;
@@ -463,92 +467,85 @@
       return prefix + "-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
     }
 
-    function normalizeAttachment(att) {
-      if (typeof att === "string") {
-        return { id: makeId("att"), name: att, type: "", dataUrl: "" };
-      }
+    function normalizeField(item, index) {
       return {
-        id: String(att && att.id ? att.id : makeId("att")),
-        name: String(att && att.name ? att.name : "lampiran"),
-        type: String(att && att.type ? att.type : ""),
-        dataUrl: String(att && att.dataUrl ? att.dataUrl : "")
+        id: String(item && item.id ? item.id : makeId("field")),
+        label: String(item && item.label ? item.label : "Pertanyaan " + (index + 1)),
+        type: String(item && item.type ? item.type : "text"),
+        required: Boolean(item && item.required),
+        placeholder: String(item && item.placeholder ? item.placeholder : ""),
+        options: Array.isArray(item && item.options) ? item.options.map(String) : []
       };
     }
 
-    function normalizeAgenda(item, index) {
-      const normalizedStatus = String(item && item.status ? item.status : "active").toLowerCase() === "inactive" ? "inactive" : "active";
+    function normalizeForm(item, index) {
       return {
-        id: String(item && item.id ? item.id : "agenda-" + (index + 1)),
-        title: String(item && item.title ? item.title : "Judul Agenda"),
+        id: String(item && item.id ? item.id : "form-" + (index + 1)),
+        title: String(item && item.title ? item.title : "Form Pendaftaran"),
         description: String(item && item.description ? item.description : ""),
-        startDate: String(item && item.startDate ? item.startDate : ""),
-        startTime: String(item && item.startTime ? item.startTime : ""),
-        endDate: String(item && item.endDate ? item.endDate : ""),
-        endTime: String(item && item.endTime ? item.endTime : ""),
-        location: String(item && item.location ? item.location : "-"),
-        registrationLink: String(item && item.registrationLink ? item.registrationLink : ""),
-        imageName: String(item && item.imageName ? item.imageName : ""),
-        imageDataUrl: String(item && item.imageDataUrl ? item.imageDataUrl : ""),
-        attachments: Array.isArray(item && item.attachments) ? item.attachments.map(normalizeAttachment) : [],
-        status: normalizedStatus,
-        order: Number.isFinite(Number(item && item.order)) ? Number(item.order) : index,
+        target: String(item && item.target ? item.target : "public") === "internal" ? "internal" : "public",
+        visibility: String(item && item.visibility ? item.visibility : "visible") === "draft" ? "draft" : "visible",
+        openDate: String(item && item.openDate ? item.openDate : ""),
+        closeDate: String(item && item.closeDate ? item.closeDate : ""),
+        quota: Number.isFinite(Number(item && item.quota)) ? Number(item.quota) : 0,
+        fields: Array.isArray(item && item.fields) ? item.fields.map(normalizeField) : [],
         updatedAt: String(item && item.updatedAt ? item.updatedAt : new Date().toISOString())
       };
     }
 
-    function seedData() {
-      const raw = localStorage.getItem(AGENDA_STORAGE_KEY);
-      const parsed = raw ? safeParse(raw) : null;
-      if (Array.isArray(parsed) && parsed.length) {
-        return;
-      }
-
-      const defaults = [
+    function defaultForms() {
+      return [
         {
-          id: makeId("agenda"),
-          title: "Promo Pembuatan website",
-          description: "Program Studi Sarjana Informatika UAJY menyelenggarakan kuliah umum bertema memahami pengguna dengan metode riset sederhana.",
-          startDate: "2026-02-21",
-          startTime: "10:50",
-          endDate: "2026-02-21",
-          endTime: "16:50",
-          location: "STP Ampta Yogyakarta",
-          registrationLink: "",
-          imageName: "",
-          imageDataUrl: "",
-          attachments: [],
-          status: "active",
-          order: 0,
+          id: makeId("form"),
+          title: "Form Pendaftaran Open Recruitment",
+          description: "Form umum untuk pendaftaran anggota baru.",
+          target: "public",
+          visibility: "visible",
+          openDate: "2026-03-20",
+          closeDate: "2026-04-10",
+          quota: 100,
+          fields: [
+            { id: makeId("field"), label: "Nama Lengkap", type: "text", required: true, placeholder: "", options: [] },
+            { id: makeId("field"), label: "Email", type: "email", required: true, placeholder: "", options: [] },
+            { id: makeId("field"), label: "Alasan Bergabung", type: "textarea", required: true, placeholder: "", options: [] }
+          ],
           updatedAt: new Date().toISOString()
         }
       ];
-
-      localStorage.setItem(AGENDA_STORAGE_KEY, JSON.stringify(defaults));
     }
 
-    function loadAgendas() {
-      const raw = localStorage.getItem(AGENDA_STORAGE_KEY);
+    function loadForms() {
+      const raw = localStorage.getItem(FORM_STORAGE_KEY);
       const parsed = raw ? safeParse(raw) : null;
-      agendas = Array.isArray(parsed) ? parsed.map(normalizeAgenda) : [];
-      localStorage.setItem(AGENDA_STORAGE_KEY, JSON.stringify(agendas));
+      forms = Array.isArray(parsed) && parsed.length ? parsed.map(normalizeForm) : defaultForms().map(normalizeForm);
+      localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(forms));
     }
 
-    function saveAgendas() {
-      localStorage.setItem(AGENDA_STORAGE_KEY, JSON.stringify(agendas));
+    function loadSubmissions() {
+      const raw = localStorage.getItem(SUBMISSION_STORAGE_KEY);
+      const parsed = raw ? safeParse(raw) : null;
+      submissions = Array.isArray(parsed) ? parsed : [];
     }
 
-    function formatDateTime(dateValue, timeValue) {
-      if (!dateValue) {
+    function saveForms() {
+      localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(forms));
+    }
+
+    function getSubmissionCount(formId) {
+      return submissions.filter(function (item) {
+        return item && item.formId === formId;
+      }).length;
+    }
+
+    function formatDate(value) {
+      if (!value) {
         return "-";
       }
-      const dateObj = new Date(dateValue + "T00:00:00");
-      if (Number.isNaN(dateObj.getTime())) {
-        return dateValue + (timeValue ? " " + timeValue : "");
+      const d = new Date(value + "T00:00:00");
+      if (Number.isNaN(d.getTime())) {
+        return value;
       }
-      const day = String(dateObj.getDate()).padStart(2, "0");
-      const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-      const year = dateObj.getFullYear();
-      return day + "/" + month + "/" + year + (timeValue ? " " + timeValue : "");
+      return String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
     }
 
     function escapeHtml(text) {
@@ -560,66 +557,71 @@
         .replace(/'/g, "&#39;");
     }
 
-    function applyFilters() {
+    function filteredForms() {
       const keyword = searchInput.value.trim().toLowerCase();
-      const status = statusFilter.value;
+      const target = targetFilter.value;
 
-      return agendas
+      return forms
         .slice()
         .sort(function (a, b) {
-          return (a.order - b.order) || new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
         })
         .filter(function (item) {
-          if (status !== "all" && item.status !== status) {
+          if (target !== "all" && item.target !== target) {
             return false;
           }
           if (!keyword) {
             return true;
           }
-          return [item.title, item.location].join(" ").toLowerCase().indexOf(keyword) >= 0;
+          return item.title.toLowerCase().indexOf(keyword) >= 0;
         });
     }
 
     function renderRows() {
-      const filtered = applyFilters();
-      if (!filtered.length) {
-        agendaRows.innerHTML = "";
+      const list = filteredForms();
+      if (!list.length) {
+        formRows.innerHTML = "";
         emptyState.style.display = "block";
         return;
       }
 
       emptyState.style.display = "none";
-      agendaRows.innerHTML = filtered.map(function (item) {
-        const statusLabel = item.status === "active" ? "Aktif" : "Nonaktif";
-        const attachmentsLabel = item.attachments.length ? "Lampiran: " + item.attachments.length + " file" : "Tanpa lampiran";
+      formRows.innerHTML = list.map(function (item) {
+        const targetText = item.target === "internal" ? "Internal" : "Umum";
+        const visibilityText = item.visibility === "draft" ? "Draft" : "Ditampilkan";
+        const count = getSubmissionCount(item.id);
+        const quotaText = item.quota > 0 ? String(item.quota) : "Tanpa batas";
+
         return "<tr>"
-          + "<td class=\"title-cell\"><strong>" + escapeHtml(item.title) + "</strong><div class=\"sub\">" + escapeHtml(attachmentsLabel) + "</div></td>"
-          + "<td>" + escapeHtml(formatDateTime(item.startDate, item.startTime)) + "</td>"
-          + "<td>" + escapeHtml(item.location || "-") + "</td>"
-          + "<td><span class=\"status " + item.status + "\">" + statusLabel + "</span></td>"
+          + "<td class=\"title-cell\"><strong>" + escapeHtml(item.title) + "</strong><div class=\"sub\">" + escapeHtml(item.description || "-") + "</div></td>"
+          + "<td>" + targetText + "</td>"
+          + "<td>" + escapeHtml(formatDate(item.openDate)) + " - " + escapeHtml(formatDate(item.closeDate)) + "</td>"
+          + "<td>" + quotaText + "</td>"
+          + "<td><span class=\"status " + (item.visibility === "draft" ? "draft" : "visible") + "\">" + visibilityText + "</span></td>"
+          + "<td>" + String(count) + "</td>"
           + "<td><div class=\"inline-actions\">"
-          + "<a class=\"btn ghost\" href=\"form-agenda.html?id=" + encodeURIComponent(item.id) + "\">Edit</a>"
+          + "<a class=\"btn ghost\" href=\"pendaftar-form.html?formId=" + encodeURIComponent(item.id) + "\">Pendaftar</a>"
+          + "<a class=\"btn ghost\" href=\"builder-form-pendaftaran.html?id=" + encodeURIComponent(item.id) + "\">Edit</a>"
           + "<button class=\"btn warn\" type=\"button\" data-delete-id=\"" + escapeHtml(item.id) + "\">Hapus</button>"
           + "</div></td>"
           + "</tr>";
       }).join("");
     }
 
-    function removeAgenda(id) {
-      const target = agendas.find(function (item) { return item.id === id; });
+    function removeForm(id) {
+      const target = forms.find(function (item) { return item.id === id; });
       if (!target) {
         return;
       }
-
-      const ok = window.confirm('Hapus agenda "' + target.title + '"?');
+      const ok = window.confirm('Hapus form "' + target.title + '"?');
       if (!ok) {
         return;
       }
 
-      agendas = agendas.filter(function (item) { return item.id !== id; });
-      saveAgendas();
+      forms = forms.filter(function (item) { return item.id !== id; });
+      saveForms();
       renderRows();
-      showNotify("Agenda berhasil dihapus.");
+      showNotify("Form berhasil dihapus.");
     }
 
     function updateLiveDateTime() {
@@ -636,20 +638,19 @@
       liveDateTime.textContent = day + ", " + date + " " + month + " " + year + " " + hour + ":" + minute + ":" + second;
     }
 
-    agendaRows.addEventListener("click", function (event) {
+    formRows.addEventListener("click", function (event) {
       const button = event.target.closest("button[data-delete-id]");
       if (!button) {
         return;
       }
-      const id = button.getAttribute("data-delete-id") || "";
-      removeAgenda(id);
+      removeForm(button.getAttribute("data-delete-id") || "");
     });
 
     searchInput.addEventListener("input", renderRows);
-    statusFilter.addEventListener("change", renderRows);
+    targetFilter.addEventListener("change", renderRows);
 
-    seedData();
-    loadAgendas();
+    loadForms();
+    loadSubmissions();
     renderRows();
     updateLiveDateTime();
     setInterval(updateLiveDateTime, 1000);
