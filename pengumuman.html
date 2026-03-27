@@ -69,6 +69,24 @@
     .breadcrumb li + li::before { content: "/"; margin-right: 10px; color: #8a8a8a; }
 
     .content { padding: 20px 0 34px; }
+    .content-grid { display: grid; grid-template-columns: 250px 1fr; gap: 16px; align-items: start; }
+    .category-panel { border: 1px solid var(--line-soft); background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.05); padding: 14px; }
+    .category-panel h3 { margin: 0 0 10px; font-size: 1.45rem; }
+    .category-list { display: grid; gap: 8px; }
+    .category-btn {
+      border: 1px solid #d0d0d0;
+      background: #f3f3f3;
+      color: #363636;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 0.95rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+    .category-btn:hover { border-color: #b6b6b6; background: #e8e8e8; }
+    .category-btn.active { background: #2d62d9; color: #fff; border-color: #2d62d9; font-weight: 600; }
+    .announce-main { min-width: 0; }
     .filter-card { border: 2px solid var(--line); background: #fff; padding: 14px; margin-bottom: 14px; }
     .filter-grid { display: grid; grid-template-columns: 2fr 1fr auto auto; gap: 8px; align-items: end; }
     .field { display: grid; gap: 5px; }
@@ -103,6 +121,14 @@
     .desc { margin: 0; color: #4b4b4b; font-size: 0.92rem; line-height: 1.48; }
     .bottom-row { margin-top: 4px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
     .lampiran { margin: 0; font-size: 0.84rem; color: #575757; }
+    .empty-state {
+      border: 1px dashed #acacac;
+      background: #fafafa;
+      color: #666;
+      font-size: 0.93rem;
+      padding: 18px;
+      text-align: center;
+    }
 
     .footer { border-top: 2px solid var(--line); border-bottom: 2px solid var(--line); background: linear-gradient(180deg,#f7f7f7 0%,#ececec 100%); margin-top: 10px; color: #2e2e2e; }
     .footer-main { padding: 20px 0 14px; }
@@ -119,6 +145,7 @@
     .footer-bottom { border-top: 1px solid #bebebe; padding: 10px 0 14px; text-align: center; font-size: 0.84rem; color: #5c5c5c; }
 
     @media (max-width: 980px) {
+      .content-grid { grid-template-columns: 1fr; }
       .filter-grid { grid-template-columns: 1fr 1fr; }
       .announce-card { grid-template-columns: 1fr; }
       .thumb { min-height: 170px; border-right: 0; border-bottom: 1px solid var(--line-soft); }
@@ -186,92 +213,36 @@
   </div>
 
   <main class="container content">
-    <section class="filter-card" aria-label="Filter pengumuman">
-      <div class="filter-grid">
-        <div class="field">
-          <label for="q">Cari Pengumuman</label>
-          <input id="q" type="search" placeholder="Cari berdasarkan judul, isi, atau kategori...">
-        </div>
-        <div class="field">
-          <label for="sort">Urutkan</label>
-          <select id="sort">
-            <option>Terbaru Lebih Dulu</option>
-            <option>Terlama Lebih Dulu</option>
-            <option>Judul A-Z</option>
-          </select>
-        </div>
-        <button class="btn-primary" type="button">Cari</button>
-        <button class="btn" type="button">Reset</button>
-      </div>
-    </section>
+    <div class="content-grid">
+      <aside class="category-panel" aria-label="Kategori pengumuman">
+        <h3>Kategori</h3>
+        <div id="categoryList" class="category-list"></div>
+      </aside>
 
-    <p class="meta-line">Menampilkan 4 pengumuman</p>
+      <section class="announce-main" aria-label="Daftar pengumuman">
+        <section class="filter-card" aria-label="Filter pengumuman">
+          <div class="filter-grid">
+            <div class="field">
+              <label for="q">Cari Pengumuman</label>
+              <input id="q" type="search" placeholder="Cari berdasarkan judul, isi, atau kategori...">
+            </div>
+            <div class="field">
+              <label for="sort">Urutkan</label>
+              <select id="sort">
+                <option value="newest">Terbaru Lebih Dulu</option>
+                <option value="oldest">Terlama Lebih Dulu</option>
+                <option value="title">Judul A-Z</option>
+              </select>
+            </div>
+            <button id="applyFilterBtn" class="btn-primary" type="button">Cari</button>
+            <button id="resetFilterBtn" class="btn" type="button">Reset</button>
+          </div>
+        </section>
 
-    <section class="announce-list" aria-label="Daftar pengumuman">
-      <article class="announce-card">
-        <div class="thumb">Preview Dokumen Pengumuman</div>
-        <div class="body">
-          <div class="meta-row">
-            <span class="badge">Pengumuman</span>
-            <span>19 Februari 2026</span>
-          </div>
-          <h3 class="title">Mahasiswa Informatika UAJY Unjuk Kreativitas Melalui Pameran Hasil Karya UAS</h3>
-          <p class="desc">Program Studi Informatika Universitas Atma Jaya Yogyakarta menggelar pameran hasil karya mahasiswa semester 1. Kegiatan memamerkan proyek game dan aplikasi yang dikembangkan selama satu semester.</p>
-          <div class="bottom-row">
-            <p class="lampiran">3 file lampiran</p>
-            <a class="btn-primary" href="pengumuman-detail.html">Baca Selengkapnya</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="announce-card">
-        <div class="thumb">Preview Dokumen Pengumuman</div>
-        <div class="body">
-          <div class="meta-row">
-            <span class="badge">Informasi</span>
-            <span>15 Februari 2026</span>
-          </div>
-          <h3 class="title">Perubahan Jadwal Gladi Bersih Pekan Suci</h3>
-          <p class="desc">Terdapat penyesuaian jadwal gladi bersih petugas multimedia. Seluruh operator, kameramen, dan tim audio diminta memeriksa pembagian sesi terbaru melalui dashboard internal.</p>
-          <div class="bottom-row">
-            <p class="lampiran">1 file lampiran</p>
-            <a class="btn" href="pengumuman-detail.html">Baca Selengkapnya</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="announce-card">
-        <div class="thumb">Preview Dokumen Pengumuman</div>
-        <div class="body">
-          <div class="meta-row">
-            <span class="badge">Berita</span>
-            <span>10 Februari 2026</span>
-          </div>
-          <h3 class="title">Workshop Singkat Manajemen Konten Siaran</h3>
-          <p class="desc">Crembo mengadakan sesi berbagi praktik terbaik pengelolaan konten siaran untuk media sosial dan live streaming. Materi fokus pada penjadwalan publikasi dan kualitas dokumentasi visual.</p>
-          <div class="bottom-row">
-            <p class="lampiran">2 file lampiran</p>
-            <a class="btn" href="pengumuman-detail.html">Baca Selengkapnya</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="announce-card">
-        <div class="thumb">Preview Dokumen Pengumuman</div>
-        <div class="body">
-          <div class="meta-row">
-            <span class="badge">Pengumuman</span>
-            <span>01 Februari 2026</span>
-          </div>
-          <h3 class="title">Pembaruan Format Laporan Pelayanan Bulanan</h3>
-          <p class="desc">Template laporan pelayanan telah diperbarui untuk memudahkan rekap operator, dokumentasi, serta evaluasi kualitas siaran. Anggota diminta menggunakan format terbaru mulai bulan ini.</p>
-          <div class="bottom-row">
-            <p class="lampiran">2 file lampiran</p>
-            <a class="btn" href="pengumuman-detail.html">Baca Selengkapnya</a>
-          </div>
-        </div>
-      </article>
-    </section>
+        <p id="metaLine" class="meta-line">Menampilkan 0 pengumuman</p>
+        <section id="announceList" class="announce-list" aria-label="Daftar pengumuman"></section>
+      </section>
+    </div>
   </main>
 
   <footer class="footer">
@@ -314,6 +285,197 @@
     const topHeader = document.getElementById("topHeader");
     const searchForm = document.getElementById("searchForm");
     const searchInput = document.getElementById("searchInput");
+    const qInput = document.getElementById("q");
+    const sortSelect = document.getElementById("sort");
+    const applyFilterBtn = document.getElementById("applyFilterBtn");
+    const resetFilterBtn = document.getElementById("resetFilterBtn");
+    const categoryList = document.getElementById("categoryList");
+    const announceList = document.getElementById("announceList");
+    const metaLine = document.getElementById("metaLine");
+
+    const ANNOUNCEMENT_STORAGE_KEY = "crembo-announcements";
+    const ANNOUNCEMENT_CATEGORY_STORAGE_KEY = "crembo-announcement-categories";
+
+    const DEFAULT_ANNOUNCEMENTS = [
+      {
+        id: "pengumuman-uajy-karya",
+        category: "Berita",
+        date: "2026-02-19",
+        title: "Mahasiswa Informatika UAJY Unjuk Kreativitas Melalui Pameran Hasil Karya UAS",
+        summary: "Program Studi Informatika Universitas Atma Jaya Yogyakarta menggelar pameran hasil karya mahasiswa semester 1. Kegiatan memamerkan proyek game dan aplikasi yang dikembangkan selama satu semester.",
+        attachments: ["jadwal-guru-dan-jadwal-kelas.zip", "llde-info-laporan-umum.pdf", "penolakan-karena-sudah-seminggu.pdf"],
+        author: "Super Admin"
+      },
+      {
+        id: "perubahan-gladi-bersih",
+        category: "Informasi",
+        date: "2026-02-15",
+        title: "Perubahan Jadwal Gladi Bersih Pekan Suci",
+        summary: "Terdapat penyesuaian jadwal gladi bersih petugas multimedia. Seluruh operator, kameramen, dan tim audio diminta memeriksa pembagian sesi terbaru melalui dashboard internal.",
+        attachments: ["jadwal-gladi-terbaru.pdf"],
+        author: "Admin Liturgi"
+      },
+      {
+        id: "workshop-konten-siaran",
+        category: "Pelatihan",
+        date: "2026-02-10",
+        title: "Workshop Singkat Manajemen Konten Siaran",
+        summary: "Crembo mengadakan sesi berbagi praktik terbaik pengelolaan konten siaran untuk media sosial dan live streaming. Materi fokus pada penjadwalan publikasi dan kualitas dokumentasi visual.",
+        attachments: ["materi-workshop.pdf", "template-konten.xlsx"],
+        author: "Koordinator Media"
+      },
+      {
+        id: "pembaruan-format-laporan",
+        category: "Pengumuman",
+        date: "2026-02-01",
+        title: "Pembaruan Format Laporan Pelayanan Bulanan",
+        summary: "Template laporan pelayanan telah diperbarui untuk memudahkan rekap operator, dokumentasi, serta evaluasi kualitas siaran. Anggota diminta menggunakan format terbaru mulai bulan ini.",
+        attachments: ["template-laporan-v2.docx", "contoh-laporan.pdf"],
+        author: "Sekretariat"
+      }
+    ];
+
+    const categoryFromQuery = new URLSearchParams(window.location.search).get("kategori");
+    let activeCategory = categoryFromQuery ? normalizeCategory(categoryFromQuery) : "Semua Berita";
+
+    function safeJsonParse(raw) {
+      try {
+        return JSON.parse(raw);
+      } catch (err) {
+        return null;
+      }
+    }
+
+    function normalizeCategory(value) {
+      return String(value || "Tanpa Kategori").trim() || "Tanpa Kategori";
+    }
+
+    function normalizeAnnouncement(item, index) {
+      return {
+        id: String(item && item.id ? item.id : "pengumuman-" + (index + 1)),
+        category: normalizeCategory(item && item.category),
+        date: String(item && item.date ? item.date : "2026-01-01"),
+        title: String(item && item.title ? item.title : "Judul pengumuman"),
+        summary: String(item && item.summary ? item.summary : "Ringkasan belum tersedia."),
+        attachments: Array.isArray(item && item.attachments) ? item.attachments.map(String) : [],
+        author: String(item && item.author ? item.author : "Admin")
+      };
+    }
+
+    function readAnnouncements() {
+      const raw = localStorage.getItem(ANNOUNCEMENT_STORAGE_KEY);
+      const parsed = raw ? safeJsonParse(raw) : null;
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        return DEFAULT_ANNOUNCEMENTS.slice();
+      }
+      return parsed.map(normalizeAnnouncement);
+    }
+
+    function readAdminCategories(announcements) {
+      const raw = localStorage.getItem(ANNOUNCEMENT_CATEGORY_STORAGE_KEY);
+      const parsed = raw ? safeJsonParse(raw) : null;
+
+      const categorySet = new Set();
+      announcements.forEach(function (item) {
+        categorySet.add(normalizeCategory(item.category));
+      });
+
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        parsed.forEach(function (item) {
+          if (typeof item === "string") {
+            categorySet.add(normalizeCategory(item));
+            return;
+          }
+          if (item && item.label) {
+            categorySet.add(normalizeCategory(item.label));
+          }
+        });
+      }
+
+      return ["Semua Berita"].concat(Array.from(categorySet));
+    }
+
+    function formatDate(dateValue) {
+      const parsed = new Date(dateValue);
+      if (Number.isNaN(parsed.getTime())) {
+        return dateValue;
+      }
+      return parsed.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+    }
+
+    function sortAnnouncements(items) {
+      const currentSort = sortSelect.value;
+      const sorted = items.slice();
+      if (currentSort === "oldest") {
+        sorted.sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+        return sorted;
+      }
+      if (currentSort === "title") {
+        sorted.sort(function (a, b) { return a.title.localeCompare(b.title, "id"); });
+        return sorted;
+      }
+      sorted.sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
+      return sorted;
+    }
+
+    function filterAnnouncements(allItems) {
+      const keyword = qInput.value.trim().toLowerCase();
+      const filtered = allItems.filter(function (item) {
+        const passCategory = activeCategory === "Semua Berita" || item.category === activeCategory;
+        const passKeyword = !keyword || [item.title, item.summary, item.category].join(" ").toLowerCase().includes(keyword);
+        return passCategory && passKeyword;
+      });
+      return sortAnnouncements(filtered);
+    }
+
+    function renderCategories(categories, announcements) {
+      const counts = announcements.reduce(function (acc, item) {
+        acc[item.category] = (acc[item.category] || 0) + 1;
+        return acc;
+      }, {});
+
+      categoryList.innerHTML = categories.map(function (category) {
+        const countLabel = category === "Semua Berita" ? announcements.length : (counts[category] || 0);
+        const isActive = category === activeCategory ? " active" : "";
+        return '<button type="button" class="category-btn' + isActive + '" data-category="' + category.replace(/"/g, "&quot;") + '">' + category + ' (' + countLabel + ')</button>';
+      }).join("");
+    }
+
+    function renderAnnouncementList(items) {
+      if (items.length === 0) {
+        announceList.innerHTML = '<div class="empty-state">Tidak ada pengumuman pada kategori atau kata kunci ini.</div>';
+        metaLine.textContent = "Menampilkan 0 pengumuman";
+        return;
+      }
+
+      announceList.innerHTML = items.map(function (item, index) {
+        const buttonClass = index === 0 ? "btn-primary" : "btn";
+        const attachmentCount = item.attachments.length;
+        return '<article class="announce-card">'
+          + '<div class="thumb">Preview Dokumen Pengumuman</div>'
+          + '<div class="body">'
+          + '<div class="meta-row"><span class="badge">' + item.category + '</span><span>' + formatDate(item.date) + '</span></div>'
+          + '<h3 class="title">' + item.title + '</h3>'
+          + '<p class="desc">' + item.summary + '</p>'
+          + '<div class="bottom-row">'
+          + '<p class="lampiran">' + attachmentCount + ' file lampiran</p>'
+          + '<a class="' + buttonClass + '" href="pengumuman-detail.html?id=' + encodeURIComponent(item.id) + '">Baca Selengkapnya</a>'
+          + '</div></div></article>';
+      }).join("");
+
+      metaLine.textContent = "Menampilkan " + items.length + " pengumuman";
+    }
+
+    function renderAnnouncementPage() {
+      const announcements = readAnnouncements();
+      const categories = readAdminCategories(announcements);
+      if (!categories.includes(activeCategory)) {
+        activeCategory = "Semua Berita";
+      }
+
+      renderCategories(categories, announcements);
+      renderAnnouncementList(filterAnnouncements(announcements));
+    }
 
     function syncStickyOffset() {
       const headerHeight = topHeader ? topHeader.offsetHeight : 118;
@@ -328,6 +490,33 @@
       const keyword = searchInput.value.trim();
       window.location.href = "search.html?q=" + encodeURIComponent(keyword);
     });
+
+    categoryList.addEventListener("click", function (event) {
+      const button = event.target.closest(".category-btn");
+      if (!button) {
+        return;
+      }
+      activeCategory = button.getAttribute("data-category") || "Semua Berita";
+      renderAnnouncementPage();
+    });
+
+    applyFilterBtn.addEventListener("click", renderAnnouncementPage);
+    qInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        renderAnnouncementPage();
+      }
+    });
+    sortSelect.addEventListener("change", renderAnnouncementPage);
+
+    resetFilterBtn.addEventListener("click", function () {
+      qInput.value = "";
+      sortSelect.value = "newest";
+      activeCategory = "Semua Berita";
+      renderAnnouncementPage();
+    });
+
+    renderAnnouncementPage();
   
     (function () {
       const PROFILE_MENU_STORAGE_KEY = "crembo-profile-menu";

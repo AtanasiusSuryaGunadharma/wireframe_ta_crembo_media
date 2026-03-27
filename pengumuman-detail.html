@@ -181,9 +181,9 @@
 
   <section class="hero" aria-label="Header detail pengumuman">
     <div>
-      <span class="badge">Pengumuman</span>
-      <h2>Mahasiswa Informatika UAJY Unjuk Kreativitas Melalui Pameran Hasil...</h2>
-      <div class="hero-meta">Super Admin • 19 Februari 2026</div>
+      <span id="heroBadge" class="badge">Pengumuman</span>
+      <h2 id="heroTitle">Mahasiswa Informatika UAJY Unjuk Kreativitas Melalui Pameran Hasil...</h2>
+      <div id="heroMeta" class="hero-meta">Super Admin • 19 Februari 2026</div>
     </div>
   </section>
 
@@ -192,6 +192,7 @@
       <ol class="breadcrumb" aria-label="Breadcrumb">
         <li><a href="home.html">Beranda</a></li>
         <li><a href="pengumuman.html">Pengumuman</a></li>
+        <li><a id="breadcrumbCategory" href="pengumuman.html">Kategori</a></li>
         <li aria-current="page">Detail</li>
       </ol>
     </div>
@@ -199,32 +200,18 @@
 
   <main class="container content">
     <article class="article-card">
-      <h3>Mahasiswa Informatika UAJY Unjuk Kreativitas Melalui Pameran Hasil Karya UAS</h3>
+      <h3 id="articleTitle">Mahasiswa Informatika UAJY Unjuk Kreativitas Melalui Pameran Hasil Karya UAS</h3>
 
       <div class="doc-preview">
         <h4>Preview Header Postingan</h4>
-        <div class="post-header-preview">Preview Dokumentasi Header Pengumuman</div>
+        <div id="postHeaderPreview" class="post-header-preview">Preview Dokumentasi Header Pengumuman</div>
       </div>
 
-      <p>Program Studi Informatika Universitas Atma Jaya Yogyakarta (UAJY) menggelar pameran hasil karya Mata Kuliah Pemikiran Desain dan Kreativitas. Pameran diadakan setiap tahun oleh mahasiswa semester satu sebagai bentuk evaluasi proyek akhir semester.</p>
-      <p>Dalam kegiatan ini, mahasiswa dibagi ke dalam beberapa kelompok untuk menampilkan hasil proyek berupa game, aplikasi, dan konsep produk digital lainnya. Panitia menilai pameran ini sebagai ruang latihan presentasi sekaligus kolaborasi lintas tim.</p>
-
-      <div class="inline-image">Preview Dokumentasi Kegiatan 1</div>
-
-      <p>Tahun ini tema pameran adalah "Akar Nusantara: Melestarikan Akar yang Menopang Warisan Kita". Tema ini menekankan keragaman budaya Nusantara yang diolah ke dalam konsep kreatif berbasis teknologi dan media digital.</p>
-      <p>Kegiatan dibuka dengan sambutan dekan dan dosen pengampu. Mereka menekankan bahwa proses kreatif harus dibangun dari pemahaman masalah yang baik, eksplorasi ide, lalu pengujian solusi agar karya yang dihasilkan lebih relevan.</p>
-
-      <div class="inline-image">Preview Dokumentasi Kegiatan 2</div>
-
-      <p>Rangkaian acara ditutup dengan sesi voting karya terbaik dan refleksi bersama. Melalui kegiatan ini, mahasiswa diharapkan semakin percaya diri mengembangkan karya inovatif, komunikatif, serta berdampak untuk komunitas.</p>
+      <div id="articleBody"></div>
 
       <section class="attachments-wrap" aria-label="File lampiran">
         <h4>File Lampiran</h4>
-        <div class="attachment-grid">
-          <div class="attachment-item">jadwal-guru-dan-jadwal-kelas.zip</div>
-          <div class="attachment-item">llde-info-laporan-umum.pdf</div>
-          <div class="attachment-item">penolakan-karena-sudah-seminggu.pdf</div>
-        </div>
+        <div id="attachmentGrid" class="attachment-grid"></div>
       </section>
 
       <div class="back-wrap">
@@ -273,6 +260,160 @@
     const topHeader = document.getElementById("topHeader");
     const searchForm = document.getElementById("searchForm");
     const searchInput = document.getElementById("searchInput");
+    const heroBadge = document.getElementById("heroBadge");
+    const heroTitle = document.getElementById("heroTitle");
+    const heroMeta = document.getElementById("heroMeta");
+    const breadcrumbCategory = document.getElementById("breadcrumbCategory");
+    const articleTitle = document.getElementById("articleTitle");
+    const articleBody = document.getElementById("articleBody");
+    const attachmentGrid = document.getElementById("attachmentGrid");
+    const postHeaderPreview = document.getElementById("postHeaderPreview");
+
+    const ANNOUNCEMENT_STORAGE_KEY = "crembo-announcements";
+    const DEFAULT_ANNOUNCEMENTS = [
+      {
+        id: "pengumuman-uajy-karya",
+        category: "Berita",
+        date: "2026-02-19",
+        title: "Mahasiswa Informatika UAJY Unjuk Kreativitas Melalui Pameran Hasil Karya UAS",
+        summary: "Program Studi Informatika Universitas Atma Jaya Yogyakarta menggelar pameran hasil karya mahasiswa semester 1. Kegiatan memamerkan proyek game dan aplikasi yang dikembangkan selama satu semester.",
+        body: [
+          "Program Studi Informatika Universitas Atma Jaya Yogyakarta (UAJY) menggelar pameran hasil karya Mata Kuliah Pemikiran Desain dan Kreativitas. Pameran diadakan setiap tahun oleh mahasiswa semester satu sebagai bentuk evaluasi proyek akhir semester.",
+          "Dalam kegiatan ini, mahasiswa dibagi ke dalam beberapa kelompok untuk menampilkan hasil proyek berupa game, aplikasi, dan konsep produk digital lainnya. Panitia menilai pameran ini sebagai ruang latihan presentasi sekaligus kolaborasi lintas tim.",
+          "Tahun ini tema pameran adalah Akar Nusantara: Melestarikan Akar yang Menopang Warisan Kita. Tema ini menekankan keragaman budaya Nusantara yang diolah ke dalam konsep kreatif berbasis teknologi dan media digital.",
+          "Rangkaian acara ditutup dengan sesi voting karya terbaik dan refleksi bersama. Melalui kegiatan ini, mahasiswa diharapkan semakin percaya diri mengembangkan karya inovatif, komunikatif, serta berdampak untuk komunitas."
+        ],
+        attachments: ["jadwal-guru-dan-jadwal-kelas.zip", "llde-info-laporan-umum.pdf", "penolakan-karena-sudah-seminggu.pdf"],
+        author: "Super Admin"
+      },
+      {
+        id: "perubahan-gladi-bersih",
+        category: "Informasi",
+        date: "2026-02-15",
+        title: "Perubahan Jadwal Gladi Bersih Pekan Suci",
+        summary: "Terdapat penyesuaian jadwal gladi bersih petugas multimedia. Seluruh operator, kameramen, dan tim audio diminta memeriksa pembagian sesi terbaru melalui dashboard internal.",
+        body: [
+          "Perubahan jadwal gladi bersih dilakukan untuk menyesuaikan ketersediaan ruangan dan perangkat siaran. Seluruh petugas diminta hadir 30 menit lebih awal dari jadwal terbaru.",
+          "Daftar penugasan terbaru akan dipublikasikan di dashboard internal. Koordinator tiap divisi diminta mengonfirmasi kehadiran tim maksimal H-1 pelaksanaan."
+        ],
+        attachments: ["jadwal-gladi-terbaru.pdf"],
+        author: "Admin Liturgi"
+      },
+      {
+        id: "workshop-konten-siaran",
+        category: "Pelatihan",
+        date: "2026-02-10",
+        title: "Workshop Singkat Manajemen Konten Siaran",
+        summary: "Crembo mengadakan sesi berbagi praktik terbaik pengelolaan konten siaran untuk media sosial dan live streaming. Materi fokus pada penjadwalan publikasi dan kualitas dokumentasi visual.",
+        body: [
+          "Workshop difokuskan pada strategi menyusun kalender konten, penyuntingan ringkas, serta manajemen arsip dokumentasi agar mudah dicari untuk kebutuhan publikasi ulang.",
+          "Peserta juga mendapat template kerja yang bisa langsung dipakai untuk evaluasi kualitas konten mingguan."
+        ],
+        attachments: ["materi-workshop.pdf", "template-konten.xlsx"],
+        author: "Koordinator Media"
+      },
+      {
+        id: "pembaruan-format-laporan",
+        category: "Pengumuman",
+        date: "2026-02-01",
+        title: "Pembaruan Format Laporan Pelayanan Bulanan",
+        summary: "Template laporan pelayanan telah diperbarui untuk memudahkan rekap operator, dokumentasi, serta evaluasi kualitas siaran. Anggota diminta menggunakan format terbaru mulai bulan ini.",
+        body: [
+          "Format baru menambahkan ringkasan aktivitas mingguan, indikator kualitas siaran, serta kolom catatan kendala teknis untuk mempermudah proses evaluasi bulanan.",
+          "Semua anggota diminta menggunakan format versi terbaru agar proses rekap data lintas tim berjalan seragam."
+        ],
+        attachments: ["template-laporan-v2.docx", "contoh-laporan.pdf"],
+        author: "Sekretariat"
+      }
+    ];
+
+    function safeJsonParse(raw) {
+      try {
+        return JSON.parse(raw);
+      } catch (err) {
+        return null;
+      }
+    }
+
+    function normalizeCategory(value) {
+      return String(value || "Tanpa Kategori").trim() || "Tanpa Kategori";
+    }
+
+    function normalizeAnnouncement(item, index) {
+      return {
+        id: String(item && item.id ? item.id : "pengumuman-" + (index + 1)),
+        category: normalizeCategory(item && item.category),
+        date: String(item && item.date ? item.date : "2026-01-01"),
+        title: String(item && item.title ? item.title : "Judul pengumuman"),
+        summary: String(item && item.summary ? item.summary : "Ringkasan belum tersedia."),
+        body: Array.isArray(item && item.body) && item.body.length > 0 ? item.body.map(String) : [String(item && item.summary ? item.summary : "Isi belum tersedia.")],
+        attachments: Array.isArray(item && item.attachments) ? item.attachments.map(String) : [],
+        author: String(item && item.author ? item.author : "Admin")
+      };
+    }
+
+    function readAnnouncements() {
+      const raw = localStorage.getItem(ANNOUNCEMENT_STORAGE_KEY);
+      const parsed = raw ? safeJsonParse(raw) : null;
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        return DEFAULT_ANNOUNCEMENTS.slice();
+      }
+      return parsed.map(normalizeAnnouncement);
+    }
+
+    function formatDate(dateValue) {
+      const parsed = new Date(dateValue);
+      if (Number.isNaN(parsed.getTime())) {
+        return dateValue;
+      }
+      return parsed.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+    }
+
+    function readCurrentAnnouncement(announcements) {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      if (!id) {
+        return announcements[0];
+      }
+      const found = announcements.find(function (item) { return item.id === id; });
+      return found || announcements[0];
+    }
+
+    function renderAnnouncementDetail(item) {
+      if (!item) {
+        return;
+      }
+
+      heroBadge.textContent = item.category;
+      heroTitle.textContent = item.title;
+      heroMeta.textContent = item.author + " • " + formatDate(item.date);
+
+      breadcrumbCategory.textContent = item.category;
+      breadcrumbCategory.href = "pengumuman.html?kategori=" + encodeURIComponent(item.category);
+
+      articleTitle.textContent = item.title;
+      postHeaderPreview.textContent = "Preview Dokumentasi Header " + item.category;
+
+      articleBody.innerHTML = item.body.map(function (paragraph, index) {
+        const paragraphHtml = '<p>' + paragraph + '</p>';
+        if (index === 1) {
+          return paragraphHtml + '<div class="inline-image">Preview Dokumentasi Kegiatan 1</div>';
+        }
+        if (index === 2) {
+          return paragraphHtml + '<div class="inline-image">Preview Dokumentasi Kegiatan 2</div>';
+        }
+        return paragraphHtml;
+      }).join("");
+
+      if (!item.attachments.length) {
+        attachmentGrid.innerHTML = '<div class="attachment-item">Belum ada lampiran.</div>';
+        return;
+      }
+
+      attachmentGrid.innerHTML = item.attachments.map(function (fileName) {
+        return '<div class="attachment-item">' + fileName + '</div>';
+      }).join("");
+    }
 
     function syncStickyOffset() {
       const headerHeight = topHeader ? topHeader.offsetHeight : 118;
@@ -287,6 +428,8 @@
       const keyword = searchInput.value.trim();
       window.location.href = "search.html?q=" + encodeURIComponent(keyword);
     });
+
+    renderAnnouncementDetail(readCurrentAnnouncement(readAnnouncements()));
   
     (function () {
       const PROFILE_MENU_STORAGE_KEY = "crembo-profile-menu";
