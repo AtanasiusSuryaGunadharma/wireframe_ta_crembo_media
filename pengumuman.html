@@ -298,45 +298,25 @@
 
     const DEFAULT_ANNOUNCEMENTS = [
       {
-        id: "pengumuman-uajy-karya",
-        category: "Berita",
-        date: "2026-02-19",
+        id: "berita-1",
         title: "Mahasiswa Informatika UAJY Unjuk Kreativitas Melalui Pameran Hasil Karya UAS",
-        summary: "Program Studi Informatika Universitas Atma Jaya Yogyakarta menggelar pameran hasil karya mahasiswa semester 1. Kegiatan memamerkan proyek game dan aplikasi yang dikembangkan selama satu semester.",
-        attachments: ["jadwal-guru-dan-jadwal-kelas.zip", "llde-info-laporan-umum.pdf", "penolakan-karena-sudah-seminggu.pdf"],
-        author: "Super Admin"
-      },
-      {
-        id: "perubahan-gladi-bersih",
-        category: "Informasi",
-        date: "2026-02-15",
-        title: "Perubahan Jadwal Gladi Bersih Pekan Suci",
-        summary: "Terdapat penyesuaian jadwal gladi bersih petugas multimedia. Seluruh operator, kameramen, dan tim audio diminta memeriksa pembagian sesi terbaru melalui dashboard internal.",
-        attachments: ["jadwal-gladi-terbaru.pdf"],
-        author: "Admin Liturgi"
-      },
-      {
-        id: "workshop-konten-siaran",
-        category: "Pelatihan",
-        date: "2026-02-10",
-        title: "Workshop Singkat Manajemen Konten Siaran",
-        summary: "Crembo mengadakan sesi berbagi praktik terbaik pengelolaan konten siaran untuk media sosial dan live streaming. Materi fokus pada penjadwalan publikasi dan kualitas dokumentasi visual.",
-        attachments: ["materi-workshop.pdf", "template-konten.xlsx"],
-        author: "Koordinator Media"
-      },
-      {
-        id: "pembaruan-format-laporan",
-        category: "Pengumuman",
-        date: "2026-02-01",
-        title: "Pembaruan Format Laporan Pelayanan Bulanan",
-        summary: "Template laporan pelayanan telah diperbarui untuk memudahkan rekap operator, dokumentasi, serta evaluasi kualitas siaran. Anggota diminta menggunakan format terbaru mulai bulan ini.",
-        attachments: ["template-laporan-v2.docx", "contoh-laporan.pdf"],
-        author: "Sekretariat"
+        slug: "mahasiswa-informatika-uajy-unjuk-kreativitas",
+        categories: ["Umum", "Prestasi"],
+        author: "Super Admin",
+        status: "published",
+        date: "2026-02-25",
+        thumbnailName: "karya-uas.jpg",
+        thumbnailDataUrl: "",
+        summary: "Program Studi Informatika UAJY menggelar pameran hasil karya mahasiswa semester satu.",
+        content: "Program Studi Informatika UAJY menggelar pameran hasil karya mahasiswa semester satu.",
+        attachments: [
+          { id: "att-1", name: "siaran-pers.pdf", type: "application/pdf", dataUrl: "" }
+        ]
       }
     ];
 
     const categoryFromQuery = new URLSearchParams(window.location.search).get("kategori");
-    let activeCategory = categoryFromQuery ? normalizeCategory(categoryFromQuery) : "Semua Berita";
+    let activeCategory = categoryFromQuery ? normalizeCategoryName(categoryFromQuery) : "Semua Berita";
 
     function safeJsonParse(raw) {
       try {
@@ -346,29 +326,74 @@
       }
     }
 
-    function normalizeCategory(value) {
-      return String(value || "Tanpa Kategori").trim() || "Tanpa Kategori";
+    function normalizeCategoryName(value) {
+      return String(value || "Umum").trim() || "Umum";
+    }
+
+    function slugify(text) {
+      return String(text || "")
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+    }
+
+    function normalizeAttachment(att) {
+      if (typeof att === "string") {
+        return { id: "att-" + slugify(att), name: att, type: "", dataUrl: "" };
+      }
+      return {
+        id: String(att && att.id ? att.id : "att-" + Date.now()),
+        name: String(att && att.name ? att.name : "lampiran"),
+        type: String(att && att.type ? att.type : ""),
+        dataUrl: String(att && att.dataUrl ? att.dataUrl : "")
+      };
     }
 
     function normalizeAnnouncement(item, index) {
+      const categories = Array.isArray(item && item.categories)
+        ? item.categories.map(normalizeCategoryName)
+        : [normalizeCategoryName(item && item.category)];
+
+      const statusRaw = String(item && item.status ? item.status : "published").toLowerCase();
+      const status = statusRaw === "draft" ? "draft" : "published";
+
+      const content = String(item && (item.content || (Array.isArray(item.body) ? item.body.join("\n\n") : ""))
+        ? (item.content || (Array.isArray(item.body) ? item.body.join("\n\n") : ""))
+        : (item && item.summary ? item.summary : ""));
+
       return {
         id: String(item && item.id ? item.id : "pengumuman-" + (index + 1)),
-        category: normalizeCategory(item && item.category),
+        title: String(item && item.title ? item.title : "Judul Pengumuman"),
+        slug: String(item && item.slug ? item.slug : slugify(item && item.title ? item.title : "pengumuman")),
+        categories: categories,
+        category: categories[0],
+        status: status,
         date: String(item && item.date ? item.date : "2026-01-01"),
-        title: String(item && item.title ? item.title : "Judul pengumuman"),
-        summary: String(item && item.summary ? item.summary : "Ringkasan belum tersedia."),
-        attachments: Array.isArray(item && item.attachments) ? item.attachments.map(String) : [],
-        author: String(item && item.author ? item.author : "Admin")
+        author: String(item && item.author ? item.author : "Admin"),
+        thumbnailName: String(item && item.thumbnailName ? item.thumbnailName : ""),
+        thumbnailDataUrl: String(item && item.thumbnailDataUrl ? item.thumbnailDataUrl : ""),
+        summary: String(item && item.summary ? item.summary : content.slice(0, 180)),
+        content: content,
+        attachments: Array.isArray(item && item.attachments) ? item.attachments.map(normalizeAttachment) : []
       };
+    }
+
+    function ensureSeedAnnouncements() {
+      const raw = localStorage.getItem(ANNOUNCEMENT_STORAGE_KEY);
+      const parsed = raw ? safeJsonParse(raw) : null;
+      if (!Array.isArray(parsed) || !parsed.length) {
+        localStorage.setItem(ANNOUNCEMENT_STORAGE_KEY, JSON.stringify(DEFAULT_ANNOUNCEMENTS));
+      }
     }
 
     function readAnnouncements() {
       const raw = localStorage.getItem(ANNOUNCEMENT_STORAGE_KEY);
       const parsed = raw ? safeJsonParse(raw) : null;
-      if (!Array.isArray(parsed) || parsed.length === 0) {
-        return DEFAULT_ANNOUNCEMENTS.slice();
-      }
-      return parsed.map(normalizeAnnouncement);
+      const normalized = Array.isArray(parsed) ? parsed.map(normalizeAnnouncement) : DEFAULT_ANNOUNCEMENTS.map(normalizeAnnouncement);
+      return normalized.filter(function (item) { return item.status === "published"; });
     }
 
     function readAdminCategories(announcements) {
@@ -377,17 +402,17 @@
 
       const categorySet = new Set();
       announcements.forEach(function (item) {
-        categorySet.add(normalizeCategory(item.category));
+        item.categories.forEach(function (cat) { categorySet.add(normalizeCategoryName(cat)); });
       });
 
       if (Array.isArray(parsed) && parsed.length > 0) {
         parsed.forEach(function (item) {
           if (typeof item === "string") {
-            categorySet.add(normalizeCategory(item));
+            categorySet.add(normalizeCategoryName(item));
             return;
           }
-          if (item && item.label) {
-            categorySet.add(normalizeCategory(item.label));
+          if (item && (item.name || item.label)) {
+            categorySet.add(normalizeCategoryName(item.name || item.label));
           }
         });
       }
@@ -396,7 +421,7 @@
     }
 
     function formatDate(dateValue) {
-      const parsed = new Date(dateValue);
+      const parsed = new Date(dateValue + "T00:00:00");
       if (Number.isNaN(parsed.getTime())) {
         return dateValue;
       }
@@ -421,18 +446,29 @@
     function filterAnnouncements(allItems) {
       const keyword = qInput.value.trim().toLowerCase();
       const filtered = allItems.filter(function (item) {
-        const passCategory = activeCategory === "Semua Berita" || item.category === activeCategory;
-        const passKeyword = !keyword || [item.title, item.summary, item.category].join(" ").toLowerCase().includes(keyword);
+        const passCategory = activeCategory === "Semua Berita" || item.categories.includes(activeCategory);
+        const passKeyword = !keyword || [item.title, item.summary, item.author].concat(item.categories).join(" ").toLowerCase().includes(keyword);
         return passCategory && passKeyword;
       });
       return sortAnnouncements(filtered);
     }
 
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     function renderCategories(categories, announcements) {
-      const counts = announcements.reduce(function (acc, item) {
-        acc[item.category] = (acc[item.category] || 0) + 1;
-        return acc;
-      }, {});
+      const counts = {};
+      announcements.forEach(function (item) {
+        item.categories.forEach(function (cat) {
+          counts[cat] = (counts[cat] || 0) + 1;
+        });
+      });
 
       categoryList.innerHTML = categories.map(function (category) {
         const countLabel = category === "Semua Berita" ? announcements.length : (counts[category] || 0);
@@ -451,12 +487,15 @@
       announceList.innerHTML = items.map(function (item, index) {
         const buttonClass = index === 0 ? "btn-primary" : "btn";
         const attachmentCount = item.attachments.length;
+        const thumb = item.thumbnailDataUrl
+          ? '<img src="' + item.thumbnailDataUrl + '" alt="Thumbnail pengumuman" style="width:100%;height:100%;object-fit:cover;">'
+          : ('<div>Thumbnail Pengumuman' + (item.thumbnailName ? '<br><small>' + escapeHtml(item.thumbnailName) + '</small>' : '') + '</div>');
         return '<article class="announce-card">'
-          + '<div class="thumb">Preview Dokumen Pengumuman</div>'
+          + '<div class="thumb">' + thumb + '</div>'
           + '<div class="body">'
-          + '<div class="meta-row"><span class="badge">' + item.category + '</span><span>' + formatDate(item.date) + '</span></div>'
-          + '<h3 class="title">' + item.title + '</h3>'
-          + '<p class="desc">' + item.summary + '</p>'
+          + '<div class="meta-row"><span class="badge">' + escapeHtml(item.categories[0] || "Umum") + '</span><span>' + escapeHtml(formatDate(item.date)) + '</span></div>'
+          + '<h3 class="title">' + escapeHtml(item.title) + '</h3>'
+          + '<p class="desc">' + escapeHtml(item.summary || "-") + '</p>'
           + '<div class="bottom-row">'
           + '<p class="lampiran">' + attachmentCount + ' file lampiran</p>'
           + '<a class="' + buttonClass + '" href="pengumuman-detail.html?id=' + encodeURIComponent(item.id) + '">Baca Selengkapnya</a>'
@@ -482,6 +521,7 @@
       document.documentElement.style.setProperty("--header-h", headerHeight + "px");
     }
 
+    ensureSeedAnnouncements();
     syncStickyOffset();
     window.addEventListener("resize", syncStickyOffset);
 
@@ -517,7 +557,7 @@
     });
 
     renderAnnouncementPage();
-  
+
     (function () {
       const PROFILE_MENU_STORAGE_KEY = "crembo-profile-menu";
       const DEFAULT_PROFILE_MENU = [
