@@ -1,0 +1,991 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hasil Evaluasi Streaming - Crembo Media</title>
+  <style>
+    :root {
+      --bg: #ececec;
+      --panel: #ffffff;
+      --line: #1f1f1f;
+      --text: #111111;
+      --side-text: #f4f4f4;
+      --radius: 16px;
+      --shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 20% 10%, #f8f8f8 0%, #ececec 38%, #e3e3e3 100%);
+      min-height: 100vh;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #181818 0%, #0f0f0f 100%);
+      color: var(--side-text);
+      border-right: 2px solid var(--line);
+      padding: 18px 14px;
+      overflow-y: auto;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .brand {
+      border: 1px solid #838383;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .brand h1 { margin: 0; font-size: 1rem; text-transform: uppercase; }
+    .brand p { margin: 6px 0 0; color: #cdcdcd; font-size: 0.82rem; }
+
+    .menu-group {
+      border: 1px solid #656565;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .group-toggle {
+      width: 100%;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      color: var(--side-text);
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 11px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .group-items {
+      display: block;
+      border-top: 1px solid #525252;
+      padding: 6px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .menu-link {
+      display: block;
+      text-decoration: none;
+      color: #e5e5e5;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 0.83rem;
+      margin-bottom: 4px;
+    }
+
+    .menu-link.active {
+      border-color: #cfcfcf;
+      background: #e9e9e9;
+      color: #151515;
+      font-weight: 700;
+    }
+
+    .side-actions {
+      margin-top: 16px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .side-actions a {
+      text-decoration: none;
+      border: 1px solid #8d8d8d;
+      color: #ebebeb;
+      text-align: center;
+      padding: 9px 10px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+    }
+
+    .main { padding: 16px; }
+
+    .meta-header {
+      border: 1px solid #cfcfcf;
+      background: #f3f3f3;
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .meta-title {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .meta-sub {
+      margin: 4px 0 0;
+      color: #4b5563;
+      font-size: 0.86rem;
+    }
+
+    .chip {
+      border: 1px solid #1f1f1f;
+      background: #fafafa;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .toolbar {
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .toolbar-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 0.85rem;
+      color: #4b4b4b;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border: 1px solid #bdbdbd;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      background: #fff;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid #1f2937;
+      border-radius: 9px;
+      background: linear-gradient(180deg, #4b5563 0%, #1f2937 100%);
+      color: #fff;
+      font-weight: 700;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .summary-grid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      gap: 8px;
+    }
+
+    .summary-item {
+      border: 1px solid #bdbdbd;
+      background: #fafafa;
+      padding: 10px;
+    }
+
+    .summary-item p {
+      margin: 0;
+      font-size: 0.8rem;
+      color: #575757;
+    }
+
+    .summary-item strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 1.15rem;
+    }
+
+    .panel {
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .panel-head {
+      padding: 12px 14px;
+      border-bottom: 1px solid #c8c8c8;
+      background: #f5f5f5;
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .panel-body {
+      padding: 12px;
+    }
+
+    .table-scroll {
+      border: 1px solid #c5c5c5;
+      overflow: auto;
+      background: #fff;
+    }
+
+    .table-scroll table {
+      min-width: 980px;
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+
+    th,
+    td {
+      border: 1px solid #cbcbcb;
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #efefef;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .empty-note {
+      margin: 10px 0 0;
+      border: 1px dashed #adadad;
+      background: #fbfbfb;
+      padding: 10px;
+      font-size: 0.86rem;
+      color: #616161;
+    }
+
+    .pending-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 10px;
+    }
+
+    .pending-item {
+      border: 1px solid #c2c2c2;
+      background: #fafafa;
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .pending-item h4 {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .pending-item p {
+      margin: 0;
+      font-size: 0.84rem;
+      color: #575757;
+    }
+
+    .tag-overdue {
+      display: inline-block;
+      width: fit-content;
+      border: 1px solid #bb9a62;
+      background: #fff8ea;
+      padding: 3px 8px;
+      font-size: 0.77rem;
+      border-radius: 999px;
+    }
+
+    @media (max-width: 1080px) {
+      .toolbar-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(150px, 1fr));
+      }
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .toolbar-grid,
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Sidebar admin">
+      <div class="brand">
+        <h1>Crembo Media Panel</h1>
+        <p>Laporan evaluasi streaming (admin)</p>
+      </div>
+
+      <div class="menu-group">
+        <button class="group-toggle" type="button">Tugas Streaming <span>-</span></button>
+        <div class="group-items">
+          <a class="menu-link" href="hasil-evaluasi-streaming.html">Registrasi Tugas Misa Besar</a>
+          <a class="menu-link" href="hasil-evaluasi-streaming.html">Penugasan Petugas Misa</a>
+          <a class="menu-link active" href="hasil-evaluasi-streaming.html">Hasil Evaluasi Streaming</a>
+        </div>
+      </div>
+
+      <div class="side-actions">
+        <a href="dashboard.html">Kembali ke Dashboard</a>
+        <a href="home.html">Kembali ke Beranda</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="meta-header">
+        <div>
+          <h1 class="meta-title">Hasil Evaluasi Streaming</h1>
+          <p class="meta-sub">Hanya untuk admin panel: filter jenis misa, periode, export, dan monitoring misa terlewat yang belum diisi.</p>
+        </div>
+        <span class="chip" id="activeFilterChip">Filter: Semua</span>
+      </header>
+
+      <section class="toolbar" aria-label="Filter hasil evaluasi">
+        <div class="toolbar-grid">
+          <div class="field">
+            <label for="resultTypeFilter">Filter Jenis Misa</label>
+            <select id="resultTypeFilter">
+              <option value="all">Semua Jenis</option>
+              <option value="Biasa">Misa Biasa</option>
+              <option value="Hari Raya">Misa Hari Raya</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="periodScaleFilter">Skala Periode</label>
+            <select id="periodScaleFilter">
+              <option value="week">Per Minggu</option>
+              <option value="month">Per Bulan</option>
+              <option value="year">Per Tahun</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="periodWeekInput">Pilih Periode</label>
+            <input id="periodWeekInput" type="week">
+            <input id="periodMonthInput" type="month" hidden>
+            <input id="periodYearInput" type="number" min="2000" max="2100" step="1" hidden>
+          </div>
+
+          <div class="field">
+            <label for="evaluationSort">Urutan Evaluasi Masuk</label>
+            <select id="evaluationSort">
+              <option value="oldest">Terlama ke Terbaru</option>
+              <option value="newest">Terbaru ke Terlama</option>
+            </select>
+          </div>
+
+          <div class="result-actions">
+            <button id="downloadEvalExcelBtn" class="btn" type="button">Download Excel</button>
+            <button id="downloadEvalPdfBtn" class="btn" type="button">Download PDF</button>
+          </div>
+        </div>
+
+        <div class="summary-grid" id="evaluationSummary"></div>
+      </section>
+
+      <section class="panel" aria-label="Tabel evaluasi masuk">
+        <header class="panel-head">
+          <h2>Evaluasi Sudah Masuk</h2>
+        </header>
+        <div class="panel-body">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Jam</th>
+                  <th>Jenis Misa</th>
+                  <th>Judul Misa</th>
+                  <th>Petugas Bertugas</th>
+                  <th>Pengisi Evaluasi</th>
+                  <th>Waktu Submit</th>
+                  <th>Catatan Penutup</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="completedEvalRows"></tbody>
+            </table>
+          </div>
+          <p id="completedEvalEmpty" class="empty-note" hidden>Belum ada evaluasi yang sesuai filter.</p>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Daftar misa terlewat belum diisi">
+        <header class="panel-head">
+          <h2>Misa Terlewat Yang Belum Diisi</h2>
+        </header>
+        <div class="panel-body">
+          <div id="pendingEvalList" class="pending-grid"></div>
+          <p id="pendingEvalEmpty" class="empty-note" hidden>Tidak ada misa terlewat yang belum diisi untuk filter ini.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "crembo-evaluasi-streaming";
+
+    const schedules = [
+      {
+        id: "normal-2026-03-27-1800",
+        date: "2026-03-27",
+        time: "18:00",
+        type: "Biasa",
+        title: "Misa Jumat Biasa",
+        team: { operator: "Rikha", camera: "Jeni", supervisor: "Tyas" }
+      },
+      {
+        id: "normal-2026-03-28-1800",
+        date: "2026-03-28",
+        time: "18:00",
+        type: "Biasa",
+        title: "Misa Sabtu Sore",
+        team: { operator: "Lisa", camera: "Evan", supervisor: "Jose" }
+      },
+      {
+        id: "raya-2026-03-29-0800",
+        date: "2026-03-29",
+        time: "08:00",
+        type: "Hari Raya",
+        title: "Minggu Palma - Sesi Pagi",
+        team: { operator: "Rossa", camera: "Aurel", supervisor: "Asha" }
+      },
+      {
+        id: "raya-2026-03-29-1700",
+        date: "2026-03-29",
+        time: "17:00",
+        type: "Hari Raya",
+        title: "Minggu Palma - Sesi Sore",
+        team: { operator: "Rikha", camera: "Jeni", supervisor: "Tyas" }
+      },
+      {
+        id: "normal-2026-03-30-1800",
+        date: "2026-03-30",
+        time: "18:00",
+        type: "Biasa",
+        title: "Misa Senin Biasa",
+        team: { operator: "Lisa", camera: "Evan", supervisor: "Jose" }
+      }
+    ];
+
+    const resultTypeFilter = document.getElementById("resultTypeFilter");
+    const periodScaleFilter = document.getElementById("periodScaleFilter");
+    const periodWeekInput = document.getElementById("periodWeekInput");
+    const periodMonthInput = document.getElementById("periodMonthInput");
+    const periodYearInput = document.getElementById("periodYearInput");
+    const completedEvalRows = document.getElementById("completedEvalRows");
+    const completedEvalEmpty = document.getElementById("completedEvalEmpty");
+    const pendingEvalList = document.getElementById("pendingEvalList");
+    const pendingEvalEmpty = document.getElementById("pendingEvalEmpty");
+    const evaluationSummary = document.getElementById("evaluationSummary");
+    const downloadEvalExcelBtn = document.getElementById("downloadEvalExcelBtn");
+    const downloadEvalPdfBtn = document.getElementById("downloadEvalPdfBtn");
+    const evaluationSort = document.getElementById("evaluationSort");
+    const activeFilterChip = document.getElementById("activeFilterChip");
+
+    function readStoredEvaluations() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          return {};
+        }
+        return JSON.parse(raw);
+      } catch (err) {
+        return {};
+      }
+    }
+
+    function getScheduleById(id) {
+      return schedules.find(function (item) { return item.id === id; });
+    }
+
+    function normalizeName(value) {
+      return String(value || "").trim();
+    }
+
+    function normalizeStaffList(items) {
+      const unique = [];
+      items.forEach(function (name) {
+        const clean = normalizeName(name);
+        if (!clean) {
+          return;
+        }
+        const exists = unique.some(function (item) {
+          return item.toLowerCase() === clean.toLowerCase();
+        });
+        if (!exists) {
+          unique.push(clean);
+        }
+      });
+      return unique;
+    }
+
+    function formatDate(dateStr) {
+      const date = new Date(dateStr + "T00:00:00");
+      return date.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+    }
+
+    function formatDateTime(isoString) {
+      if (!isoString) {
+        return "-";
+      }
+      const date = new Date(isoString);
+      if (Number.isNaN(date.getTime())) {
+        return "-";
+      }
+      return date.toLocaleString("id-ID", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }) + " WIB";
+    }
+
+    function getISOWeekValue(dateObj) {
+      const date = new Date(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()));
+      const dayNumber = date.getUTCDay() || 7;
+      date.setUTCDate(date.getUTCDate() + 4 - dayNumber);
+      const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+      const weekNo = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+      return date.getUTCFullYear() + "-W" + String(weekNo).padStart(2, "0");
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function getScheduleDateTime(schedule) {
+      return new Date(schedule.date + "T" + schedule.time + ":00");
+    }
+
+    function getSelectedPeriodValue() {
+      const scale = periodScaleFilter.value;
+      if (scale === "month") {
+        return periodMonthInput.value;
+      }
+      if (scale === "year") {
+        return periodYearInput.value;
+      }
+      return periodWeekInput.value;
+    }
+
+    function matchesTypeFilter(typeValue) {
+      if (resultTypeFilter.value === "all") {
+        return true;
+      }
+      return typeValue === resultTypeFilter.value;
+    }
+
+    function matchesPeriodFilter(dateValue) {
+      const selected = getSelectedPeriodValue();
+      if (!selected) {
+        return true;
+      }
+
+      const date = new Date(dateValue + "T00:00:00");
+      if (Number.isNaN(date.getTime())) {
+        return false;
+      }
+
+      const scale = periodScaleFilter.value;
+      if (scale === "week") {
+        return getISOWeekValue(date) === selected;
+      }
+      if (scale === "month") {
+        return dateValue.slice(0, 7) === selected;
+      }
+      return String(date.getFullYear()) === selected;
+    }
+
+    function getCompletedEvaluations() {
+      const saved = readStoredEvaluations();
+      const entries = Object.keys(saved).map(function (scheduleId) {
+        const item = saved[scheduleId] || {};
+        const schedule = getScheduleById(scheduleId);
+        const date = item.date || (schedule ? schedule.date : "");
+        const time = item.time || (schedule ? schedule.time : "");
+        const misaType = item.misaType || (schedule ? schedule.type : "-");
+        const title = schedule ? schedule.title : "Jadwal tidak ditemukan";
+        const staff = normalizeStaffList([
+          item.operator,
+          item.camera,
+          item.supervisor
+        ].concat(Array.isArray(item.extraStaff) ? item.extraStaff : []));
+
+        return {
+          scheduleId: scheduleId,
+          date: date,
+          time: time,
+          misaType: misaType,
+          title: title,
+          staff: staff,
+          evaluator: normalizeName(item.evaluatorName),
+          evaluatorRole: normalizeName(item.evaluatorRole),
+          submittedAt: item.submittedAt || "",
+          finalNote: normalizeName(item.finalNote)
+        };
+      });
+
+      const sortMode = evaluationSort.value;
+      entries.sort(function (a, b) {
+        const aDate = new Date((a.submittedAt || "1970-01-01T00:00:00") + "");
+        const bDate = new Date((b.submittedAt || "1970-01-01T00:00:00") + "");
+        if (sortMode === "oldest") {
+          return aDate.getTime() - bDate.getTime();
+        }
+        return bDate.getTime() - aDate.getTime();
+      });
+
+      return entries.filter(function (item) {
+        return matchesTypeFilter(item.misaType) && matchesPeriodFilter(item.date);
+      });
+    }
+
+    function getPendingOverdueEvaluations() {
+      const saved = readStoredEvaluations();
+      const now = new Date();
+
+      return schedules.filter(function (schedule) {
+        const isPast = getScheduleDateTime(schedule).getTime() < now.getTime();
+        const hasEvaluated = !!saved[schedule.id];
+        return isPast && !hasEvaluated;
+      }).filter(function (schedule) {
+        return matchesTypeFilter(schedule.type) && matchesPeriodFilter(schedule.date);
+      });
+    }
+
+    function renderResultPeriodInput() {
+      const scale = periodScaleFilter.value;
+      periodWeekInput.hidden = scale !== "week";
+      periodMonthInput.hidden = scale !== "month";
+      periodYearInput.hidden = scale !== "year";
+    }
+
+    function renderEvaluationSummary(completed, pending) {
+      const totalOverdue = completed.length + pending.length;
+      evaluationSummary.innerHTML =
+        '<article class="summary-item"><p>Evaluasi Masuk</p><strong>' + completed.length + '</strong></article>' +
+        '<article class="summary-item"><p>Misa Terlewat Belum Diisi</p><strong>' + pending.length + '</strong></article>' +
+        '<article class="summary-item"><p>Total Misa (Sesuai Filter)</p><strong>' + totalOverdue + '</strong></article>' +
+        '<article class="summary-item"><p>Jenis Misa Aktif</p><strong>' + (resultTypeFilter.value === "all" ? "Semua" : resultTypeFilter.value) + '</strong></article>';
+
+      const typeLabel = resultTypeFilter.value === "all" ? "Semua" : resultTypeFilter.value;
+      activeFilterChip.textContent = "Filter: " + typeLabel;
+    }
+
+    function renderCompletedTable(rows) {
+      if (!rows.length) {
+        completedEvalRows.innerHTML = "";
+        completedEvalEmpty.hidden = false;
+        return;
+      }
+
+      completedEvalEmpty.hidden = true;
+      completedEvalRows.innerHTML = rows.map(function (item) {
+        const evaluator = item.evaluator
+          ? escapeHtml(item.evaluator + (item.evaluatorRole ? " (" + item.evaluatorRole + ")" : ""))
+          : "-";
+        const note = item.finalNote ? escapeHtml(item.finalNote) : "-";
+
+        return '<tr>' +
+          '<td>' + escapeHtml(formatDate(item.date)) + '</td>' +
+          '<td>' + escapeHtml(item.time || "-") + '</td>' +
+          '<td>' + escapeHtml(item.misaType || "-") + '</td>' +
+          '<td>' + escapeHtml(item.title) + '</td>' +
+          '<td>' + escapeHtml(item.staff.join(", ") || "-") + '</td>' +
+          '<td>' + evaluator + '</td>' +
+          '<td>' + escapeHtml(formatDateTime(item.submittedAt)) + '</td>' +
+          '<td>' + note + '</td>' +
+          '<td><button class="btn" type="button" data-delete-evaluation="' + escapeHtml(item.scheduleId) + '">Hapus</button></td>' +
+        '</tr>';
+      }).join("");
+    }
+
+    function deleteEvaluationByScheduleId(scheduleId) {
+      const saved = readStoredEvaluations();
+      if (!saved[scheduleId]) {
+        return;
+      }
+
+      const ok = window.confirm("Hapus hasil evaluasi ini? Data yang dihapus tidak bisa dikembalikan.");
+      if (!ok) {
+        return;
+      }
+
+      delete saved[scheduleId];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+      renderEvaluationResults();
+    }
+
+    function renderPendingList(rows) {
+      if (!rows.length) {
+        pendingEvalList.innerHTML = "";
+        pendingEvalEmpty.hidden = false;
+        return;
+      }
+
+      pendingEvalEmpty.hidden = true;
+      pendingEvalList.innerHTML = rows.map(function (item) {
+        const staffNames = normalizeStaffList([
+          item.team.operator,
+          item.team.camera,
+          item.team.supervisor
+        ]);
+
+        return '<article class="pending-item">' +
+          '<span class="tag-overdue">Belum Diisi</span>' +
+          '<h4>' + escapeHtml(item.title) + '</h4>' +
+          '<p><strong>Tanggal:</strong> ' + escapeHtml(formatDate(item.date)) + ' - ' + escapeHtml(item.time) + ' WIB</p>' +
+          '<p><strong>Jenis:</strong> ' + escapeHtml(item.type) + '</p>' +
+          '<p><strong>Petugas Bertugas:</strong> ' + escapeHtml(staffNames.join(", ") || "-") + '</p>' +
+        '</article>';
+      }).join("");
+    }
+
+    function renderEvaluationResults() {
+      const completed = getCompletedEvaluations();
+      const pending = getPendingOverdueEvaluations();
+      renderEvaluationSummary(completed, pending);
+      renderCompletedTable(completed);
+      renderPendingList(pending);
+    }
+
+    function getScaleLabel() {
+      if (periodScaleFilter.value === "month") {
+        return "bulan";
+      }
+      if (periodScaleFilter.value === "year") {
+        return "tahun";
+      }
+      return "minggu";
+    }
+
+    function exportEvaluationExcel() {
+      const completed = getCompletedEvaluations();
+      const pending = getPendingOverdueEvaluations();
+      const scaleLabel = getScaleLabel();
+      const periodValue = getSelectedPeriodValue() || "Semua";
+
+      let html = '<html><head><meta charset="UTF-8"></head><body>';
+      html += '<h3>Rekap Hasil Evaluasi Streaming</h3>';
+      html += '<p>Jenis Misa: ' + escapeHtml(resultTypeFilter.value === "all" ? "Semua" : resultTypeFilter.value) + '</p>';
+      html += '<p>Skala: Per ' + escapeHtml(scaleLabel) + '</p>';
+      html += '<p>Periode: ' + escapeHtml(periodValue) + '</p>';
+      html += '<h4>Evaluasi Sudah Masuk</h4>';
+      html += '<table border="1" cellspacing="0" cellpadding="6">';
+      html += '<tr><th>Tanggal</th><th>Jam</th><th>Jenis</th><th>Judul</th><th>Petugas</th><th>Pengisi</th><th>Submit</th><th>Catatan</th></tr>';
+
+      if (completed.length) {
+        completed.forEach(function (item) {
+          html += '<tr>' +
+            '<td>' + escapeHtml(formatDate(item.date)) + '</td>' +
+            '<td>' + escapeHtml(item.time || "-") + '</td>' +
+            '<td>' + escapeHtml(item.misaType || "-") + '</td>' +
+            '<td>' + escapeHtml(item.title) + '</td>' +
+            '<td>' + escapeHtml(item.staff.join(", ") || "-") + '</td>' +
+            '<td>' + escapeHtml(item.evaluator + (item.evaluatorRole ? " (" + item.evaluatorRole + ")" : "")) + '</td>' +
+            '<td>' + escapeHtml(formatDateTime(item.submittedAt)) + '</td>' +
+            '<td>' + escapeHtml(item.finalNote || "-") + '</td>' +
+          '</tr>';
+        });
+      } else {
+        html += '<tr><td colspan="8">Tidak ada data evaluasi.</td></tr>';
+      }
+
+      html += '</table>';
+      html += '<h4>Misa Terlewat Belum Diisi</h4>';
+      html += '<table border="1" cellspacing="0" cellpadding="6">';
+      html += '<tr><th>Tanggal</th><th>Jam</th><th>Jenis</th><th>Judul</th><th>Petugas Bertugas</th></tr>';
+
+      if (pending.length) {
+        pending.forEach(function (item) {
+          const staffNames = normalizeStaffList([
+            item.team.operator,
+            item.team.camera,
+            item.team.supervisor
+          ]);
+          html += '<tr>' +
+            '<td>' + escapeHtml(formatDate(item.date)) + '</td>' +
+            '<td>' + escapeHtml(item.time) + '</td>' +
+            '<td>' + escapeHtml(item.type) + '</td>' +
+            '<td>' + escapeHtml(item.title) + '</td>' +
+            '<td>' + escapeHtml(staffNames.join(", ") || "-") + '</td>' +
+          '</tr>';
+        });
+      } else {
+        html += '<tr><td colspan="5">Tidak ada data misa terlewat yang belum diisi.</td></tr>';
+      }
+
+      html += '</table></body></html>';
+
+      const blob = new Blob([html], { type: "application/vnd.ms-excel" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "rekap-evaluasi-streaming-" + periodScaleFilter.value + ".xls";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function exportEvaluationPdf() {
+      const completed = getCompletedEvaluations();
+      const pending = getPendingOverdueEvaluations();
+      const scaleLabel = getScaleLabel();
+      const periodValue = getSelectedPeriodValue() || "Semua";
+
+      const popup = window.open("", "_blank", "width=1024,height=768");
+      if (!popup) {
+        return;
+      }
+
+      const completedRows = completed.length
+        ? completed.map(function (item) {
+            return '<tr>' +
+              '<td>' + escapeHtml(formatDate(item.date)) + '</td>' +
+              '<td>' + escapeHtml(item.time || "-") + '</td>' +
+              '<td>' + escapeHtml(item.misaType || "-") + '</td>' +
+              '<td>' + escapeHtml(item.title) + '</td>' +
+              '<td>' + escapeHtml(item.staff.join(", ") || "-") + '</td>' +
+              '<td>' + escapeHtml(item.evaluator + (item.evaluatorRole ? " (" + item.evaluatorRole + ")" : "")) + '</td>' +
+              '<td>' + escapeHtml(formatDateTime(item.submittedAt)) + '</td>' +
+            '</tr>';
+          }).join("")
+        : '<tr><td colspan="7">Tidak ada data evaluasi.</td></tr>';
+
+      const pendingRows = pending.length
+        ? pending.map(function (item) {
+            const staffNames = normalizeStaffList([
+              item.team.operator,
+              item.team.camera,
+              item.team.supervisor
+            ]);
+
+            return '<tr>' +
+              '<td>' + escapeHtml(formatDate(item.date)) + '</td>' +
+              '<td>' + escapeHtml(item.time) + '</td>' +
+              '<td>' + escapeHtml(item.type) + '</td>' +
+              '<td>' + escapeHtml(item.title) + '</td>' +
+              '<td>' + escapeHtml(staffNames.join(", ") || "-") + '</td>' +
+            '</tr>';
+          }).join("")
+        : '<tr><td colspan="5">Tidak ada data misa terlewat yang belum diisi.</td></tr>';
+
+      popup.document.write(
+        '<!doctype html><html><head><meta charset="utf-8"><title>Rekap Evaluasi Streaming</title>' +
+        '<style>body{font-family:Arial,sans-serif;padding:20px;color:#111}h2,h3{margin-bottom:8px}p{margin:4px 0 10px}table{width:100%;border-collapse:collapse;margin-top:8px;margin-bottom:18px}th,td{border:1px solid #888;padding:6px;font-size:12px;text-align:left;vertical-align:top}th{background:#f2f2f2}@media print{body{padding:0}}</style>' +
+        '</head><body>' +
+        '<h2>Rekap Hasil Evaluasi Streaming</h2>' +
+        '<p>Jenis Misa: ' + escapeHtml(resultTypeFilter.value === "all" ? "Semua" : resultTypeFilter.value) + '</p>' +
+        '<p>Skala: Per ' + escapeHtml(scaleLabel) + ' | Periode: ' + escapeHtml(periodValue) + '</p>' +
+        '<h3>Evaluasi Sudah Masuk</h3>' +
+        '<table><thead><tr><th>Tanggal</th><th>Jam</th><th>Jenis</th><th>Judul</th><th>Petugas</th><th>Pengisi</th><th>Submit</th></tr></thead><tbody>' + completedRows + '</tbody></table>' +
+        '<h3>Misa Terlewat Belum Diisi</h3>' +
+        '<table><thead><tr><th>Tanggal</th><th>Jam</th><th>Jenis</th><th>Judul</th><th>Petugas Bertugas</th></tr></thead><tbody>' + pendingRows + '</tbody></table>' +
+        '</body></html>'
+      );
+      popup.document.close();
+      popup.focus();
+      popup.print();
+    }
+
+    const today = new Date();
+    periodWeekInput.value = getISOWeekValue(today);
+    periodMonthInput.value = String(today.getFullYear()) + "-" + String(today.getMonth() + 1).padStart(2, "0");
+    periodYearInput.value = String(today.getFullYear());
+
+    renderResultPeriodInput();
+    renderEvaluationResults();
+
+    resultTypeFilter.addEventListener("change", renderEvaluationResults);
+
+    periodScaleFilter.addEventListener("change", function () {
+      renderResultPeriodInput();
+      renderEvaluationResults();
+    });
+
+    periodWeekInput.addEventListener("change", renderEvaluationResults);
+    periodMonthInput.addEventListener("change", renderEvaluationResults);
+    periodYearInput.addEventListener("input", renderEvaluationResults);
+    evaluationSort.addEventListener("change", renderEvaluationResults);
+
+    downloadEvalExcelBtn.addEventListener("click", exportEvaluationExcel);
+    downloadEvalPdfBtn.addEventListener("click", exportEvaluationPdf);
+
+    completedEvalRows.addEventListener("click", function (event) {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) {
+        return;
+      }
+
+      const scheduleId = target.getAttribute("data-delete-evaluation") || "";
+      if (!scheduleId) {
+        return;
+      }
+
+      deleteEvaluationByScheduleId(scheduleId);
+    });
+  </script>
+</body>
+</html>
