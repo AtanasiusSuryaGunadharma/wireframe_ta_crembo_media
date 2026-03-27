@@ -125,6 +125,59 @@
 
     .main { padding: 16px; }
 
+    .meta-header {
+      border: 1px solid #cfcfcf;
+      background: #f3f3f3;
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .meta-title {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+
+    .meta-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .chip {
+      border: 1px solid #1f1f1f;
+      background: #fafafa;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .world-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid #6b7280;
+      background: #fff;
+      color: #374151;
+      text-decoration: none;
+    }
+
+    .world-link svg {
+      width: 18px;
+      height: 18px;
+    }
+
     .headline {
       border: 1px solid #cfcfcf;
       background: #f3f3f3;
@@ -347,6 +400,21 @@
     </aside>
 
     <main class="main">
+      <header class="meta-header" aria-label="Header dashboard waktu berjalan">
+        <h1 class="meta-title">Dashboard</h1>
+        <div class="meta-badges">
+          <span id="liveDateTime" class="chip">-</span>
+          <a class="world-link" href="home.html?session=active" title="Kembali ke Home (tetap login)">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"></circle>
+              <path d="M3 12H21" stroke="currentColor" stroke-width="1.8"></path>
+              <path d="M12 3C14.3 5.5 15.6 8.7 15.6 12C15.6 15.3 14.3 18.5 12 21" stroke="currentColor" stroke-width="1.8"></path>
+              <path d="M12 3C9.7 5.5 8.4 8.7 8.4 12C8.4 15.3 9.7 18.5 12 21" stroke="currentColor" stroke-width="1.8"></path>
+            </svg>
+          </a>
+        </div>
+      </header>
+
       <header class="headline">
         <div>
           <h2>Kelola Berita</h2>
@@ -398,6 +466,7 @@
     const statusFilter = document.getElementById("statusFilter");
     const newsRows = document.getElementById("newsRows");
     const emptyState = document.getElementById("emptyState");
+    const liveDateTime = document.getElementById("liveDateTime");
     const notify = document.getElementById("notify");
 
     let announcements = [];
@@ -611,6 +680,23 @@
     ensureSeedData();
     loadAnnouncements();
     renderRows();
+
+    function updateLiveDateTime() {
+      const now = new Date();
+      const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+      const day = dayNames[now.getDay()];
+      const date = String(now.getDate()).padStart(2, "0");
+      const month = monthNames[now.getMonth()];
+      const year = now.getFullYear();
+      const hour = String(now.getHours()).padStart(2, "0");
+      const minute = String(now.getMinutes()).padStart(2, "0");
+      const second = String(now.getSeconds()).padStart(2, "0");
+      liveDateTime.textContent = day + ", " + date + " " + month + " " + year + " " + hour + ":" + minute + ":" + second;
+    }
+
+    updateLiveDateTime();
+    setInterval(updateLiveDateTime, 1000);
 
     searchInput.addEventListener("input", renderRows);
     statusFilter.addEventListener("change", renderRows);
