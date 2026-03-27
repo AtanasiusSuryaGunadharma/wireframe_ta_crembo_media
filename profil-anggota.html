@@ -558,6 +558,10 @@
                 <textarea id="memberAddress" placeholder="Alamat lengkap anggota..." required></textarea>
               </div>
               <div class="field">
+                <label for="memberBirthDate">Tanggal Lahir</label>
+                <input id="memberBirthDate" type="date" required>
+              </div>
+              <div class="field">
                 <label for="memberRole">Role Utama</label>
                 <select id="memberRole" disabled aria-readonly="true">
                   <option>Anggota Multimedia</option>
@@ -697,6 +701,7 @@
     const memberEmail = document.getElementById("memberEmail");
     const memberPhone = document.getElementById("memberPhone");
     const memberAddress = document.getElementById("memberAddress");
+    const memberBirthDate = document.getElementById("memberBirthDate");
     const memberRole = document.getElementById("memberRole");
     const profileForm = document.getElementById("profileForm");
 
@@ -747,6 +752,7 @@
         email: "anggota.crembo@example.com",
         phone: "08xx-xxxx-xxxx",
         address: "Alamat belum diisi",
+        birthDate: "",
         role: "Anggota Multimedia"
       };
     }
@@ -763,6 +769,7 @@
           email: parsed.email || defaultProfile().email,
           phone: parsed.phone || defaultProfile().phone,
           address: parsed.address || defaultProfile().address,
+          birthDate: parsed.birthDate || defaultProfile().birthDate,
           role: parsed.role || defaultProfile().role
         };
       } catch (error) {
@@ -778,6 +785,7 @@
       memberEmail.value = profile.email;
       memberPhone.value = profile.phone;
       memberAddress.value = profile.address;
+      memberBirthDate.value = profile.birthDate;
       memberRole.value = profile.role;
     }
 
@@ -789,8 +797,15 @@
         email: memberEmail.value.trim(),
         phone: memberPhone.value.trim(),
         address: memberAddress.value.trim(),
+        birthDate: memberBirthDate.value,
         role: currentProfile.role
       };
+
+      if (!payload.birthDate) {
+        showNotify("Tanggal lahir wajib diisi.");
+        return;
+      }
+
       localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(payload));
       renderProfile();
       showNotify("Profil anggota berhasil diperbarui.");

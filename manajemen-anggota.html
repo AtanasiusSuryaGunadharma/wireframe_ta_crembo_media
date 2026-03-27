@@ -512,7 +512,7 @@
                 <strong>Import Data Massal Anggota</strong>
                 <span class="status">Mode Tampilan</span>
               </div>
-              <p class="helper">Siapkan data anggota lewat file CSV atau Excel, lalu unduh template agar format kolom tetap konsisten.</p>
+              <p class="helper">Siapkan data anggota lewat file CSV atau Excel, lalu unduh template agar format kolom tetap konsisten (nama, email, WA, alamat, tanggal lahir, role, status).</p>
               <div class="bulk-actions">
                 <button id="importCsvBtn" class="btn ghost" type="button">Import CSV</button>
                 <button id="importExcelBtn" class="btn ghost" type="button">Import Excel</button>
@@ -529,6 +529,7 @@
                     <th>Email</th>
                     <th>No WA</th>
                     <th>Alamat</th>
+                    <th>Tanggal Lahir</th>
                     <th>Role</th>
                     <th>Status</th>
                     <th>Aksi</th>
@@ -563,6 +564,10 @@
                 <textarea id="memberAddressInput" placeholder="Alamat anggota..." required></textarea>
               </div>
               <div>
+                <label class="label" for="memberBirthDateInput">Tanggal Lahir</label>
+                <input id="memberBirthDateInput" type="date" required>
+              </div>
+              <div>
                 <label class="label" for="memberRoleInput">Role</label>
                 <select id="memberRoleInput">
                   <option value="anggota">Anggota</option>
@@ -577,7 +582,7 @@
                   <option>Nonaktif</option>
                 </select>
               </div>
-              <p class="helper">Role dan status anggota bisa diperbarui kapan saja dari form ini.</p>
+              <p class="helper">Reset password anggota akan menggunakan tanggal lahir dari data ini.</p>
               <div class="inline-actions">
                 <button class="btn" type="submit">Simpan Data</button>
                 <button id="cancelEditBtn" class="btn ghost" type="button">Batal</button>
@@ -645,6 +650,7 @@
     const memberEmailInput = document.getElementById("memberEmailInput");
     const memberPhoneInput = document.getElementById("memberPhoneInput");
     const memberAddressInput = document.getElementById("memberAddressInput");
+    const memberBirthDateInput = document.getElementById("memberBirthDateInput");
     const memberRoleInput = document.getElementById("memberRoleInput");
     const memberStatusInput = document.getElementById("memberStatusInput");
     const cancelEditBtn = document.getElementById("cancelEditBtn");
@@ -722,10 +728,32 @@
 
     function defaultMembers() {
       return [
-        { id: "m-1", name: "Atanasius Surya Guna", email: "surya@example.com", phone: "081234567890", address: "Jl. Melati No. 12, Yogyakarta", role: "anggota", status: "Aktif", note: "Aktif reguler" },
-        { id: "m-2", name: "Rikha", email: "rikha@example.com", phone: "081222111000", address: "Jl. Cendana No. 5, Sleman", role: "admin", status: "Aktif", note: "Admin operasional" },
-        { id: "m-3", name: "Jeni", email: "jeni@example.com", phone: "081333222111", address: "Jl. Kenanga No. 18, Bantul", role: "anggota", status: "Nonaktif", note: "Cuti akademik" }
+        { id: "m-1", name: "Atanasius Surya Guna", email: "surya@example.com", phone: "081234567890", address: "Jl. Melati No. 12, Yogyakarta", birthDate: "2002-07-10", role: "anggota", status: "Aktif", password: "20020710", note: "Aktif reguler" },
+        { id: "m-2", name: "Rikha", email: "rikha@example.com", phone: "081222111000", address: "Jl. Cendana No. 5, Sleman", birthDate: "2001-11-08", role: "admin", status: "Aktif", password: "20011108", note: "Admin operasional" },
+        { id: "m-3", name: "Jeni", email: "jeni@example.com", phone: "081333222111", address: "Jl. Kenanga No. 18, Bantul", birthDate: "2003-03-16", role: "anggota", status: "Nonaktif", password: "20030316", note: "Cuti akademik" }
       ];
+    }
+
+    function normalizeBirthDate(value) {
+      const raw = String(value || "").trim();
+      if (!raw) {
+        return "";
+      }
+      if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+        return raw;
+      }
+      const parsed = new Date(raw);
+      if (Number.isNaN(parsed.getTime())) {
+        return "";
+      }
+      const year = parsed.getFullYear();
+      const month = String(parsed.getMonth() + 1).padStart(2, "0");
+      const date = String(parsed.getDate()).padStart(2, "0");
+      return year + "-" + month + "-" + date;
+    }
+
+    function defaultPasswordFromBirthDate(birthDate) {
+      return String(birthDate || "").replace(/-/g, "");
     }
 
     function defaultRequests() {
@@ -774,11 +802,16 @@
           email: "anggota" + index + "@example.com",
           phone: "08xx-xxxx-xxxx",
           address: "Alamat belum diisi",
+          birthDate: "",
           role: "anggota",
           status: "Aktif",
+          password: "",
           note: ""
         };
       }
+
+      const normalizedBirthDate = normalizeBirthDate(item && (item.birthDate || item.tanggalLahir));
+      const fallbackPassword = normalizedBirthDate ? defaultPasswordFromBirthDate(normalizedBirthDate) : "";
 
       return {
         id: String(item && item.id ? item.id : makeId("m")),
@@ -786,8 +819,10 @@
         email: String(item && item.email ? item.email : "anggota@example.com"),
         phone: String(item && item.phone ? item.phone : "08xx-xxxx-xxxx"),
         address: String(item && item.address ? item.address : "Alamat belum diisi"),
+        birthDate: normalizedBirthDate,
         role: normalizeRole(item && item.role),
         status: String(item && item.status ? item.status : "Aktif"),
+        password: String(item && item.password ? item.password : fallbackPassword),
         note: String(item && item.note ? item.note : "")
       };
     }
@@ -872,7 +907,7 @@
       const statusFilter = filterStatusSelect.value;
 
       return members.filter(function (member) {
-        const matchKeyword = !keyword || [member.name, member.email, member.phone, member.address, roleLabel(member.role)].join(" ").toLowerCase().includes(keyword);
+        const matchKeyword = !keyword || [member.name, member.email, member.phone, member.address, member.birthDate, roleLabel(member.role)].join(" ").toLowerCase().includes(keyword);
         const matchRole = roleFilter === "all" || member.role === roleFilter;
         const matchStatus = statusFilter === "all" || member.status === statusFilter;
         return matchKeyword && matchRole && matchStatus;
@@ -902,7 +937,7 @@
     function renderMemberTable() {
       const rows = filteredMembers();
       if (!rows.length) {
-        memberTableBody.innerHTML = '<tr><td colspan="7">Tidak ada data anggota yang cocok.</td></tr>';
+        memberTableBody.innerHTML = '<tr><td colspan="8">Tidak ada data anggota yang cocok.</td></tr>';
         return;
       }
 
@@ -913,10 +948,12 @@
           + '<td>' + escapeHtml(member.email) + '</td>'
           + '<td>' + escapeHtml(member.phone) + '</td>'
           + '<td>' + escapeHtml(member.address) + '</td>'
+          + '<td>' + escapeHtml(formatDate(member.birthDate)) + '</td>'
           + '<td>' + escapeHtml(roleLabel(member.role)) + '</td>'
           + '<td><span class="' + statusClass + '">' + escapeHtml(member.status) + '</span></td>'
           + '<td><div class="inline-actions">'
           + '<button class="btn ghost" type="button" data-action="edit" data-id="' + member.id + '">Edit</button>'
+          + '<button class="btn ghost" type="button" data-action="reset-password" data-id="' + member.id + '">Reset Password</button>'
           + '<button class="btn warn" type="button" data-action="delete" data-id="' + member.id + '">Hapus</button>'
           + '</div></td>'
           + '</tr>';
@@ -986,9 +1023,24 @@
       memberEmailInput.value = member.email;
       memberPhoneInput.value = member.phone;
       memberAddressInput.value = member.address;
+      memberBirthDateInput.value = member.birthDate || "";
       memberRoleInput.value = member.role;
       memberStatusInput.value = member.status;
       memberNameInput.focus();
+    }
+
+    function resetMemberPassword(id) {
+      const target = members.find(function (item) { return item.id === id; });
+      if (!target) {
+        return;
+      }
+      if (!target.birthDate) {
+        showNotify("Tanggal lahir anggota belum diisi. Tidak bisa reset password.");
+        return;
+      }
+      target.password = defaultPasswordFromBirthDate(target.birthDate);
+      saveMembers();
+      showNotify("Password " + target.name + " direset ke tanggal lahir.");
     }
 
     function deleteMember(id) {
@@ -1014,15 +1066,19 @@
         email: memberEmailInput.value.trim(),
         phone: memberPhoneInput.value.trim(),
         address: memberAddressInput.value.trim(),
+        birthDate: normalizeBirthDate(memberBirthDateInput.value),
         role: normalizeRole(memberRoleInput.value),
         status: memberStatusInput.value,
+        password: "",
         note: ""
       };
 
-      if (!payload.name || !payload.email || !payload.phone || !payload.address) {
-        showNotify("Nama, email, nomor WA, dan alamat wajib diisi.");
+      if (!payload.name || !payload.email || !payload.phone || !payload.address || !payload.birthDate) {
+        showNotify("Nama, email, nomor WA, alamat, dan tanggal lahir wajib diisi.");
         return;
       }
+
+      payload.password = defaultPasswordFromBirthDate(payload.birthDate);
 
       if (role !== "super_admin" && payload.role === "super_admin") {
         showNotify("Hanya super admin yang dapat menetapkan role Super Admin.");
@@ -1035,6 +1091,7 @@
           showNotify("Admin tidak dapat mengubah data akun Super Admin.");
           return;
         }
+        payload.password = members[existingIndex].password || defaultPasswordFromBirthDate(payload.birthDate);
         members[existingIndex] = payload;
         showNotify("Data anggota berhasil diperbarui.");
       } else {
@@ -1155,6 +1212,8 @@
 
       if (action === "edit") {
         openEdit(id);
+      } else if (action === "reset-password") {
+        resetMemberPassword(id);
       } else if (action === "delete") {
         deleteMember(id);
       }
