@@ -509,24 +509,133 @@
     const resultMeta = document.getElementById("resultMeta");
     const resultList = document.getElementById("resultList");
 
-    const categories = ["Semua", "Berita", "Pengumuman", "Agenda", "Dokumen", "Form", "Peraturan"];
-    let activeCategory = "Semua";
+    const ANNOUNCEMENT_STORAGE_KEY = "crembo-announcements";
+    const ANNOUNCEMENT_CATEGORY_STORAGE_KEY = "crembo-announcement-categories";
 
-    const items = [
+    const DEFAULT_ANNOUNCEMENTS = [
+      {
+        id: "pengumuman-uajy-karya",
+        category: "Berita",
+        date: "2026-02-19",
+        title: "Mahasiswa Informatika UAJY Unjuk Kreativitas Melalui Pameran Hasil Karya UAS",
+        summary: "Program Studi Informatika Universitas Atma Jaya Yogyakarta menggelar pameran hasil karya mahasiswa semester 1."
+      },
+      {
+        id: "perubahan-gladi-bersih",
+        category: "Informasi",
+        date: "2026-02-15",
+        title: "Perubahan Jadwal Gladi Bersih Pekan Suci",
+        summary: "Penyesuaian jadwal gladi bersih petugas multimedia untuk persiapan pelayanan."
+      },
+      {
+        id: "workshop-konten-siaran",
+        category: "Pelatihan",
+        date: "2026-02-10",
+        title: "Workshop Singkat Manajemen Konten Siaran",
+        summary: "Sesi berbagi praktik terbaik pengelolaan konten siaran untuk media sosial dan live streaming."
+      },
+      {
+        id: "pembaruan-format-laporan",
+        category: "Pengumuman",
+        date: "2026-02-01",
+        title: "Pembaruan Format Laporan Pelayanan Bulanan",
+        summary: "Template laporan pelayanan diperbarui untuk memudahkan rekap operator, dokumentasi, dan evaluasi."
+      }
+    ];
+
+    const staticItems = [
       { title: "Peraturan Kemahasiswaan", category: "Peraturan", date: "2026-02-26", desc: "Peraturan dan tata tertib kegiatan mahasiswa untuk panduan operasional.", link: "#" },
       { title: "Instrumen Money - Mahasiswa", category: "Dokumen", date: "2026-02-26", desc: "Instrumen monitoring dan evaluasi untuk mahasiswa STP AMPTA.", link: "#" },
       { title: "Peluncuran Program Pertukaran Pelajar", category: "Berita", date: "2026-02-25", desc: "Program pertukaran pelajar baru dengan universitas mitra internasional.", link: "#" },
       { title: "Promo Pembuatan website", category: "Agenda", date: "2026-02-21", desc: "Kegiatan kuliah umum bertema riset pengguna dan implementasi solusi.", link: "agenda-detail.html" },
-      { title: "Mahasiswa Informatika UAJY Unjuk Kreativitas", category: "Pengumuman", date: "2026-02-19", desc: "Pameran hasil karya UAS mahasiswa Informatika UAJY.", link: "pengumuman-detail.html" },
       { title: "Pendaftaran Beasiswa Penuh 2026/2027", category: "Berita", date: "2026-02-20", desc: "Informasi pembukaan pendaftaran beasiswa penuh tahun akademik 2026/2027.", link: "#" },
       { title: "Form Pendaftaran Open Recruitment", category: "Form", date: "2026-03-31", desc: "Form pendaftaran anggota baru tim multimedia.", link: "form-pendaftaran-detail.html" },
       { title: "Template Laporan Pelayanan", category: "Dokumen", date: "2026-02-14", desc: "Template laporan pelayanan bulanan terbaru dalam format dokumen.", link: "#" },
       { title: "Workshop Manajemen Konten Siaran", category: "Agenda", date: "2026-02-10", desc: "Agenda workshop internal pengelolaan konten siaran digital.", link: "agenda-detail.html" }
     ];
 
+    let categories = ["Semua"];
+    let activeCategory = "Semua";
+    let items = [];
+
     function syncStickyOffset() {
       const headerHeight = topHeader ? topHeader.offsetHeight : 118;
       document.documentElement.style.setProperty("--header-h", headerHeight + "px");
+    }
+
+    function safeJsonParse(raw) {
+      try {
+        return JSON.parse(raw);
+      } catch (err) {
+        return null;
+      }
+    }
+
+    function normalizeCategory(value) {
+      return String(value || "Tanpa Kategori").trim() || "Tanpa Kategori";
+    }
+
+    function readAnnouncements() {
+      const raw = localStorage.getItem(ANNOUNCEMENT_STORAGE_KEY);
+      const parsed = raw ? safeJsonParse(raw) : null;
+      const source = Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_ANNOUNCEMENTS;
+
+      return source.map(function (item, index) {
+        const id = String(item && item.id ? item.id : "pengumuman-" + (index + 1));
+        const category = normalizeCategory(item && item.category);
+        const date = String(item && item.date ? item.date : "2026-01-01");
+        const title = String(item && item.title ? item.title : "Judul pengumuman");
+        const desc = String(item && (item.summary || item.desc) ? (item.summary || item.desc) : "Ringkasan belum tersedia.");
+        return {
+          title: title,
+          category: category,
+          date: date,
+          desc: desc,
+          link: "pengumuman-detail.html?id=" + encodeURIComponent(id)
+        };
+      });
+    }
+
+    function readAnnouncementCategories(announcementItems) {
+      const raw = localStorage.getItem(ANNOUNCEMENT_CATEGORY_STORAGE_KEY);
+      const parsed = raw ? safeJsonParse(raw) : null;
+      const categorySet = new Set();
+
+      announcementItems.forEach(function (item) {
+        categorySet.add(normalizeCategory(item.category));
+      });
+
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        parsed.forEach(function (item) {
+          if (typeof item === "string") {
+            categorySet.add(normalizeCategory(item));
+            return;
+          }
+          if (item && item.label) {
+            categorySet.add(normalizeCategory(item.label));
+          }
+        });
+      }
+
+      return Array.from(categorySet);
+    }
+
+    function buildSearchDataset() {
+      const announcementItems = readAnnouncements();
+      items = staticItems.concat(announcementItems);
+
+      const allCategories = new Set(["Semua", "Agenda", "Dokumen", "Form", "Peraturan"]);
+      readAnnouncementCategories(announcementItems).forEach(function (category) {
+        allCategories.add(category);
+      });
+      staticItems.forEach(function (item) {
+        allCategories.add(normalizeCategory(item.category));
+      });
+
+      categories = Array.from(allCategories);
+      if (!categories.includes(activeCategory)) {
+        activeCategory = "Semua";
+      }
     }
 
     function getQueryParam() {
@@ -635,6 +744,7 @@
     searchInput.value = initialQuery;
     queryInput.value = initialQuery;
 
+    buildSearchDataset();
     drawCategories();
     renderResults();
 
