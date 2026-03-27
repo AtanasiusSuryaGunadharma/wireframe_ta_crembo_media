@@ -3,13 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Form Berita - Crembo Media</title>
+  <title>Form Agenda - Crembo Media</title>
   <style>
     :root {
       --bg: #ececec;
       --panel: #ffffff;
       --line: #1f1f1f;
-      --muted: #5b5b5b;
       --text: #111111;
       --side-text: #f4f4f4;
       --radius: 16px;
@@ -120,11 +119,6 @@
 
     .main { padding: 16px; }
 
-    .container {
-      display: grid;
-      gap: 12px;
-    }
-
     .meta-header {
       border: 1px solid #cfcfcf;
       background: #f3f3f3;
@@ -178,6 +172,11 @@
       height: 18px;
     }
 
+    .container {
+      display: grid;
+      gap: 12px;
+    }
+
     .headline {
       border: 1px solid #d1d5db;
       border-radius: 12px;
@@ -203,16 +202,8 @@
       gap: 10px;
     }
 
-    .field {
-      display: grid;
-      gap: 6px;
-    }
-
-    .label {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #374151;
-    }
+    .field { display: grid; gap: 6px; }
+    .label { font-size: 0.82rem; font-weight: 700; color: #374151; }
 
     input, textarea, select {
       width: 100%;
@@ -225,7 +216,7 @@
     }
 
     textarea {
-      min-height: 260px;
+      min-height: 230px;
       resize: vertical;
     }
 
@@ -261,26 +252,10 @@
       overflow: hidden;
     }
 
-    .category-checks {
+    .split-2 {
       display: grid;
-      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      grid-template-columns: 1fr 1fr;
       gap: 8px;
-    }
-
-    .check-item {
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      padding: 7px 8px;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      background: #f9fafb;
-      font-size: 0.84rem;
-    }
-
-    .check-item input {
-      width: auto;
-      margin: 0;
     }
 
     .upload-box {
@@ -295,7 +270,7 @@
       cursor: pointer;
     }
 
-    .thumb-preview {
+    .image-preview {
       border: 1px solid #d1d5db;
       border-radius: 10px;
       padding: 8px;
@@ -305,7 +280,7 @@
       max-width: 320px;
     }
 
-    .thumb-preview img {
+    .image-preview img {
       width: 100%;
       height: 170px;
       object-fit: cover;
@@ -398,11 +373,7 @@
     @media (max-width: 920px) {
       .layout { grid-template-columns: 1fr; }
       .sidebar { display: none; }
-      .category-checks { grid-template-columns: repeat(2, minmax(150px, 1fr)); }
-    }
-
-    @media (max-width: 640px) {
-      .category-checks { grid-template-columns: 1fr; }
+      .split-2 { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -418,8 +389,8 @@
         <button class="group-toggle" type="button">Informasi & Publikasi <span>-</span></button>
         <div class="group-items">
           <a class="menu-link" href="manajemen-profil.html">Profil</a>
-          <a class="menu-link active" href="kelola-berita.html">Pengumuman</a>
-          <a class="menu-link" href="manajemen-agenda.html">Agenda Kegiatan</a>
+          <a class="menu-link" href="kelola-berita.html">Pengumuman</a>
+          <a class="menu-link active" href="manajemen-agenda.html">Agenda Kegiatan</a>
           <a class="menu-link" href="form-pendaftaran.html">Form Pendaftaran</a>
         </div>
       </div>
@@ -449,78 +420,99 @@
       <section class="container">
         <header class="headline">
           <div>
-            <h1 id="pageTitle">Tambah Berita Baru</h1>
-            <p id="pageDesc">Lengkapi judul, kategori, tanggal, thumbnail, isi, status, dan lampiran (opsional).</p>
+            <h1 id="pageTitle">Tambah Agenda</h1>
+            <p id="pageDesc">Buat agenda atau acara baru.</p>
           </div>
-          <a class="btn ghost" href="kelola-berita.html">Kembali</a>
+          <a class="btn ghost" href="manajemen-agenda.html">Kembali</a>
         </header>
 
         <article class="panel">
-          <form id="newsForm" style="display:grid;gap:10px;">
-        <div class="field">
-          <label class="label" for="titleInput">Judul Berita</label>
-          <input id="titleInput" type="text" placeholder="Masukkan judul berita" required>
-        </div>
+          <form id="agendaForm" style="display:grid;gap:10px;">
+            <div class="field">
+              <label class="label" for="titleInput">Judul Agenda *</label>
+              <input id="titleInput" type="text" placeholder="Judul agenda" required>
+            </div>
 
-        <div class="field">
-          <label class="label" for="slugInput">Slug</label>
-          <input id="slugInput" type="text" placeholder="Auto-generated dari judul">
-          <p class="helper">Kosongkan jika ingin slug dibuat otomatis.</p>
-        </div>
+            <div class="field">
+              <label class="label">Foto Agenda</label>
+              <input id="imageInput" type="file" accept="image/*" style="display:none;">
+              <div id="imageDrop" class="upload-box" role="button" tabindex="0" aria-label="Upload foto agenda">
+                <strong>Klik atau seret foto ke sini</strong>
+                <span>Format: JPEG, PNG, GIF (Maks 2MB)</span>
+              </div>
+              <div id="imagePreview" class="image-preview" style="display:none;"></div>
+            </div>
 
-        <div class="field">
-          <label class="label">Kategori</label>
-          <div id="categoryChecks" class="category-checks"></div>
-        </div>
+            <div class="field">
+              <label class="label" for="descriptionInput">Deskripsi</label>
+              <div class="editor-toolbar" aria-hidden="true">
+                <span>B</span><span>I</span><span>U</span><span>List</span><span>Link</span>
+              </div>
+              <div class="editor-area">
+                <textarea id="descriptionInput" placeholder="Tulis deskripsi agenda di sini..."></textarea>
+              </div>
+            </div>
 
-        <div class="field">
-          <label class="label" for="dateInput">Tanggal Publikasi</label>
-          <input id="dateInput" type="date" required>
-        </div>
+            <div class="split-2">
+              <div class="field">
+                <label class="label" for="startDateInput">Tanggal Mulai *</label>
+                <input id="startDateInput" type="date" required>
+              </div>
+              <div class="field">
+                <label class="label" for="startTimeInput">Waktu Mulai *</label>
+                <input id="startTimeInput" type="time" required>
+              </div>
+            </div>
 
-        <div class="field">
-          <label class="label">Thumbnail (Gambar Cover)</label>
-          <input id="thumbnailInput" type="file" accept="image/*" style="display:none;">
-          <div id="thumbnailDrop" class="upload-box" role="button" tabindex="0" aria-label="Upload thumbnail">
-            <strong>Klik untuk upload thumbnail</strong>
-            <span>Format gambar JPG, PNG, WEBP</span>
-          </div>
-          <div id="thumbnailPreview" class="thumb-preview" style="display:none;"></div>
-        </div>
+            <div class="split-2">
+              <div class="field">
+                <label class="label" for="endDateInput">Tanggal Selesai</label>
+                <input id="endDateInput" type="date">
+              </div>
+              <div class="field">
+                <label class="label" for="endTimeInput">Waktu Selesai</label>
+                <input id="endTimeInput" type="time">
+              </div>
+            </div>
 
-        <div class="field">
-          <label class="label" for="contentInput">Konten Berita</label>
-          <div class="editor-toolbar" aria-hidden="true">
-            <span>Normal</span><span>B</span><span>I</span><span>U</span><span>List</span><span>Quote</span><span>Link</span><span>Image</span>
-          </div>
-          <div class="editor-area">
-            <textarea id="contentInput" placeholder="Tulis konten berita di sini..." required></textarea>
-          </div>
-          <p class="helper">Toolbar hanya simulasi pada wireframe ini.</p>
-        </div>
+            <div class="field">
+              <label class="label" for="locationInput">Lokasi</label>
+              <input id="locationInput" type="text" placeholder="Lokasi acara">
+            </div>
 
-        <div class="field">
-          <label class="label" for="statusInput">Status</label>
-          <select id="statusInput" required>
-            <option value="draft">Draft</option>
-            <option value="published">Publikasi</option>
-          </select>
-        </div>
+            <div class="field">
+              <label class="label" for="registrationLinkInput">Link (Pendaftaran/Meeting)</label>
+              <input id="registrationLinkInput" type="url" placeholder="https://...">
+            </div>
 
-        <div class="field">
-          <label class="label">Lampiran (Opsional, bisa lebih dari 1)</label>
-          <input id="attachmentInput" type="file" multiple style="display:none;" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.txt,.png,.jpg,.jpeg,.webp">
-          <div id="attachmentDrop" class="upload-box" role="button" tabindex="0" aria-label="Upload lampiran">
-            <strong>Klik untuk upload lampiran</strong>
-            <span>PDF, DOC, DOCX, XLS, XLSX, ZIP, gambar, dll.</span>
-          </div>
-          <div id="attachmentList" class="attachments"></div>
-        </div>
+            <div class="field">
+              <label class="label">Lampiran (PDF / Dokumen - bisa lebih dari 1 file)</label>
+              <input id="attachmentInput" type="file" multiple style="display:none;" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.txt,.png,.jpg,.jpeg,.webp">
+              <div id="attachmentDrop" class="upload-box" role="button" tabindex="0" aria-label="Upload lampiran agenda">
+                <strong>Klik untuk pilih file lampiran</strong>
+                <span>Format: PDF, DOC, XLS, ZIP, gambar, dll</span>
+              </div>
+              <div id="attachmentList" class="attachments"></div>
+            </div>
 
-        <div class="actions">
-          <button class="btn primary" type="submit">Simpan Berita</button>
-          <a class="btn ghost" href="kelola-berita.html">Batal</a>
-        </div>
+            <div class="split-2">
+              <div class="field">
+                <label class="label" for="statusInput">Status</label>
+                <select id="statusInput">
+                  <option value="inactive">Nonaktif</option>
+                  <option value="active">Aktif</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="label" for="orderInput">Urutan</label>
+                <input id="orderInput" type="number" min="0" step="1" value="0">
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn primary" type="submit" id="saveBtn">Simpan Agenda</button>
+              <a class="btn ghost" href="manajemen-agenda.html">Batal</a>
+            </div>
           </form>
         </article>
       </section>
@@ -530,38 +522,40 @@
   <div id="notify" class="notify" role="status" aria-live="polite"></div>
 
   <script>
-    const ANNOUNCEMENT_STORAGE_KEY = "crembo-announcements";
-    const CATEGORY_STORAGE_KEY = "crembo-announcement-categories";
+    const AGENDA_STORAGE_KEY = "crembo-agendas";
 
     const params = new URLSearchParams(window.location.search);
     const editId = params.get("id") || "";
 
     const pageTitle = document.getElementById("pageTitle");
     const pageDesc = document.getElementById("pageDesc");
-    const newsForm = document.getElementById("newsForm");
+    const saveBtn = document.getElementById("saveBtn");
+    const agendaForm = document.getElementById("agendaForm");
 
     const titleInput = document.getElementById("titleInput");
-    const slugInput = document.getElementById("slugInput");
-    const dateInput = document.getElementById("dateInput");
-    const contentInput = document.getElementById("contentInput");
+    const descriptionInput = document.getElementById("descriptionInput");
+    const startDateInput = document.getElementById("startDateInput");
+    const startTimeInput = document.getElementById("startTimeInput");
+    const endDateInput = document.getElementById("endDateInput");
+    const endTimeInput = document.getElementById("endTimeInput");
+    const locationInput = document.getElementById("locationInput");
+    const registrationLinkInput = document.getElementById("registrationLinkInput");
     const statusInput = document.getElementById("statusInput");
+    const orderInput = document.getElementById("orderInput");
 
-    const categoryChecks = document.getElementById("categoryChecks");
-
-    const thumbnailInput = document.getElementById("thumbnailInput");
-    const thumbnailDrop = document.getElementById("thumbnailDrop");
-    const thumbnailPreview = document.getElementById("thumbnailPreview");
+    const imageInput = document.getElementById("imageInput");
+    const imageDrop = document.getElementById("imageDrop");
+    const imagePreview = document.getElementById("imagePreview");
 
     const attachmentInput = document.getElementById("attachmentInput");
     const attachmentDrop = document.getElementById("attachmentDrop");
     const attachmentList = document.getElementById("attachmentList");
-    const liveDateTime = document.getElementById("liveDateTime");
 
+    const liveDateTime = document.getElementById("liveDateTime");
     const notify = document.getElementById("notify");
 
-    let categories = [];
-    let announcements = [];
-    let currentThumbnail = { name: "", dataUrl: "" };
+    let agendas = [];
+    let currentImage = { name: "", dataUrl: "" };
     let currentAttachments = [];
 
     function showNotify(message) {
@@ -571,20 +565,6 @@
       showNotify.timer = window.setTimeout(function () {
         notify.classList.remove("show");
       }, 2300);
-    }
-
-    function updateLiveDateTime() {
-      const now = new Date();
-      const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-      const day = dayNames[now.getDay()];
-      const date = String(now.getDate()).padStart(2, "0");
-      const month = monthNames[now.getMonth()];
-      const year = now.getFullYear();
-      const hour = String(now.getHours()).padStart(2, "0");
-      const minute = String(now.getMinutes()).padStart(2, "0");
-      const second = String(now.getSeconds()).padStart(2, "0");
-      liveDateTime.textContent = day + ", " + date + " " + month + " " + year + " " + hour + ":" + minute + ":" + second;
     }
 
     function safeParse(raw) {
@@ -599,29 +579,6 @@
       return prefix + "-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
     }
 
-    function slugify(text) {
-      return String(text || "")
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "");
-    }
-
-    function normalizeCategory(item, index) {
-      if (typeof item === "string") {
-        return { id: "cat-" + index, name: item, slug: slugify(item), description: "", order: index };
-      }
-      return {
-        id: String(item && item.id ? item.id : makeId("cat")),
-        name: String(item && (item.name || item.label) ? (item.name || item.label) : "Kategori"),
-        slug: String(item && item.slug ? item.slug : slugify(item && (item.name || item.label) ? (item.name || item.label) : "kategori")),
-        description: String(item && item.description ? item.description : ""),
-        order: Number.isFinite(Number(item && item.order)) ? Number(item.order) : index
-      };
-    }
-
     function normalizeAttachment(att) {
       if (typeof att === "string") {
         return { id: makeId("att"), name: att, type: "", dataUrl: "" };
@@ -634,61 +591,35 @@
       };
     }
 
-    function normalizeAnnouncement(item, index) {
-      const categoriesList = Array.isArray(item && item.categories)
-        ? item.categories.map(String)
-        : [String(item && item.category ? item.category : "Umum")];
-
-      let status = String(item && item.status ? item.status : "published").toLowerCase();
-      if (status !== "draft") {
-        status = "published";
-      }
-
-      const content = String(item && (item.content || (Array.isArray(item.body) ? item.body.join("\n\n") : ""))
-        ? (item.content || (Array.isArray(item.body) ? item.body.join("\n\n") : ""))
-        : (item && item.summary ? item.summary : ""));
-
+    function normalizeAgenda(item, index) {
       return {
-        id: String(item && item.id ? item.id : "berita-" + (index + 1)),
-        title: String(item && item.title ? item.title : "Judul Berita"),
-        slug: String(item && item.slug ? item.slug : slugify(item && item.title ? item.title : "judul-berita")),
-        categories: categoriesList,
-        author: String(item && item.author ? item.author : "Super Admin"),
-        status: status,
-        date: String(item && item.date ? item.date : new Date().toISOString().slice(0, 10)),
-        thumbnailName: String(item && item.thumbnailName ? item.thumbnailName : ""),
-        thumbnailDataUrl: String(item && item.thumbnailDataUrl ? item.thumbnailDataUrl : ""),
-        content: content,
-        summary: String(item && item.summary ? item.summary : content.slice(0, 180)),
+        id: String(item && item.id ? item.id : "agenda-" + (index + 1)),
+        title: String(item && item.title ? item.title : "Judul Agenda"),
+        description: String(item && item.description ? item.description : ""),
+        startDate: String(item && item.startDate ? item.startDate : ""),
+        startTime: String(item && item.startTime ? item.startTime : ""),
+        endDate: String(item && item.endDate ? item.endDate : ""),
+        endTime: String(item && item.endTime ? item.endTime : ""),
+        location: String(item && item.location ? item.location : ""),
+        registrationLink: String(item && item.registrationLink ? item.registrationLink : ""),
+        imageName: String(item && item.imageName ? item.imageName : ""),
+        imageDataUrl: String(item && item.imageDataUrl ? item.imageDataUrl : ""),
         attachments: Array.isArray(item && item.attachments) ? item.attachments.map(normalizeAttachment) : [],
-        updatedAt: String(item && item.updatedAt ? item.updatedAt : new Date().toISOString().slice(0, 10))
+        status: String(item && item.status ? item.status : "active").toLowerCase() === "inactive" ? "inactive" : "active",
+        order: Number.isFinite(Number(item && item.order)) ? Number(item.order) : index,
+        updatedAt: String(item && item.updatedAt ? item.updatedAt : new Date().toISOString())
       };
     }
 
-    function defaultCategories() {
-      return [
-        { id: "cat-umum", name: "Umum", slug: "umum", description: "Berita umum dan pengumuman penting", order: 0 },
-        { id: "cat-akademik", name: "Akademik", slug: "akademik", description: "Berita terkait kegiatan akademik", order: 1 },
-        { id: "cat-prestasi", name: "Prestasi", slug: "prestasi", description: "Pencapaian dan prestasi", order: 2 }
-      ];
-    }
-
-    function loadCategories() {
-      const raw = localStorage.getItem(CATEGORY_STORAGE_KEY);
+    function loadAgendas() {
+      const raw = localStorage.getItem(AGENDA_STORAGE_KEY);
       const parsed = raw ? safeParse(raw) : null;
-      categories = Array.isArray(parsed) && parsed.length ? parsed.map(normalizeCategory) : defaultCategories();
-      localStorage.setItem(CATEGORY_STORAGE_KEY, JSON.stringify(categories));
+      agendas = Array.isArray(parsed) ? parsed.map(normalizeAgenda) : [];
+      localStorage.setItem(AGENDA_STORAGE_KEY, JSON.stringify(agendas));
     }
 
-    function loadAnnouncements() {
-      const raw = localStorage.getItem(ANNOUNCEMENT_STORAGE_KEY);
-      const parsed = raw ? safeParse(raw) : null;
-      announcements = Array.isArray(parsed) ? parsed.map(normalizeAnnouncement) : [];
-      localStorage.setItem(ANNOUNCEMENT_STORAGE_KEY, JSON.stringify(announcements));
-    }
-
-    function saveAnnouncements() {
-      localStorage.setItem(ANNOUNCEMENT_STORAGE_KEY, JSON.stringify(announcements));
+    function saveAgendas() {
+      localStorage.setItem(AGENDA_STORAGE_KEY, JSON.stringify(agendas));
     }
 
     function readAsDataUrl(file) {
@@ -700,26 +631,17 @@
       });
     }
 
-    function renderCategoryChecks() {
-      categoryChecks.innerHTML = categories
-        .slice()
-        .sort(function (a, b) { return a.order - b.order; })
-        .map(function (cat) {
-          return '<label class="check-item"><input type="checkbox" value="' + cat.name.replace(/"/g, "&quot;") + '"><span>' + cat.name + '</span></label>';
-        }).join("");
-    }
-
-    function renderThumbnail() {
-      if (!currentThumbnail.name && !currentThumbnail.dataUrl) {
-        thumbnailPreview.style.display = "none";
-        thumbnailPreview.innerHTML = "";
+    function renderImage() {
+      if (!currentImage.name && !currentImage.dataUrl) {
+        imagePreview.style.display = "none";
+        imagePreview.innerHTML = "";
         return;
       }
-      thumbnailPreview.style.display = "grid";
-      const img = currentThumbnail.dataUrl
-        ? '<img src="' + currentThumbnail.dataUrl + '" alt="Thumbnail berita">'
-        : '<img alt="Thumbnail berita" src="" style="display:none;">';
-      thumbnailPreview.innerHTML = img + '<strong>' + currentThumbnail.name + '</strong>';
+      imagePreview.style.display = "grid";
+      const img = currentImage.dataUrl
+        ? '<img src="' + currentImage.dataUrl + '" alt="Foto agenda">'
+        : '<img alt="Foto agenda" src="" style="display:none;">';
+      imagePreview.innerHTML = img + '<strong>' + currentImage.name + '</strong>';
     }
 
     function renderAttachments() {
@@ -729,69 +651,67 @@
       }
 
       attachmentList.innerHTML = currentAttachments.map(function (att, index) {
-        const tag = att.type && att.type.indexOf("pdf") >= 0 ? "PDF" : "FILE";
+        const label = att.type && att.type.indexOf("pdf") >= 0 ? "PDF" : "FILE";
+        const viewLink = att.dataUrl ? '<a href="' + att.dataUrl + '" target="_blank" rel="noopener" style="color:#1d4ed8;font-weight:700;text-decoration:none;">Lihat</a>' : '<span style="color:#6b7280;">Tidak bisa dipreview</span>';
         return '<div class="attachment-item">'
-          + '<span>[' + tag + '] ' + att.name + '</span>'
-          + '<button type="button" data-remove-index="' + String(index) + '">Hapus</button>'
+          + '<span>[' + label + '] ' + att.name + '</span>'
+          + '<div style="display:flex;gap:8px;align-items:center;">' + viewLink + '<button type="button" data-remove-index="' + String(index) + '">Hapus</button></div>'
           + '</div>';
       }).join("");
     }
 
-    function selectedCategories() {
-      return Array.from(categoryChecks.querySelectorAll('input[type="checkbox"]:checked')).map(function (el) {
-        return el.value;
-      });
-    }
-
     function fillEditData() {
       if (!editId) {
-        dateInput.value = new Date().toISOString().slice(0, 10);
+        const today = new Date().toISOString().slice(0, 10);
+        startDateInput.value = today;
+        endDateInput.value = today;
         return;
       }
 
-      const target = announcements.find(function (item) { return item.id === editId; });
+      const target = agendas.find(function (item) { return item.id === editId; });
       if (!target) {
-        showNotify("Data berita tidak ditemukan.");
+        showNotify("Data agenda tidak ditemukan.");
         window.setTimeout(function () {
-          window.location.href = "kelola-berita.html";
+          window.location.href = "manajemen-agenda.html";
         }, 700);
         return;
       }
 
-      pageTitle.textContent = "Edit Pengumuman";
-      pageDesc.textContent = "Data sebelumnya dimuat otomatis. Silakan update sesuai kebutuhan.";
+      pageTitle.textContent = "Edit Agenda";
+      pageDesc.textContent = "Ubah data agenda";
+      saveBtn.textContent = "Simpan Perubahan";
 
       titleInput.value = target.title;
-      slugInput.value = target.slug;
-      dateInput.value = target.date;
-      contentInput.value = target.content;
+      descriptionInput.value = target.description;
+      startDateInput.value = target.startDate;
+      startTimeInput.value = target.startTime;
+      endDateInput.value = target.endDate;
+      endTimeInput.value = target.endTime;
+      locationInput.value = target.location;
+      registrationLinkInput.value = target.registrationLink;
       statusInput.value = target.status;
-      currentThumbnail = {
-        name: target.thumbnailName || "",
-        dataUrl: target.thumbnailDataUrl || ""
+      orderInput.value = String(target.order);
+      currentImage = {
+        name: target.imageName || "",
+        dataUrl: target.imageDataUrl || ""
       };
       currentAttachments = target.attachments.slice();
 
-      const set = new Set(target.categories.map(String));
-      categoryChecks.querySelectorAll('input[type="checkbox"]').forEach(function (box) {
-        box.checked = set.has(box.value);
-      });
-
-      renderThumbnail();
+      renderImage();
       renderAttachments();
     }
 
-    async function handleThumbnailChange(files) {
+    async function handleImageChange(files) {
       if (!files || !files.length) {
         return;
       }
       const file = files[0];
       const dataUrl = await readAsDataUrl(file);
-      currentThumbnail = {
+      currentImage = {
         name: file.name,
         dataUrl: dataUrl
       };
-      renderThumbnail();
+      renderImage();
     }
 
     async function handleAttachmentAdd(files) {
@@ -817,74 +737,79 @@
       renderAttachments();
     }
 
-    function buildSummary(content) {
-      const text = content.replace(/\s+/g, " ").trim();
-      return text.length > 180 ? text.slice(0, 180) + "..." : text;
+    function updateLiveDateTime() {
+      const now = new Date();
+      const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+      const day = dayNames[now.getDay()];
+      const date = String(now.getDate()).padStart(2, "0");
+      const month = monthNames[now.getMonth()];
+      const year = now.getFullYear();
+      const hour = String(now.getHours()).padStart(2, "0");
+      const minute = String(now.getMinutes()).padStart(2, "0");
+      const second = String(now.getSeconds()).padStart(2, "0");
+      liveDateTime.textContent = day + ", " + date + " " + month + " " + year + " " + hour + ":" + minute + ":" + second;
     }
 
-    async function saveNews(event) {
+    function saveAgenda(event) {
       event.preventDefault();
 
       const title = titleInput.value.trim();
-      const content = contentInput.value.trim();
-      const categoriesSelected = selectedCategories();
+      const startDate = startDateInput.value;
+      const startTime = startTimeInput.value;
 
-      if (!title || !content) {
-        showNotify("Judul dan konten wajib diisi.");
-        return;
-      }
-
-      if (!categoriesSelected.length) {
-        showNotify("Pilih minimal 1 kategori.");
+      if (!title || !startDate || !startTime) {
+        showNotify("Judul, tanggal mulai, dan waktu mulai wajib diisi.");
         return;
       }
 
       const payload = {
-        id: editId || makeId("berita"),
+        id: editId || makeId("agenda"),
         title: title,
-        slug: slugInput.value.trim() || slugify(title),
-        categories: categoriesSelected,
-        category: categoriesSelected[0],
-        author: "Super Admin",
-        status: statusInput.value === "draft" ? "draft" : "published",
-        date: dateInput.value || new Date().toISOString().slice(0, 10),
-        thumbnailName: currentThumbnail.name || "",
-        thumbnailDataUrl: currentThumbnail.dataUrl || "",
-        content: content,
-        summary: buildSummary(content),
+        description: descriptionInput.value.trim(),
+        startDate: startDate,
+        startTime: startTime,
+        endDate: endDateInput.value,
+        endTime: endTimeInput.value,
+        location: locationInput.value.trim(),
+        registrationLink: registrationLinkInput.value.trim(),
+        imageName: currentImage.name || "",
+        imageDataUrl: currentImage.dataUrl || "",
         attachments: currentAttachments.slice(),
-        updatedAt: new Date().toISOString().slice(0, 10)
+        status: statusInput.value === "active" ? "active" : "inactive",
+        order: Number.isFinite(Number(orderInput.value)) ? Number(orderInput.value) : 0,
+        updatedAt: new Date().toISOString()
       };
 
-      const existingIndex = announcements.findIndex(function (item) { return item.id === payload.id; });
+      const existingIndex = agendas.findIndex(function (item) { return item.id === payload.id; });
       if (existingIndex >= 0) {
-        announcements[existingIndex] = payload;
-        showNotify("Pengumuman berhasil diperbarui.");
+        agendas[existingIndex] = payload;
+        showNotify("Agenda berhasil diperbarui.");
       } else {
-        announcements.push(payload);
-        showNotify("Pengumuman berhasil ditambahkan.");
+        agendas.push(payload);
+        showNotify("Agenda berhasil ditambahkan.");
       }
 
-      saveAnnouncements();
+      saveAgendas();
       window.setTimeout(function () {
-        window.location.href = "kelola-berita.html";
+        window.location.href = "manajemen-agenda.html";
       }, 500);
     }
 
-    thumbnailDrop.addEventListener("click", function () {
-      thumbnailInput.click();
+    imageDrop.addEventListener("click", function () {
+      imageInput.click();
     });
 
-    thumbnailDrop.addEventListener("keydown", function (event) {
+    imageDrop.addEventListener("keydown", function (event) {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        thumbnailInput.click();
+        imageInput.click();
       }
     });
 
-    thumbnailInput.addEventListener("change", function () {
-      handleThumbnailChange(Array.from(thumbnailInput.files || [])).then(function () {
-        thumbnailInput.value = "";
+    imageInput.addEventListener("change", function () {
+      handleImageChange(Array.from(imageInput.files || [])).then(function () {
+        imageInput.value = "";
       });
     });
 
@@ -918,11 +843,9 @@
       renderAttachments();
     });
 
-    newsForm.addEventListener("submit", saveNews);
+    agendaForm.addEventListener("submit", saveAgenda);
 
-    loadCategories();
-    loadAnnouncements();
-    renderCategoryChecks();
+    loadAgendas();
     renderAttachments();
     fillEditData();
     updateLiveDateTime();
