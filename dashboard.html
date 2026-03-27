@@ -584,8 +584,8 @@
         <div class="group-items" id="contentMenu"></div>
       </div>
 
-      <div class="menu-group">
-        <button class="group-toggle" type="button">Keanggotaan <span>+</span></button>
+      <div class="menu-group open">
+        <button class="group-toggle" type="button">Keanggotaan <span>-</span></button>
         <div class="group-items" id="anggotaMenu"></div>
       </div>
 
@@ -804,13 +804,11 @@
 
     function renderMemberMenu(currentRole) {
       const baseItems = [
-        "Data Anggota",
-        "Permintaan Status Aktif / Nonaktif",
-        // "Profil Anggota"
+        { label: "Data Anggota", href: "manajemen-anggota.html" }
       ];
 
       const extraSuperAdmin = [
-        "Kelola Data Admin",
+        { label: "Kelola Data Admin", href: "#" },
         // "Audit Perubahan Role"
       ];
 
@@ -821,7 +819,7 @@
       anggotaMenu.innerHTML = list
         .map(function (item, index) {
           const activeClass = index === 0 ? " active" : "";
-          return '<a class="menu-link' + activeClass + '" href="#">' + item + "</a>";
+          return '<a class="menu-link' + activeClass + '" href="' + item.href + '">' + item.label + "</a>";
         })
         .join("");
     }

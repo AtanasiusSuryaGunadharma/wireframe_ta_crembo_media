@@ -554,6 +554,10 @@
                 <input id="memberPhone" type="tel" placeholder="08xx-xxxx-xxxx" required>
               </div>
               <div class="field">
+                <label for="memberAddress">Alamat</label>
+                <textarea id="memberAddress" placeholder="Alamat lengkap anggota..." required></textarea>
+              </div>
+              <div class="field">
                 <label for="memberRole">Role Utama</label>
                 <select id="memberRole" disabled aria-readonly="true">
                   <option>Anggota Multimedia</option>
@@ -665,6 +669,7 @@
   <script>
     const PROFILE_STORAGE_KEY = "crembo-member-profile";
     const INACTIVE_REQUEST_STORAGE_KEY = "crembo-member-inactive-request";
+    const STATUS_REQUEST_STORAGE_KEY = "crembo-member-status-requests";
 
     const sidebar = document.getElementById("sidebar");
     const mobileMenuBtn = document.getElementById("mobileMenuBtn");
@@ -691,6 +696,7 @@
     const fullName = document.getElementById("fullName");
     const memberEmail = document.getElementById("memberEmail");
     const memberPhone = document.getElementById("memberPhone");
+    const memberAddress = document.getElementById("memberAddress");
     const memberRole = document.getElementById("memberRole");
     const profileForm = document.getElementById("profileForm");
 
@@ -740,6 +746,7 @@
         fullName: loginName,
         email: "anggota.crembo@example.com",
         phone: "08xx-xxxx-xxxx",
+        address: "Alamat belum diisi",
         role: "Anggota Multimedia"
       };
     }
@@ -755,6 +762,7 @@
           fullName: parsed.fullName || defaultProfile().fullName,
           email: parsed.email || defaultProfile().email,
           phone: parsed.phone || defaultProfile().phone,
+          address: parsed.address || defaultProfile().address,
           role: parsed.role || defaultProfile().role
         };
       } catch (error) {
@@ -769,6 +777,7 @@
       fullName.value = profile.fullName;
       memberEmail.value = profile.email;
       memberPhone.value = profile.phone;
+      memberAddress.value = profile.address;
       memberRole.value = profile.role;
     }
 
@@ -779,6 +788,7 @@
         fullName: fullName.value.trim(),
         email: memberEmail.value.trim(),
         phone: memberPhone.value.trim(),
+        address: memberAddress.value.trim(),
         role: currentProfile.role
       };
       localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(payload));
@@ -847,6 +857,7 @@
 
     function submitInactiveRequest(event) {
       event.preventDefault();
+      const currentProfile = readProfile();
       const payload = {
         reason: inactiveReason.value,
         effectiveDate: inactiveDate.value,
@@ -854,7 +865,32 @@
         status: "Menunggu Review Admin",
         submittedDate: new Date().toISOString().slice(0, 10)
       };
+
+      const rawList = localStorage.getItem(STATUS_REQUEST_STORAGE_KEY);
+      let requestList = [];
+      if (rawList) {
+        try {
+          const parsedList = JSON.parse(rawList);
+          requestList = Array.isArray(parsedList) ? parsedList : [];
+        } catch (error) {
+          requestList = [];
+        }
+      }
+
+      requestList.push({
+        id: "req-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8),
+        memberId: "",
+        memberName: currentProfile.fullName,
+        requestType: "Nonaktif",
+        reason: payload.reason,
+        note: payload.note,
+        effectiveDate: payload.effectiveDate,
+        submittedDate: payload.submittedDate,
+        status: payload.status
+      });
+
       localStorage.setItem(INACTIVE_REQUEST_STORAGE_KEY, JSON.stringify(payload));
+      localStorage.setItem(STATUS_REQUEST_STORAGE_KEY, JSON.stringify(requestList));
       renderMembershipStatus();
       inactiveRequestForm.reset();
       showNotify("Pengajuan status nonaktif berhasil dikirim.");
