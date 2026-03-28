@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kelola Tentang Crembo - Crembo Media</title>
+  <title>Kelola Embed YouTube - Crembo Media</title>
   <style>
     :root {
       --bg: #ececec;
@@ -276,9 +276,7 @@
     }
 
     input[type="text"],
-    input[type="number"],
-    input[type="file"],
-    textarea {
+    input[type="number"] {
       width: 100%;
       border: 1px solid #bdbdbd;
       border-radius: 10px;
@@ -288,9 +286,18 @@
       background: #fff;
     }
 
-    textarea {
-      min-height: 130px;
-      resize: vertical;
+    .check-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.85rem;
+      width: fit-content;
+    }
+
+    .check-row input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+      accent-color: #295fc2;
     }
 
     .btn {
@@ -334,12 +341,6 @@
       flex-wrap: wrap;
     }
 
-    .upload-meta {
-      margin-top: 6px;
-      font-size: 0.8rem;
-      color: #5f5f5f;
-    }
-
     .table-wrap {
       overflow: auto;
       border: 1px solid #cdcdcd;
@@ -367,21 +368,6 @@
       font-size: 0.76rem;
       text-transform: uppercase;
       letter-spacing: 0.02em;
-    }
-
-    .preview-box {
-      width: 140px;
-      height: 80px;
-      border: 1px dashed #999;
-      background-size: cover;
-      background-position: center;
-      background-color: #f4f4f4;
-      display: grid;
-      place-items: center;
-      font-size: 0.68rem;
-      color: #666;
-      text-align: center;
-      padding: 4px;
     }
 
     .drag-handle {
@@ -439,6 +425,44 @@
       color: #616161;
     }
 
+    .url-preview {
+      margin-top: 6px;
+      padding: 8px;
+      border: 1px solid #d4d4d4;
+      border-radius: 8px;
+      background: #f9f9f9;
+      font-size: 0.8rem;
+      color: #505050;
+      word-break: break-all;
+    }
+
+    .video-thumbnail {
+      display: block;
+      width: 100%;
+      max-width: 160px;
+      height: auto;
+      border-radius: 8px;
+      background: #000;
+      border: 1px solid #d1d1d1;
+    }
+
+    .preview-cell {
+      text-align: center;
+      padding: 6px !important;
+    }
+
+    .preview-placeholder {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 120px;
+      height: 68px;
+      border-radius: 6px;
+      background: #1a1a1a;
+      color: #999;
+      font-size: 0.8rem;
+    }
+
     @media (max-width: 1080px) {
       .layout { grid-template-columns: 1fr; }
       .sidebar { position: static; height: auto; }
@@ -447,7 +471,8 @@
 
     @media (max-width: 760px) {
       .main { padding: 10px; }
-      .header,
+      .dashboard-headline-bar,
+      .topbar,
       .panel-head,
       .panel-body { padding: 10px; }
 
@@ -511,11 +536,6 @@
         letter-spacing: 0.02em;
       }
 
-      .preview-box {
-        width: 100%;
-        max-width: 200px;
-      }
-
       .action-stack {
         width: 100%;
       }
@@ -531,15 +551,15 @@
     <aside class="sidebar" aria-label="Sidebar kelola konten utama website">
       <div class="brand">
         <h1>Crembo Media Panel</h1>
-        <p>Modul kelola section Tentang Crembo</p>
+        <p>Modul kelola embed YouTube</p>
       </div>
 
       <div class="menu-group">
         <button class="group-toggle" type="button">Konten Utama Website <span>-</span></button>
         <div class="group-items">
           <a class="menu-link" href="kelola-carousel-home.html">Kelola Carousel Home</a>
-          <a class="menu-link active" href="kelola-tentang-crembo.html">Kelola Konten Tentang Crembo</a>
-          <a class="menu-link" href="kelola-embed-youtube.html">Kelola Embed YouTube</a>
+          <a class="menu-link" href="kelola-tentang-crembo.html">Kelola Konten Tentang Crembo</a>
+          <a class="menu-link active" href="kelola-embed-youtube.html">Kelola Embed YouTube</a>
           <a class="menu-link" href="#">Kelola Embed Google Maps</a>
           <a class="menu-link" href="#">Kelola Embed Instagram</a>
         </div>
@@ -552,8 +572,8 @@
     </aside>
 
     <main class="main">
-      <header class="dashboard-headline-bar" aria-label="Header kelola tentang crembo waktu berjalan">
-        <h1>Kelola Tentang Crembo</h1>
+      <header class="dashboard-headline-bar" aria-label="Header kelola embed youtube waktu berjalan">
+        <h1>Kelola Embed YouTube</h1>
         <div class="head-meta">
           <span id="liveDateTime">-</span>
           <a class="world-link" href="home.html?session=active" title="Lihat Home (tetap login)">
@@ -569,103 +589,122 @@
 
       <header class="topbar">
         <div>
-          <h2 class="headline">Kelola Konten Profil Crembo</h2>
-          <p class="subhead">Atur deskripsi profil, tombol Pelajari Lebih Lanjut, dan slideshow foto section Tentang Crembo di halaman home.</p>
+          <h2 class="headline">Kelola Video YouTube Section Home</h2>
+          <p class="subhead">Admin dan Super Admin dapat menambah, edit, dan hapus video embed YouTube di section home.</p>
         </div>
         <span id="roleChip" class="role-chip">Role: -</span>
       </header>
 
-      <section class="panel" aria-label="Form pengaturan section tentang crembo">
+      <section class="panel" aria-label="Form kelola embed youtube">
         <header class="panel-head">
-          <h2>Pengaturan Konten Teks dan Tombol</h2>
+          <h2 id="formTitle">Tambah Video YouTube Baru</h2>
         </header>
         <div class="panel-body">
           <div id="statusMessage" class="status" role="status" aria-live="polite"></div>
 
-          <form id="aboutForm">
+          <form id="youtubeForm">
+            <input id="videoId" type="hidden">
+
             <div class="form-grid">
               <div class="field full">
-                <label for="aboutDescription">Deskripsi Profil</label>
-                <textarea id="aboutDescription" placeholder="Isi deskripsi profil Crembo yang tampil di home" required></textarea>
+                <label for="videoTitle">Judul Video</label>
+                <input id="videoTitle" type="text" required placeholder="Contoh: Embed YouTube Crembo Media">
+              </div>
+
+              <div class="field full">
+                <label for="videoUrl">URL YouTube atau Embed Link</label>
+                <input id="videoUrl" type="text" required placeholder="https://www.youtube.com/watch?v=... atau https://www.youtube.com/embed/...">
+                <div class="url-preview" id="urlPreview" style="display: none;"></div>
               </div>
 
               <div class="field">
-                <label for="aboutButtonText">Teks Tombol</label>
-                <input id="aboutButtonText" type="text" placeholder="Contoh: Pelajari Lebih Lanjut" required>
+                <label for="videoOrder">Urutan Tampil</label>
+                <input id="videoOrder" type="number" min="0" step="1" value="0">
               </div>
 
               <div class="field">
-                <label for="aboutButtonLink">Link Tombol</label>
-                <input id="aboutButtonLink" type="text" placeholder="Contoh: profil.html atau https://example.com" required>
-              </div>
-
-              <div class="field">
-                <label for="aboutAutoSeconds">Interval Auto Slide (detik)</label>
-                <input id="aboutAutoSeconds" type="number" min="2" max="30" step="1" value="5" required>
+                <label for="isActive">Status</label>
+                <label class="check-row"><input id="isActive" type="checkbox" checked> Aktifkan video ini</label>
               </div>
             </div>
 
             <div class="form-actions">
-              <button class="btn primary" type="submit">Simpan Pengaturan Tentang Crembo</button>
+              <button id="submitBtn" class="btn primary" type="submit">Simpan Video</button>
+              <button id="cancelEditBtn" class="btn ghost" type="button" hidden>Batal Edit</button>
+              <button id="resetFormBtn" class="btn ghost" type="button">Reset Form</button>
             </div>
           </form>
         </div>
       </section>
 
-      <section class="panel" aria-label="Kelola foto slideshow tentang crembo">
+      <section class="panel" aria-label="Daftar video youtube">
         <header class="panel-head">
-          <h2>Kelola Foto Slideshow</h2>
+          <h2>Daftar Video YouTube Home</h2>
         </header>
         <div class="panel-body">
-          <div class="field full">
-            <label for="aboutImagesInput">Upload Foto/Gambar (bisa lebih dari satu)</label>
-            <input id="aboutImagesInput" type="file" accept="image/*" multiple>
-            <p class="upload-meta">Urutan foto bisa diubah dengan drag and drop pada daftar di bawah. Foto nonaktif tidak akan tampil di home.</p>
-          </div>
-
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Urut</th>
                   <th>Preview</th>
-                  <th>Status</th>
+                  <th>Urut</th>
+                  <th>Judul</th>
+                  <th>URL</th>
                   <th>Urutan</th>
+                  <th>Status</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
-              <tbody id="imageRows"></tbody>
+              <tbody id="videoRows"></tbody>
             </table>
           </div>
-          <p id="emptyState" class="empty-note" hidden>Belum ada gambar. Upload gambar untuk menampilkan slideshow di home.</p>
+          <p id="emptyState" class="empty-note" hidden>Belum ada video tersimpan.</p>
         </div>
       </section>
     </main>
   </div>
 
   <script>
-    const ABOUT_STORAGE_KEY = "crembo-home-about-content";
-    const DEFAULT_ABOUT_CONTENT = {
-      description: "Ringkasan profil organisasi, visi pelayanan multimedia, serta peran Crembo dalam mendukung kegiatan liturgi dan agenda komunitas.",
-      buttonText: "Pelajari Lebih Lanjut",
-      buttonLink: "profil.html",
-      autoSeconds: 5,
-      images: []
-    };
+    const STORAGE_KEY = "crembo-home-youtube-videos";
+    const DEFAULT_VIDEOS = [];
 
     const roleChip = document.getElementById("roleChip");
     const liveDateTime = document.getElementById("liveDateTime");
-    const aboutForm = document.getElementById("aboutForm");
-    const aboutDescription = document.getElementById("aboutDescription");
-    const aboutButtonText = document.getElementById("aboutButtonText");
-    const aboutButtonLink = document.getElementById("aboutButtonLink");
-    const aboutAutoSeconds = document.getElementById("aboutAutoSeconds");
+    const formTitle = document.getElementById("formTitle");
+    const youtubeForm = document.getElementById("youtubeForm");
+    const videoId = document.getElementById("videoId");
+    const videoTitle = document.getElementById("videoTitle");
+    const videoUrl = document.getElementById("videoUrl");
+    const videoOrder = document.getElementById("videoOrder");
+    const isActive = document.getElementById("isActive");
+    const submitBtn = document.getElementById("submitBtn");
+    const cancelEditBtn = document.getElementById("cancelEditBtn");
+    const resetFormBtn = document.getElementById("resetFormBtn");
     const statusMessage = document.getElementById("statusMessage");
-    const aboutImagesInput = document.getElementById("aboutImagesInput");
-    const imageRows = document.getElementById("imageRows");
+    const videoRows = document.getElementById("videoRows");
     const emptyState = document.getElementById("emptyState");
+    const urlPreview = document.getElementById("urlPreview");
 
-    let draggingImageId = "";
+    let draggingVideoId = "";
+
+    function extractYouTubeVideoId(url) {
+      if (!url) return "";
+      
+      // Format: https://www.youtube.com/watch?v=VIDEO_ID
+      const match1 = url.match(/(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/)([^&\/?\s]+)/);
+      if (match1) return match1[1];
+      
+      // Format: https://youtu.be/VIDEO_ID
+      const match2 = url.match(/youtu\.be\/([^?&\s]+)/);
+      if (match2) return match2[1];
+      
+      return "";
+    }
+
+    function getYouTubeThumbnail(videoId) {
+      if (!videoId) return "";
+      return "https://img.youtube.com/vi/" + encodeURIComponent(videoId) + "/0.jpg";
+    }
 
     function getCurrentRole() {
       const params = new URLSearchParams(window.location.search);
@@ -704,47 +743,43 @@
         .replace(/'/g, "&#039;");
     }
 
-    function normalizeImage(item, index) {
+    function normalizeVideo(item) {
       return {
-        id: item && item.id ? String(item.id) : "about-img-" + Date.now() + "-" + index,
+        id: item && item.id ? String(item.id) : "video-" + Date.now(),
+        title: item && item.title ? String(item.title) : "",
         url: item && item.url ? String(item.url) : "",
-        order: Number(item && item.order ? item.order : index + 1),
+        order: Number(item && item.order ? item.order : 0),
         active: item && item.active !== false
       };
     }
 
-    function normalizeAboutContent(data) {
-      const source = data && typeof data === "object" ? data : {};
-      const imageList = Array.isArray(source.images) ? source.images : [];
-      return {
-        description: source.description ? String(source.description) : DEFAULT_ABOUT_CONTENT.description,
-        buttonText: source.buttonText ? String(source.buttonText) : DEFAULT_ABOUT_CONTENT.buttonText,
-        buttonLink: source.buttonLink ? String(source.buttonLink) : DEFAULT_ABOUT_CONTENT.buttonLink,
-        autoSeconds: Math.min(30, Math.max(2, Number(source.autoSeconds || DEFAULT_ABOUT_CONTENT.autoSeconds))),
-        images: imageList.map(normalizeImage)
-      };
-    }
-
-    function readAboutContent() {
+    function readVideos() {
       try {
-        const raw = localStorage.getItem(ABOUT_STORAGE_KEY);
+        const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) {
-          return normalizeAboutContent(DEFAULT_ABOUT_CONTENT);
+          return DEFAULT_VIDEOS.slice();
         }
 
         const parsed = JSON.parse(raw);
-        return normalizeAboutContent(parsed);
+        if (!Array.isArray(parsed) || !parsed.length) {
+          return DEFAULT_VIDEOS.slice();
+        }
+
+        return parsed.map(normalizeVideo);
       } catch (error) {
-        return normalizeAboutContent(DEFAULT_ABOUT_CONTENT);
+        return DEFAULT_VIDEOS.slice();
       }
     }
 
-    function writeAboutContent(payload) {
-      localStorage.setItem(ABOUT_STORAGE_KEY, JSON.stringify(payload));
+    function writeVideos(videos) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(videos));
     }
 
-    function sortImages(images) {
-      return images.slice().sort(function (a, b) {
+    function sortVideos(videos) {
+      return videos.slice().sort(function (a, b) {
+        if (a.order === b.order) {
+          return a.title.localeCompare(b.title, "id", { sensitivity: "base" });
+        }
         return a.order - b.order;
       });
     }
@@ -759,78 +794,67 @@
       statusMessage.textContent = "";
     }
 
-    function fillForm() {
-      const content = readAboutContent();
-      aboutDescription.value = content.description;
-      aboutButtonText.value = content.buttonText;
-      aboutButtonLink.value = content.buttonLink;
-      aboutAutoSeconds.value = String(content.autoSeconds);
-    }
-
-    function saveConfig(event) {
-      event.preventDefault();
-      const current = readAboutContent();
-
-      const payload = {
-        description: aboutDescription.value.trim() || DEFAULT_ABOUT_CONTENT.description,
-        buttonText: aboutButtonText.value.trim() || DEFAULT_ABOUT_CONTENT.buttonText,
-        buttonLink: aboutButtonLink.value.trim() || DEFAULT_ABOUT_CONTENT.buttonLink,
-        autoSeconds: Math.min(30, Math.max(2, Number(aboutAutoSeconds.value || DEFAULT_ABOUT_CONTENT.autoSeconds))),
-        images: current.images
-      };
-
-      writeAboutContent(payload);
-      fillForm();
-      setStatus("Pengaturan section Tentang Crembo berhasil disimpan.", "ok");
+    function resetForm() {
+      youtubeForm.reset();
+      videoId.value = "";
+      formTitle.textContent = "Tambah Video YouTube Baru";
+      submitBtn.textContent = "Simpan Video";
+      cancelEditBtn.hidden = true;
+      videoOrder.value = "0";
+      isActive.checked = true;
+      urlPreview.style.display = "none";
+      urlPreview.textContent = "";
+      clearStatus();
     }
 
     function renderRows() {
-      const content = readAboutContent();
-      const images = sortImages(content.images);
-      imageRows.innerHTML = "";
+      const videos = sortVideos(readVideos());
+      videoRows.innerHTML = "";
 
-      if (!images.length) {
+      if (!videos.length) {
         emptyState.hidden = false;
         return;
       }
 
       emptyState.hidden = true;
 
-      images.forEach(function (item) {
+      videos.forEach(function (video) {
         const tr = document.createElement("tr");
         tr.setAttribute("draggable", "true");
-        tr.setAttribute("data-image-id", item.id);
+        tr.setAttribute("data-video-id", video.id);
 
-        const previewStyle = item.url
-          ? ' style="background-image:url(\'' + escapeHtml(item.url) + '\')"'
-          : "";
+        const videoId = extractYouTubeVideoId(video.url);
+        const thumbnailUrl = getYouTubeThumbnail(videoId);
+        const previewHtml = videoId ? '<img src="' + thumbnailUrl + '" alt="' + escapeHtml(video.title || "Video") + '" class="video-thumbnail">' : '<div class="preview-placeholder">No Preview</div>';
 
         tr.innerHTML =
+          '<td data-label="Preview" class="preview-cell">' + previewHtml + '</td>' +
           '<td data-label="Urut"><span class="drag-handle" title="Drag untuk ubah urutan">::</span></td>' +
-          '<td data-label="Preview"><div class="preview-box"' + previewStyle + '>' + (item.url ? "" : "Tanpa Gambar") + '</div></td>' +
-          '<td data-label="Status"><span class="state-pill' + (item.active ? ' active' : '') + '">' + (item.active ? 'Aktif' : 'Nonaktif') + '</span></td>' +
-          '<td data-label="Urutan">' + escapeHtml(String(item.order)) + '</td>' +
+          '<td data-label="Judul"><strong>' + escapeHtml(video.title || "-") + '</strong></td>' +
+          '<td data-label="URL"><a href="' + escapeHtml(video.url || "#") + '" target="_blank" rel="noopener">' + escapeHtml((video.url || "-").substring(0, 50)) + '</a></td>' +
+          '<td data-label="Urutan">' + escapeHtml(String(video.order)) + '</td>' +
+          '<td data-label="Status"><span class="state-pill' + (video.active ? ' active' : '') + '">' + (video.active ? 'Aktif' : 'Nonaktif') + '</span></td>' +
           '<td data-label="Aksi"><div class="action-stack">' +
-            '<button class="btn ghost" type="button" data-toggle-id="' + escapeHtml(item.id) + '">' + (item.active ? 'Nonaktifkan' : 'Aktifkan') + '</button>' +
-            '<button class="btn warn" type="button" data-delete-id="' + escapeHtml(item.id) + '">Hapus</button>' +
+            '<button class="btn ghost" type="button" data-edit-id="' + escapeHtml(video.id) + '">Edit</button>' +
+            '<button class="btn warn" type="button" data-delete-id="' + escapeHtml(video.id) + '">Hapus</button>' +
           '</div></td>';
 
         tr.addEventListener("dragstart", function () {
-          draggingImageId = item.id;
+          draggingVideoId = video.id;
           tr.classList.add("dragging");
         });
 
         tr.addEventListener("dragend", function () {
-          draggingImageId = "";
+          draggingVideoId = "";
           tr.classList.remove("dragging");
-          imageRows.querySelectorAll("tr").forEach(function (row) {
+          videoRows.querySelectorAll("tr").forEach(function (row) {
             row.classList.remove("drop-target");
           });
         });
 
         tr.addEventListener("dragover", function (event) {
           event.preventDefault();
-          if (!draggingImageId || draggingImageId === item.id) {
+          if (!draggingVideoId || draggingVideoId === video.id) {
             return;
           }
           tr.classList.add("drop-target");
@@ -843,160 +867,144 @@
         tr.addEventListener("drop", function (event) {
           event.preventDefault();
           tr.classList.remove("drop-target");
-          if (!draggingImageId || draggingImageId === item.id) {
+          if (!draggingVideoId || draggingVideoId === video.id) {
             return;
           }
-          reorderImages(draggingImageId, item.id);
+          reorderVideos(draggingVideoId, video.id);
         });
 
-        imageRows.appendChild(tr);
+        videoRows.appendChild(tr);
       });
     }
 
-    function reorderImages(sourceId, targetId) {
-      const content = readAboutContent();
-      const images = sortImages(content.images);
-      const sourceIndex = images.findIndex(function (item) { return item.id === sourceId; });
-      const targetIndex = images.findIndex(function (item) { return item.id === targetId; });
+    function reorderVideos(sourceId, targetId) {
+      const videos = sortVideos(readVideos());
+      const sourceIndex = videos.findIndex(function (item) { return item.id === sourceId; });
+      const targetIndex = videos.findIndex(function (item) { return item.id === targetId; });
 
       if (sourceIndex < 0 || targetIndex < 0) {
         return;
       }
 
-      const moved = images.splice(sourceIndex, 1)[0];
-      images.splice(targetIndex, 0, moved);
+      const moved = videos.splice(sourceIndex, 1)[0];
+      videos.splice(targetIndex, 0, moved);
 
-      images.forEach(function (item, index) {
+      videos.forEach(function (item, index) {
         item.order = index + 1;
       });
 
-      content.images = images;
-      writeAboutContent(content);
+      writeVideos(videos);
       renderRows();
-      setStatus("Urutan gambar berhasil diperbarui.", "ok");
+      setStatus("Urutan video berhasil diperbarui dengan drag and drop.", "ok");
     }
 
-    function toggleImage(id) {
-      const content = readAboutContent();
-      const target = content.images.find(function (item) {
-        return item.id === id;
-      });
+    function saveVideo(event) {
+      event.preventDefault();
 
-      if (!target) {
+      const title = videoTitle.value.trim();
+      const url = videoUrl.value.trim();
+
+      if (!title) {
+        setStatus("Judul video wajib diisi.", "warn");
         return;
       }
 
-      target.active = !target.active;
-      writeAboutContent(content);
+      if (!url) {
+        setStatus("URL YouTube wajib diisi.", "warn");
+        return;
+      }
+
+      const id = videoId.value || ("video-" + Date.now());
+      const payload = normalizeVideo({
+        id: id,
+        title: title,
+        url: url,
+        order: Number(videoOrder.value || 0),
+        active: isActive.checked
+      });
+
+      const videos = readVideos();
+      const idx = videos.findIndex(function (item) {
+        return item.id === id;
+      });
+
+      if (idx >= 0) {
+        videos[idx] = payload;
+        setStatus("Video berhasil diupdate.", "ok");
+      } else {
+        videos.push(payload);
+        setStatus("Video berhasil ditambahkan.", "ok");
+      }
+
+      writeVideos(videos);
       renderRows();
-      setStatus("Status gambar berhasil diubah.", "ok");
+      resetForm();
     }
 
-    function deleteImage(id) {
-      const ok = window.confirm("Hapus gambar ini? Tindakan ini tidak dapat dibatalkan.");
+    function editVideo(id) {
+      const videos = readVideos();
+      const item = videos.find(function (video) {
+        return video.id === id;
+      });
+
+      if (!item) {
+        return;
+      }
+
+      videoId.value = item.id;
+      videoTitle.value = item.title;
+      videoUrl.value = item.url;
+      videoOrder.value = String(item.order);
+      isActive.checked = !!item.active;
+      showUrlPreview(item.url);
+
+      formTitle.textContent = "Edit Video YouTube";
+      submitBtn.textContent = "Update Video";
+      cancelEditBtn.hidden = false;
+      setStatus("Mode edit aktif. Ubah data video lalu klik Update Video.", "warn");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deleteVideo(id) {
+      const ok = window.confirm("Hapus video ini? Tindakan ini tidak dapat dibatalkan.");
       if (!ok) {
         return;
       }
 
-      const content = readAboutContent();
-      content.images = content.images.filter(function (item) {
+      const videos = readVideos().filter(function (item) {
         return item.id !== id;
       });
-
-      const sorted = sortImages(content.images);
-      sorted.forEach(function (item, index) {
-        item.order = index + 1;
-      });
-      content.images = sorted;
-
-      writeAboutContent(content);
+      writeVideos(videos);
       renderRows();
-      setStatus("Gambar berhasil dihapus.", "ok");
+      resetForm();
+      setStatus("Video berhasil dihapus.", "ok");
     }
 
-    function readFileAsDataUrl(file) {
-      return new Promise(function (resolve, reject) {
-        const reader = new FileReader();
-        reader.onload = function () {
-          resolve(String(reader.result || ""));
-        };
-        reader.onerror = function () {
-          reject(new Error("Gagal membaca file gambar."));
-        };
-        reader.readAsDataURL(file);
-      });
+    function showUrlPreview(url) {
+      if (!url) {
+        urlPreview.style.display = "none";
+        urlPreview.innerHTML = "";
+        return;
+      }
+
+      const videoId = extractYouTubeVideoId(url);
+      const isValidYouTube = url.includes("youtube.com") || url.includes("youtu.be");
+
+      if (isValidYouTube && videoId) {
+        const thumbnailUrl = getYouTubeThumbnail(videoId);
+        urlPreview.innerHTML = '<img src="' + thumbnailUrl + '" alt="Preview" class="video-thumbnail" style="max-width: 100%; margin-bottom: 6px; display: block; margin-left: auto; margin-right: auto;">' +
+          '<div style="color: #116d3f; font-weight: 600;">✓ URL YouTube valid</div>';
+        urlPreview.style.color = "#116d3f";
+      } else if (isValidYouTube) {
+        urlPreview.innerHTML = '<div style="color: #9b5b00; font-weight: 600;">⚠ Format URL tidak terkenali</div>';
+        urlPreview.style.color = "#9b5b00";
+      } else {
+        urlPreview.innerHTML = '<div style="color: #9b5b00; font-weight: 600;">⚠ Pastikan URL dari YouTube</div>';
+        urlPreview.style.color = "#9b5b00";
+      }
+
+      urlPreview.style.display = "block";
     }
-
-    async function handleUpload() {
-      const files = Array.from(aboutImagesInput.files || []);
-      if (!files.length) {
-        return;
-      }
-
-      const invalid = files.find(function (file) {
-        return !file.type.startsWith("image/");
-      });
-
-      if (invalid) {
-        setStatus("Semua file yang diupload harus berupa gambar.", "warn");
-        aboutImagesInput.value = "";
-        return;
-      }
-
-      const content = readAboutContent();
-      const sorted = sortImages(content.images);
-      let orderStart = sorted.length;
-
-      for (let i = 0; i < files.length; i += 1) {
-        const file = files[i];
-        try {
-          const dataUrl = await readFileAsDataUrl(file);
-          orderStart += 1;
-          content.images.push({
-            id: "about-img-" + Date.now() + "-" + i,
-            url: dataUrl,
-            order: orderStart,
-            active: true
-          });
-        } catch (error) {
-          setStatus("Ada file yang gagal dibaca. Coba upload ulang.", "warn");
-        }
-      }
-
-      content.images = sortImages(content.images).map(function (item, index) {
-        item.order = index + 1;
-        return item;
-      });
-
-      writeAboutContent(content);
-      renderRows();
-      setStatus("Upload gambar berhasil. Slideshow Tentang Crembo sudah diperbarui.", "ok");
-      aboutImagesInput.value = "";
-    }
-
-    imageRows.addEventListener("click", function (event) {
-      const target = event.target;
-      if (!(target instanceof HTMLButtonElement)) {
-        return;
-      }
-
-      const toggleId = target.getAttribute("data-toggle-id");
-      if (toggleId) {
-        toggleImage(toggleId);
-        return;
-      }
-
-      const deleteId = target.getAttribute("data-delete-id");
-      if (deleteId) {
-        deleteImage(deleteId);
-      }
-    });
-
-    aboutForm.addEventListener("submit", saveConfig);
-    aboutImagesInput.addEventListener("change", function () {
-      clearStatus();
-      handleUpload();
-    });
 
     function updateLiveDateTime() {
       const now = new Date();
@@ -1016,7 +1024,32 @@
     setInterval(updateLiveDateTime, 1000);
 
     roleChip.textContent = "Role: " + formatRole(getCurrentRole());
-    fillForm();
+
+    youtubeForm.addEventListener("submit", saveVideo);
+    resetFormBtn.addEventListener("click", resetForm);
+    cancelEditBtn.addEventListener("click", resetForm);
+    videoUrl.addEventListener("input", function () {
+      showUrlPreview(videoUrl.value.trim());
+    });
+
+    videoRows.addEventListener("click", function (event) {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) {
+        return;
+      }
+
+      const editId = target.getAttribute("data-edit-id");
+      if (editId) {
+        editVideo(editId);
+        return;
+      }
+
+      const deleteId = target.getAttribute("data-delete-id");
+      if (deleteId) {
+        deleteVideo(deleteId);
+      }
+    });
+
     renderRows();
   </script>
 </body>
