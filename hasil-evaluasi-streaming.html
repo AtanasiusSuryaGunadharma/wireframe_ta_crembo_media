@@ -236,6 +236,201 @@
       font-size: 1.15rem;
     }
 
+    .ai-panel {
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .ai-head {
+      padding: 12px 14px;
+      border-bottom: 1px solid #c8c8c8;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ai-head h2 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .ai-head-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ai-toggle-btn {
+      border: 1px solid #b9bcc3;
+      background: #ffffff;
+      color: #1f2937;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .ai-toggle-btn:hover {
+      background: #f3f4f6;
+    }
+
+    .ai-chip {
+      border: 1px solid #b7b7b7;
+      background: #eef2ff;
+      color: #4338ca;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 0.74rem;
+      font-weight: 700;
+    }
+
+    .ai-body {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .ai-body[hidden] {
+      display: none;
+    }
+
+    .ai-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      gap: 8px;
+    }
+
+    .ai-kpi {
+      border: 1px solid #c8c8c8;
+      background: #fafafa;
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .ai-kpi p {
+      margin: 0;
+      font-size: 0.78rem;
+      color: #5b5b5b;
+    }
+
+    .ai-kpi strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 1.35rem;
+      line-height: 1;
+    }
+
+    .ai-text-block {
+      border: 1px solid #d2d2d2;
+      background: #fcfcfc;
+      border-radius: 10px;
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .ai-text-block h3 {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    .ai-text-block p {
+      margin: 0;
+      font-size: 0.84rem;
+      color: #4b5563;
+      line-height: 1.4;
+    }
+
+    .ai-insight-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .ai-insight-box {
+      border-radius: 10px;
+      padding: 10px;
+      border: 1px solid #d4d4d4;
+      background: #fafafa;
+    }
+
+    .ai-insight-box h4 {
+      margin: 0 0 6px;
+      font-size: 0.88rem;
+    }
+
+    .ai-insight-box ul {
+      margin: 0;
+      padding-left: 16px;
+      font-size: 0.82rem;
+      color: #374151;
+      display: grid;
+      gap: 4px;
+    }
+
+    .ai-insight-box.good {
+      background: #f1fbf4;
+      border-color: #bde3c7;
+    }
+
+    .ai-insight-box.warn {
+      background: #fff4f4;
+      border-color: #f1cccc;
+    }
+
+    .ai-chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .ai-chart {
+      border: 1px solid #d2d2d2;
+      border-radius: 10px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .ai-chart h4 {
+      margin: 0 0 8px;
+      font-size: 0.86rem;
+    }
+
+    .bar-list {
+      display: grid;
+      gap: 7px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 220px 1fr 54px;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.76rem;
+      color: #4b5563;
+    }
+
+    .bar-track {
+      height: 9px;
+      background: #ececec;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 999px;
+    }
+
     .panel {
       border: 2px solid var(--line);
       border-radius: var(--radius);
@@ -332,6 +527,140 @@
       border-radius: 999px;
     }
 
+    .detail-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 3000;
+      display: grid;
+      place-items: center;
+      padding: 14px;
+      background: rgba(0, 0, 0, 0.42);
+    }
+
+    .detail-modal[hidden] {
+      display: none;
+    }
+
+    .detail-dialog {
+      width: min(980px, 95vw);
+      max-height: 90vh;
+      overflow: auto;
+      background: #fff;
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .detail-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border-bottom: 1px solid #d0d0d0;
+      background: #f6f6f6;
+    }
+
+    .detail-head h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .detail-close {
+      border: 1px solid #b7b7b7;
+      background: #fff;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .detail-body {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .detail-card {
+      border: 1px solid #d0d0d0;
+      border-radius: 10px;
+      background: #fcfcfc;
+      padding: 10px;
+    }
+
+    .detail-card h4 {
+      margin: 0 0 6px;
+      font-size: 0.86rem;
+    }
+
+    .detail-card p {
+      margin: 0;
+      font-size: 0.83rem;
+      color: #4b5563;
+      line-height: 1.4;
+    }
+
+    .staff-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .staff-table th,
+    .staff-table td {
+      border: 1px solid #d2d2d2;
+      padding: 7px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .staff-table th {
+      background: #f1f1f1;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+    }
+
+    .check-pill {
+      display: inline-block;
+      margin-right: 6px;
+      margin-bottom: 6px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 0.76rem;
+      border: 1px solid #c4c4c4;
+      background: #f6f6f6;
+      color: #3f3f3f;
+    }
+
+    .check-pill.ok {
+      border-color: #91c89c;
+      background: #ecf8ef;
+      color: #235c2d;
+    }
+
+    .table-action-wrap {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .btn-ghost {
+      border: 1px solid #9ca3af;
+      border-radius: 9px;
+      background: #fff;
+      color: #1f2937;
+      font-weight: 700;
+      padding: 7px 10px;
+      font-size: 0.79rem;
+      cursor: pointer;
+    }
+
     @media (max-width: 1080px) {
       .toolbar-grid {
         grid-template-columns: 1fr 1fr;
@@ -339,6 +668,17 @@
 
       .summary-grid {
         grid-template-columns: repeat(2, minmax(150px, 1fr));
+      }
+
+      .ai-kpi-grid,
+      .ai-insight-grid,
+      .ai-chart-grid,
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bar-row {
+        grid-template-columns: 170px 1fr 54px;
       }
     }
 
@@ -357,6 +697,14 @@
       .toolbar-grid,
       .summary-grid {
         grid-template-columns: 1fr;
+      }
+
+      .bar-row {
+        grid-template-columns: 1fr;
+      }
+
+      .table-action-wrap {
+        flex-direction: column;
       }
     }
   </style>
@@ -439,6 +787,47 @@
         <div class="summary-grid" id="evaluationSummary"></div>
       </section>
 
+      <section class="ai-panel" aria-label="Ringkasan otomatis AI hasil evaluasi">
+        <header class="ai-head">
+          <h2>Ringkasan Otomatis Hasil Evaluasi</h2>
+          <div class="ai-head-actions">
+            <span class="ai-chip">Auto Insight</span>
+            <button class="ai-toggle-btn" id="toggleAiSummaryBtn" type="button" aria-expanded="false">Tampilkan Ringkasan</button>
+          </div>
+        </header>
+        <div class="ai-body" id="aiSummaryBody" hidden>
+          <div class="ai-kpi-grid" id="aiKpiGrid"></div>
+          <article class="ai-text-block">
+            <h3>Insight Utama</h3>
+            <p id="aiInsightText">Analisis otomatis akan muncul setelah data evaluasi ditemukan.</p>
+          </article>
+          <article class="ai-text-block">
+            <h3>Rekomendasi Tindak Lanjut</h3>
+            <p id="aiRecommendationText">Belum ada rekomendasi karena data evaluasi belum tersedia.</p>
+          </article>
+          <div class="ai-insight-grid">
+            <article class="ai-insight-box good">
+              <h4>Aspek Terkuat</h4>
+              <ul id="aiStrengthList"></ul>
+            </article>
+            <article class="ai-insight-box warn">
+              <h4>Aspek Prioritas Perbaikan</h4>
+              <ul id="aiPriorityList"></ul>
+            </article>
+          </div>
+          <div class="ai-chart-grid">
+            <article class="ai-chart">
+              <h4>Distribusi Penilaian Per Petugas</h4>
+              <div class="bar-list" id="aiLikertBars"></div>
+            </article>
+            <article class="ai-chart">
+              <h4>Ringkasan Atribut Form Evaluasi</h4>
+              <div class="bar-list" id="aiQuestionBars"></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
       <section class="panel" aria-label="Tabel evaluasi masuk">
         <header class="panel-head">
           <h2>Evaluasi Sudah Masuk</h2>
@@ -475,11 +864,179 @@
           <p id="pendingEvalEmpty" class="empty-note" hidden>Tidak ada misa terlewat yang belum diisi untuk filter ini.</p>
         </div>
       </section>
+
+      <section id="evaluationDetailModal" class="detail-modal" hidden aria-label="Detail evaluasi streaming" aria-modal="true" role="dialog">
+        <article class="detail-dialog">
+          <header class="detail-head">
+            <h3>Detail Evaluasi Streaming</h3>
+            <button id="closeEvaluationDetailBtn" class="detail-close" type="button">Tutup</button>
+          </header>
+          <div id="evaluationDetailBody" class="detail-body"></div>
+        </article>
+      </section>
     </main>
   </div>
 
   <script>
     const STORAGE_KEY = "crembo-evaluasi-streaming";
+    const STORAGE_SEED_KEY = "crembo-evaluasi-streaming-seed-version";
+    const DUMMY_SEED_VERSION = "v3";
+    const RATING_SCORE_MAP = {
+      "Sangat Baik": 4,
+      "Baik": 3,
+      "Cukup": 2,
+      "Perlu Pendampingan": 1
+    };
+
+    const DUMMY_EVALUATIONS = {
+      "normal-2026-03-27-1800": {
+        date: "2026-03-27",
+        time: "18:00",
+        misaType: "Biasa",
+        operator: "Rikha",
+        camera: "Jeni",
+        supervisor: "Tyas",
+        evaluatorName: "Andreas",
+        evaluatorRole: "Koordinator Liturgi",
+        submittedAt: "2026-03-27T20:02:00",
+        technicalIssue: "",
+        liturgyIssue: "",
+        checklist: { stream: true, coordination: true, archive: true },
+        staffEvaluations: [
+          { name: "Rikha", rating: "Baik", note: "Konsisten menjaga alur live." },
+          { name: "Jeni", rating: "Sangat Baik", note: "Framing stabil saat homili." },
+          { name: "Tyas", rating: "Baik", note: "Koordinasi tim berjalan rapi." }
+        ],
+        finalNote: "Alur siaran stabil, transisi kamera aman, audio homili sudah jelas.",
+        questionScores: [4, 4, 4, 4]
+      },
+      "normal-2026-03-28-1800": {
+        date: "2026-03-28",
+        time: "18:00",
+        misaType: "Biasa",
+        operator: "Lisa",
+        camera: "Evan",
+        supervisor: "Jose",
+        evaluatorName: "Marta",
+        evaluatorRole: "Admin Streaming",
+        submittedAt: "2026-03-28T19:45:00",
+        technicalIssue: "Audio sempat peak saat lagu pembuka.",
+        liturgyIssue: "",
+        checklist: { stream: true, coordination: false, archive: true },
+        staffEvaluations: [
+          { name: "Lisa", rating: "Baik", note: "Switching cukup aman." },
+          { name: "Evan", rating: "Cukup", note: "Perlu antisipasi zoom mendadak." },
+          { name: "Jose", rating: "Baik", note: "Briefing sudah jelas." }
+        ],
+        finalNote: "Visual baik, namun komunikasi antar petugas masih perlu dipercepat saat perpindahan sesi.",
+        questionScores: [4, 3, 3, 4]
+      },
+      "normal-2026-03-26-1800": {
+        date: "2026-03-26",
+        time: "18:00",
+        misaType: "Biasa",
+        operator: "Reno",
+        camera: "Mika",
+        supervisor: "Tara",
+        evaluatorName: "Yosef",
+        evaluatorRole: "Seksi Liturgi",
+        submittedAt: "2026-03-26T20:01:00",
+        technicalIssue: "Koneksi encoder drop singkat 1 kali.",
+        liturgyIssue: "Perubahan urutan petugas bacaan di menit akhir.",
+        checklist: { stream: true, coordination: false, archive: true },
+        staffEvaluations: [
+          { name: "Reno", rating: "Cukup", note: "Respon gangguan cukup cepat." },
+          { name: "Mika", rating: "Cukup", note: "Butuh variasi shot lebih rapi." },
+          { name: "Tara", rating: "Baik", note: "Koordinasi setelah gangguan cukup baik." }
+        ],
+        finalNote: "Sinkronisasi antar kamera cukup rapi, tetapi tempo perpindahan scene pembuka masih terlambat.",
+        questionScores: [3, 3, 3, 4]
+      },
+      "normal-2026-03-25-1800": {
+        date: "2026-03-25",
+        time: "18:00",
+        misaType: "Biasa",
+        operator: "Rina",
+        camera: "Dimas",
+        supervisor: "Ari",
+        evaluatorName: "Felix",
+        evaluatorRole: "Admin Multimedia",
+        submittedAt: "2026-03-25T19:38:00",
+        technicalIssue: "Clipping audio ketika lagu penutup.",
+        liturgyIssue: "",
+        checklist: { stream: true, coordination: true, archive: false },
+        staffEvaluations: [
+          { name: "Rina", rating: "Baik", note: "Rundown terjaga." },
+          { name: "Dimas", rating: "Cukup", note: "Arah kamera perlu lebih tenang." },
+          { name: "Ari", rating: "Baik", note: "Koordinasi antar petugas cukup stabil." }
+        ],
+        finalNote: "Kualitas visual stabil, audio sempat clipping singkat ketika lagu penutup.",
+        questionScores: [4, 3, 4, 3]
+      },
+      "raya-2026-03-22-0800": {
+        date: "2026-03-22",
+        time: "08:00",
+        misaType: "Hari Raya",
+        operator: "Sella",
+        camera: "Niko",
+        supervisor: "Rafi",
+        evaluatorName: "Dian",
+        evaluatorRole: "Panitia Misa Besar",
+        submittedAt: "2026-03-22T11:12:00",
+        technicalIssue: "",
+        liturgyIssue: "",
+        checklist: { stream: true, coordination: true, archive: true },
+        staffEvaluations: [
+          { name: "Sella", rating: "Sangat Baik", note: "Kontrol live sangat baik." },
+          { name: "Niko", rating: "Sangat Baik", note: "Shot variety bagus." },
+          { name: "Rafi", rating: "Baik", note: "Koordinasi antar area lancar." }
+        ],
+        finalNote: "Misa padat namun coverage sangat baik, koordinasi floor director dan operator solid.",
+        questionScores: [5, 5, 4, 5]
+      },
+      "raya-2026-03-29-0800": {
+        date: "2026-03-29",
+        time: "08:00",
+        misaType: "Hari Raya",
+        operator: "Rossa",
+        camera: "Aurel",
+        supervisor: "Asha",
+        evaluatorName: "Doni",
+        evaluatorRole: "Tim Dokumentasi",
+        submittedAt: "2026-03-29T10:55:00",
+        technicalIssue: "",
+        liturgyIssue: "",
+        checklist: { stream: true, coordination: true, archive: true },
+        staffEvaluations: [
+          { name: "Rossa", rating: "Sangat Baik", note: "Eksekusi rundown misa raya sangat bagus." },
+          { name: "Aurel", rating: "Baik", note: "Pengambilan gambar liturgi utama tepat." },
+          { name: "Asha", rating: "Sangat Baik", note: "Alur instruksi jelas ke semua petugas." }
+        ],
+        finalNote: "Pelaksanaan sangat baik saat misa ramai, framing dan backup audio berjalan lancar.",
+        questionScores: [5, 4, 4, 5]
+      },
+      "raya-2026-03-29-1700": {
+        date: "2026-03-29",
+        time: "17:00",
+        misaType: "Hari Raya",
+        operator: "Rikha",
+        camera: "Jeni",
+        supervisor: "Tyas",
+        evaluatorName: "Nia",
+        evaluatorRole: "Sekretariat Paroki",
+        submittedAt: "2026-03-29T19:58:00",
+        technicalIssue: "Noise kecil di awal lagu pembuka.",
+        liturgyIssue: "",
+        checklist: { stream: true, coordination: true, archive: true },
+        staffEvaluations: [
+          { name: "Rikha", rating: "Baik", note: "Transisi rundown aman." },
+          { name: "Jeni", rating: "Baik", note: "Framing tetap stabil." },
+          { name: "Tyas", rating: "Baik", note: "Koordinasi baik, perlu antisipasi awal lagu." }
+        ],
+        finalNote: "Kualitas audio cukup, perlu peningkatan monitoring noise pada bagian awal lagu pembuka.",
+        questionScores: [4, 3, 4, 4]
+      }
+    };
 
     const schedules = [
       {
@@ -497,6 +1054,30 @@
         type: "Biasa",
         title: "Misa Sabtu Sore",
         team: { operator: "Lisa", camera: "Evan", supervisor: "Jose" }
+      },
+      {
+        id: "normal-2026-03-26-1800",
+        date: "2026-03-26",
+        time: "18:00",
+        type: "Biasa",
+        title: "Misa Kamis Biasa",
+        team: { operator: "Reno", camera: "Mika", supervisor: "Tara" }
+      },
+      {
+        id: "normal-2026-03-25-1800",
+        date: "2026-03-25",
+        time: "18:00",
+        type: "Biasa",
+        title: "Misa Rabu Biasa",
+        team: { operator: "Rina", camera: "Dimas", supervisor: "Ari" }
+      },
+      {
+        id: "raya-2026-03-22-0800",
+        date: "2026-03-22",
+        time: "08:00",
+        type: "Hari Raya",
+        title: "Misa Hari Raya Keluarga - Sesi Pagi",
+        team: { operator: "Sella", camera: "Niko", supervisor: "Rafi" }
       },
       {
         id: "raya-2026-03-29-0800",
@@ -538,17 +1119,53 @@
     const downloadEvalPdfBtn = document.getElementById("downloadEvalPdfBtn");
     const evaluationSort = document.getElementById("evaluationSort");
     const activeFilterChip = document.getElementById("activeFilterChip");
+    const aiKpiGrid = document.getElementById("aiKpiGrid");
+    const aiInsightText = document.getElementById("aiInsightText");
+    const aiRecommendationText = document.getElementById("aiRecommendationText");
+    const aiStrengthList = document.getElementById("aiStrengthList");
+    const aiPriorityList = document.getElementById("aiPriorityList");
+    const aiLikertBars = document.getElementById("aiLikertBars");
+    const aiQuestionBars = document.getElementById("aiQuestionBars");
+    const aiSummaryBody = document.getElementById("aiSummaryBody");
+    const toggleAiSummaryBtn = document.getElementById("toggleAiSummaryBtn");
+    const evaluationDetailModal = document.getElementById("evaluationDetailModal");
+    const evaluationDetailBody = document.getElementById("evaluationDetailBody");
+    const closeEvaluationDetailBtn = document.getElementById("closeEvaluationDetailBtn");
 
     function readStoredEvaluations() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) {
-          return {};
+        const parsed = raw ? JSON.parse(raw) : {};
+        const isSeeded = localStorage.getItem(STORAGE_SEED_KEY) === DUMMY_SEED_VERSION;
+
+        if (!isSeeded) {
+          const merged = Object.assign({}, DUMMY_EVALUATIONS, parsed);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+          localStorage.setItem(STORAGE_SEED_KEY, DUMMY_SEED_VERSION);
+          return merged;
         }
-        return JSON.parse(raw);
+
+        return parsed;
       } catch (err) {
         return {};
       }
+    }
+
+    function renderAiToggleButton() {
+      if (!toggleAiSummaryBtn || !aiSummaryBody) {
+        return;
+      }
+      const expanded = !aiSummaryBody.hidden;
+      toggleAiSummaryBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+      toggleAiSummaryBtn.textContent = expanded ? "Sembunyikan Ringkasan" : "Tampilkan Ringkasan";
+    }
+
+    function toggleAiSummary() {
+      if (!aiSummaryBody) {
+        return;
+      }
+      aiSummaryBody.hidden = !aiSummaryBody.hidden;
+      renderAiToggleButton();
     }
 
     function getScheduleById(id) {
@@ -684,7 +1301,26 @@
           evaluator: normalizeName(item.evaluatorName),
           evaluatorRole: normalizeName(item.evaluatorRole),
           submittedAt: item.submittedAt || "",
-          finalNote: normalizeName(item.finalNote)
+          finalNote: normalizeName(item.finalNote),
+          technicalIssue: normalizeName(item.technicalIssue),
+          liturgyIssue: normalizeName(item.liturgyIssue),
+          checklist: {
+            stream: !!(item.checklist && item.checklist.stream),
+            coordination: !!(item.checklist && item.checklist.coordination),
+            archive: !!(item.checklist && item.checklist.archive)
+          },
+          staffEvaluations: Array.isArray(item.staffEvaluations)
+            ? item.staffEvaluations.map(function (staffEval) {
+                const safeName = normalizeName(staffEval && staffEval.name);
+                return {
+                  name: safeName,
+                  rating: normalizeName(staffEval && staffEval.rating),
+                  note: normalizeName(staffEval && staffEval.note)
+                };
+              }).filter(function (staffEval) {
+                return !!staffEval.name;
+              })
+            : []
         };
       });
 
@@ -701,6 +1337,148 @@
       return entries.filter(function (item) {
         return matchesTypeFilter(item.misaType) && matchesPeriodFilter(item.date);
       });
+    }
+
+    function formatScore(value) {
+      return (Math.round(value * 100) / 100).toFixed(2);
+    }
+
+    function renderAiSummary(completed, pending) {
+      const ratingOrder = ["Sangat Baik", "Baik", "Cukup", "Perlu Pendampingan"];
+      const ratingCounts = {
+        "Sangat Baik": 0,
+        "Baik": 0,
+        "Cukup": 0,
+        "Perlu Pendampingan": 0
+      };
+
+      let totalStaffEval = 0;
+      let totalStaffScore = 0;
+      let checklistStream = 0;
+      let checklistCoordination = 0;
+      let checklistArchive = 0;
+      let technicalIssueCount = 0;
+      let liturgyIssueCount = 0;
+
+      completed.forEach(function (item) {
+        if (item.checklist.stream) {
+          checklistStream += 1;
+        }
+        if (item.checklist.coordination) {
+          checklistCoordination += 1;
+        }
+        if (item.checklist.archive) {
+          checklistArchive += 1;
+        }
+
+        if (item.technicalIssue) {
+          technicalIssueCount += 1;
+        }
+        if (item.liturgyIssue) {
+          liturgyIssueCount += 1;
+        }
+
+        item.staffEvaluations.forEach(function (staffEval) {
+          const rating = staffEval.rating;
+          const score = RATING_SCORE_MAP[rating];
+          if (!score) {
+            return;
+          }
+          totalStaffEval += 1;
+          totalStaffScore += score;
+          ratingCounts[rating] += 1;
+        });
+      });
+
+      const formCount = completed.length;
+      const averageStaffScore = totalStaffEval ? (totalStaffScore / totalStaffEval) : 0;
+      const streamRate = formCount ? Math.round((checklistStream / formCount) * 100) : 0;
+      const coordinationRate = formCount ? Math.round((checklistCoordination / formCount) * 100) : 0;
+      const archiveRate = formCount ? Math.round((checklistArchive / formCount) * 100) : 0;
+      const technicalIssueRate = formCount ? Math.round((technicalIssueCount / formCount) * 100) : 0;
+      const liturgyIssueRate = formCount ? Math.round((liturgyIssueCount / formCount) * 100) : 0;
+      const checklistRate = Math.round((streamRate + coordinationRate + archiveRate) / 3);
+
+      const attributeScores = [
+        { label: "Siaran berjalan sampai akhir", value: streamRate },
+        { label: "Koordinasi tim berjalan baik", value: coordinationRate },
+        { label: "Rekaman tersimpan dengan benar", value: archiveRate },
+        { label: "Penilaian petugas", value: Math.round((averageStaffScore / 4) * 100) },
+        { label: "Kendala teknis minim", value: 100 - technicalIssueRate },
+        { label: "Kendala non-teknis minim", value: 100 - liturgyIssueRate }
+      ];
+
+      aiKpiGrid.innerHTML =
+        '<article class="ai-kpi"><p>Rata-rata Penilaian Petugas</p><strong>' + formatScore(averageStaffScore) + '/4</strong></article>' +
+        '<article class="ai-kpi"><p>Kepatuhan Checklist Layanan</p><strong>' + checklistRate + '%</strong></article>' +
+        '<article class="ai-kpi"><p>Total Form Evaluasi Masuk</p><strong>' + formCount + '</strong></article>';
+
+      if (!completed.length) {
+        aiInsightText.textContent = "Belum ada evaluasi masuk di periode ini. Setelah evaluasi masuk, sistem akan merangkum kekuatan tim dan prioritas perbaikan secara otomatis.";
+        aiRecommendationText.textContent = "Pastikan evaluasi diisi maksimal 1x24 jam setelah misa agar insight periode ini lebih representatif.";
+        aiStrengthList.innerHTML = "<li>Belum ada data</li>";
+        aiPriorityList.innerHTML = "<li>Belum ada data</li>";
+        aiLikertBars.innerHTML = "";
+        aiQuestionBars.innerHTML = "";
+        return;
+      }
+
+      const rankedByHigh = attributeScores.slice().sort(function (a, b) {
+        return b.value - a.value;
+      });
+      const rankedByLow = attributeScores.slice().sort(function (a, b) {
+        return a.value - b.value;
+      });
+      const strongest = rankedByHigh.slice(0, 2);
+      const priorities = rankedByLow.slice(0, 2);
+
+      const lateRate = (pending.length + completed.length)
+        ? Math.round((pending.length / (pending.length + completed.length)) * 100)
+        : 0;
+
+      aiInsightText.textContent =
+        "Dalam periode terpilih, evaluasi streaming menunjukkan performa " +
+        (averageStaffScore >= 3.5 ? "sangat baik" : averageStaffScore >= 3 ? "baik" : "cukup") +
+        " dengan rata-rata penilaian petugas " + formatScore(averageStaffScore) + "/4. " +
+        "Aspek paling konsisten ada pada " + strongest[0].label.toLowerCase() +
+        ", sementara " + priorities[0].label.toLowerCase() +
+        " masih terlihat paling bervariasi antar jadwal.";
+
+      aiRecommendationText.textContent =
+        "Fokuskan perbaikan pada " + priorities[0].label.toLowerCase() +
+        " dan " + priorities[1].label.toLowerCase() +
+        ". Targetkan brief 10 menit sebelum misa, validasi checklist layanan per sesi, " +
+        "dan tindak lanjut untuk misa terlewat yang belum dievaluasi (" + lateRate + "% dari total jadwal di filter ini).";
+
+      aiStrengthList.innerHTML = strongest.map(function (item) {
+        return "<li>" + escapeHtml(item.label) + " (" + item.value + "%)</li>";
+      }).join("");
+
+      aiPriorityList.innerHTML = priorities.map(function (item) {
+        return "<li>" + escapeHtml(item.label) + " (" + item.value + "%)</li>";
+      }).join("");
+
+      const maxLikert = Math.max.apply(null, ratingOrder.map(function (label) {
+        return ratingCounts[label];
+      }).concat([1]));
+      aiLikertBars.innerHTML = ratingOrder.map(function (label) {
+        const count = ratingCounts[label];
+        const width = Math.round((count / maxLikert) * 100);
+        return '<div class="bar-row">' +
+          '<span>' + escapeHtml(label) + '</span>' +
+          '<div class="bar-track"><div class="bar-fill" style="width:' + width + '%"></div></div>' +
+          '<strong>' + count + '</strong>' +
+        '</div>';
+      }).join("");
+
+      aiQuestionBars.innerHTML = attributeScores.map(function (item) {
+        const width = item.value;
+        return '<div class="bar-row">' +
+          '<span>' + escapeHtml(item.label) + '</span>' +
+          '<div class="bar-track"><div class="bar-fill" style="width:' + width + '%"></div></div>' +
+          '<strong>' + item.value + '%</strong>' +
+        '</div>';
+      }).join("");
     }
 
     function getPendingOverdueEvaluations() {
@@ -758,9 +1536,73 @@
           '<td>' + evaluator + '</td>' +
           '<td>' + escapeHtml(formatDateTime(item.submittedAt)) + '</td>' +
           '<td>' + note + '</td>' +
-          '<td><button class="btn" type="button" data-delete-evaluation="' + escapeHtml(item.scheduleId) + '">Hapus</button></td>' +
+          '<td><div class="table-action-wrap">' +
+            '<button class="btn-ghost" type="button" data-open-evaluation-detail="' + escapeHtml(item.scheduleId) + '">Detail</button>' +
+            '<button class="btn" type="button" data-delete-evaluation="' + escapeHtml(item.scheduleId) + '">Hapus</button>' +
+          '</div></td>' +
         '</tr>';
       }).join("");
+    }
+
+    function renderChecklistPills(item) {
+      const checklistItems = [
+        { label: "Siaran sampai akhir", ok: !!item.checklist.stream },
+        { label: "Koordinasi tim baik", ok: !!item.checklist.coordination },
+        { label: "Rekaman tersimpan", ok: !!item.checklist.archive }
+      ];
+
+      return checklistItems.map(function (entry) {
+        return '<span class="check-pill' + (entry.ok ? ' ok' : '') + '">' +
+          escapeHtml(entry.label + ': ' + (entry.ok ? 'Ya' : 'Tidak')) +
+        '</span>';
+      }).join('');
+    }
+
+    function openEvaluationDetail(scheduleId) {
+      const data = getCompletedEvaluations().find(function (item) {
+        return item.scheduleId === scheduleId;
+      });
+
+      if (!data) {
+        return;
+      }
+
+      const staffRows = data.staffEvaluations.length
+        ? data.staffEvaluations.map(function (staffEval) {
+            return '<tr>' +
+              '<td>' + escapeHtml(staffEval.name || '-') + '</td>' +
+              '<td>' + escapeHtml(staffEval.rating || '-') + '</td>' +
+              '<td>' + escapeHtml(staffEval.note || '-') + '</td>' +
+            '</tr>';
+          }).join('')
+        : '<tr><td colspan="3">Belum ada detail evaluasi per petugas.</td></tr>';
+
+      const evaluator = data.evaluator
+        ? escapeHtml(data.evaluator + (data.evaluatorRole ? ' (' + data.evaluatorRole + ')' : ''))
+        : '-';
+
+      evaluationDetailBody.innerHTML =
+        '<div class="detail-grid">' +
+          '<article class="detail-card"><h4>Informasi Jadwal</h4><p><strong>Tanggal:</strong> ' + escapeHtml(formatDate(data.date)) + '<br><strong>Jam:</strong> ' + escapeHtml(data.time || '-') + ' WIB<br><strong>Jenis:</strong> ' + escapeHtml(data.misaType || '-') + '<br><strong>Judul:</strong> ' + escapeHtml(data.title || '-') + '</p></article>' +
+          '<article class="detail-card"><h4>Pengisi & Petugas</h4><p><strong>Pengisi:</strong> ' + evaluator + '<br><strong>Petugas bertugas:</strong> ' + escapeHtml(data.staff.join(', ') || '-') + '<br><strong>Waktu submit:</strong> ' + escapeHtml(formatDateTime(data.submittedAt)) + '</p></article>' +
+        '</div>' +
+        '<article class="detail-card"><h4>Checklist Kondisi Pelayanan</h4><p>' + renderChecklistPills(data) + '</p></article>' +
+        '<div class="detail-grid">' +
+          '<article class="detail-card"><h4>Kendala Teknis Selama Streaming</h4><p>' + escapeHtml(data.technicalIssue || '-') + '</p></article>' +
+          '<article class="detail-card"><h4>Kendala Misa Non-Teknis</h4><p>' + escapeHtml(data.liturgyIssue || '-') + '</p></article>' +
+        '</div>' +
+        '<article class="detail-card"><h4>Evaluasi Per Petugas</h4><table class="staff-table"><thead><tr><th>Nama Petugas</th><th>Penilaian Singkat</th><th>Catatan Per Petugas</th></tr></thead><tbody>' + staffRows + '</tbody></table></article>' +
+        '<article class="detail-card"><h4>Catatan Penutup / Rekomendasi</h4><p>' + escapeHtml(data.finalNote || '-') + '</p></article>';
+
+      evaluationDetailModal.hidden = false;
+    }
+
+    function closeEvaluationDetail() {
+      if (!evaluationDetailModal) {
+        return;
+      }
+      evaluationDetailModal.hidden = true;
+      evaluationDetailBody.innerHTML = '';
     }
 
     function deleteEvaluationByScheduleId(scheduleId) {
@@ -808,6 +1650,7 @@
       const completed = getCompletedEvaluations();
       const pending = getPendingOverdueEvaluations();
       renderEvaluationSummary(completed, pending);
+      renderAiSummary(completed, pending);
       renderCompletedTable(completed);
       renderPendingList(pending);
     }
@@ -959,6 +1802,7 @@
 
     renderResultPeriodInput();
     renderEvaluationResults();
+    renderAiToggleButton();
 
     resultTypeFilter.addEventListener("change", renderEvaluationResults);
 
@@ -974,10 +1818,19 @@
 
     downloadEvalExcelBtn.addEventListener("click", exportEvaluationExcel);
     downloadEvalPdfBtn.addEventListener("click", exportEvaluationPdf);
+    if (toggleAiSummaryBtn) {
+      toggleAiSummaryBtn.addEventListener("click", toggleAiSummary);
+    }
 
     completedEvalRows.addEventListener("click", function (event) {
       const target = event.target;
       if (!(target instanceof HTMLButtonElement)) {
+        return;
+      }
+
+      const detailId = target.getAttribute("data-open-evaluation-detail") || "";
+      if (detailId) {
+        openEvaluationDetail(detailId);
         return;
       }
 
@@ -987,6 +1840,24 @@
       }
 
       deleteEvaluationByScheduleId(scheduleId);
+    });
+
+    if (closeEvaluationDetailBtn) {
+      closeEvaluationDetailBtn.addEventListener("click", closeEvaluationDetail);
+    }
+
+    if (evaluationDetailModal) {
+      evaluationDetailModal.addEventListener("click", function (event) {
+        if (event.target === evaluationDetailModal) {
+          closeEvaluationDetail();
+        }
+      });
+    }
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closeEvaluationDetail();
+      }
     });
   </script>
 </body>
