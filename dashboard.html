@@ -828,20 +828,12 @@
         { label: "Kelola Carousel Home", href: "kelola-carousel-home.html" },
         { label: "Kelola Konten Tentang Crembo", href: "kelola-tentang-crembo.html" },
         { label: "Kelola Embed YouTube", href: "kelola-embed-youtube.html" },
-        { label: "Kelola Embed Google Maps", href: "#" },
-        { label: "Kelola Embed Instagram", href: "#" },
-        { label: "Kelola Jadwal Streaming Home", href: "#" },
-        { label: "Kelola Agenda Home", href: "#" },
-        { label: "Kelola Pengumuman / Berita Home", href: "#" },
-        { label: "Kelola Form Pendaftaran Home", href: "#" }
-      ];
-
-      const extraSuperAdmin = [
-        { label: "Riwayat Versi Konten Utama", href: "#" }
+        { label: "Kelola Embed Google Maps", href: "kelola-embed-google-maps.html" },
+        { label: "Kelola Embed Instagram", href: "kelola-embed-instagram.html" }
       ];
 
       const list = currentRole === "super_admin"
-        ? baseItems.concat(extraSuperAdmin)
+        ? baseItems
         : baseItems;
 
       contentMenu.innerHTML = list
