@@ -287,10 +287,180 @@
       line-height: 1;
     }
 
+    .controls-area {
+      border: 1px solid #d1d1d1;
+      border-radius: 10px;
+      padding: 12px;
+      background: #fafafa;
+      margin-bottom: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .control-group label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: #5b5b5b;
+      font-weight: 700;
+    }
+
+    .control-group input,
+    .control-group select {
+      border: 1px solid #b7b7b7;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+
+    .control-group input::placeholder {
+      color: #9a9a9a;
+    }
+
+    .controls-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .sortable-header {
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+    }
+
+    .sortable-header::after {
+      content: " ⇅";
+      opacity: 0.5;
+    }
+
+    .sortable-header.asc::after {
+      content: " ↑";
+      opacity: 1;
+    }
+
+    .sortable-header.desc::after {
+      content: " ↓";
+      opacity: 1;
+    }
+
+    .action-btn {
+      display: inline-block;
+      border: 1px solid #4a90e2;
+      background: #e8eff8;
+      color: #2563eb;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .action-btn:hover {
+      background: #d1e0f0;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: #fff;
+      border: 2px solid #1f1f1f;
+      border-radius: 14px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid #c8c8c8;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-head h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: #5b5b5b;
+    }
+
+    .modal-body {
+      padding: 16px;
+    }
+
+    .modal-body .control-group {
+      margin-bottom: 12px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      padding: 12px 16px;
+      border-top: 1px solid #d1d1d1;
+      background: #fafafa;
+    }
+
+    .btn-modal {
+      border: 1px solid #b7b7b7;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-modal.primary {
+      background: #2563eb;
+      color: #fff;
+      border-color: #2563eb;
+    }
+
+    .btn-modal.secondary {
+      background: #fff;
+      color: #111;
+      border-color: #b7b7b7;
+    }
+
     @media (max-width: 980px) {
       .layout { grid-template-columns: 1fr; }
       .sidebar { position: static; height: auto; }
       .summary { grid-template-columns: repeat(2, minmax(150px, 1fr)); }
+      .controls-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -322,20 +492,40 @@
     <main class="main">
       <header class="dashboard-headline-bar" aria-label="Header monitoring tugas anggota waktu berjalan">
         <h1>Monitoring Tugas Anggota</h1>
-        <div class="head-meta"><span id="liveDateTime">-</span></div>
+        <div class="head-meta">
+          <span id="liveDateTime">-</span>
+          <select id="monthSelector" style="border: 1px solid #999; border-radius: 6px; padding: 6px; font-size: 0.9rem;">
+            <option value="0">Januari</option>
+            <option value="1">Februari</option>
+            <option value="2" selected>Maret</option>
+            <option value="3">April</option>
+            <option value="4">Mei</option>
+            <option value="5">Juni</option>
+            <option value="6">Juli</option>
+            <option value="7">Agustus</option>
+            <option value="8">September</option>
+            <option value="9">Oktober</option>
+            <option value="10">November</option>
+            <option value="11">Desember</option>
+          </select>
+        </div>
       </header>
 
       <section class="panel">
         <header class="panel-head">
           <h2>Ringkasan Kewajiban Bulanan</h2>
-          <span class="chip">Periode: Maret 2026</span>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <label for="targetMinInput" style="font-size: 0.75rem; color: #5b5b5b; font-weight: 700;">Target Minimum:</label>
+            <input id="targetMinInput" type="number" min="1" max="10" value="2" style="width: 50px; border: 1px solid #b7b7b7; border-radius: 6px; padding: 4px; font-size: 0.85rem;">
+            <span class="chip" id="periodChip">Periode: Maret 2026</span>
+          </div>
         </header>
         <div class="panel-body">
           <div class="summary">
-            <article class="summary-box"><p>Total Anggota</p><h3>42</h3></article>
-            <article class="summary-box"><p>Sudah Memenuhi Tugas</p><h3>31</h3></article>
-            <article class="summary-box"><p>Kurang 1 Tugas</p><h3>7</h3></article>
-            <article class="summary-box"><p>Kurang > 1 Tugas</p><h3>4</h3></article>
+            <article class="summary-box"><p>Total Anggota</p><h3 id="totalMembers">42</h3></article>
+            <article class="summary-box"><p>Sudah Memenuhi Tugas</p><h3 id="completedMembers">31</h3></article>
+            <article class="summary-box"><p>Kurang 1 Tugas</p><h3 id="shortage1Members">7</h3></article>
+            <article class="summary-box"><p>Kurang > 1 Tugas</p><h3 id="shortageMultiMembers">4</h3></article>
           </div>
         </div>
       </section>
@@ -343,54 +533,52 @@
       <section class="panel">
         <header class="panel-head">
           <h2>Daftar Monitoring Anggota</h2>
-          <span class="chip">Target minimum: 2 tugas / bulan</span>
         </header>
+        
+        <div class="controls-area">
+          <div class="controls-row">
+            <div class="control-group">
+              <label for="searchFilter">Cari Nama Anggota</label>
+              <input id="searchFilter" type="text" placeholder="Ketik nama...">
+            </div>
+            <div class="control-group">
+              <label for="roleFilter">Filter Role</label>
+              <select id="roleFilter">
+                <option value="">Semua Role</option>
+                <option value="Operator">Operator</option>
+                <option value="Kameramen">Kameramen</option>
+                <option value="Supervisor">Supervisor</option>
+                <option value="Editor">Editor</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="statusFilter">Filter Status</label>
+              <select id="statusFilter">
+                <option value="">Semua Status</option>
+                <option value="Aman">Aman</option>
+                <option value="Perlu Tambahan">Perlu Tambahan</option>
+                <option value="Kritis">Kritis</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         <div class="panel-body">
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Nama</th>
-                  <th>Role Utama</th>
-                  <th>Total Tugas</th>
-                  <th>Kekurangan</th>
-                  <th>Status</th>
+                  <th class="sortable-header" data-sort="nama">Nama</th>
+                  <th class="sortable-header" data-sort="role">Role Utama</th>
+                  <th class="sortable-header" data-sort="total">Total Tugas</th>
+                  <th class="sortable-header" data-sort="kekurangan">Kekurangan</th>
+                  <th class="sortable-header" data-sort="status">Status</th>
                   <th>Catatan</th>
+                  <th>Aksi</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>Rikha</td>
-                  <td>Operator</td>
-                  <td>3</td>
-                  <td>0</td>
-                  <td><span class="pill ok">Aman</span></td>
-                  <td>Distribusi merata</td>
-                </tr>
-                <tr>
-                  <td>Jeni</td>
-                  <td>Kameramen</td>
-                  <td>2</td>
-                  <td>0</td>
-                  <td><span class="pill ok">Aman</span></td>
-                  <td>-</td>
-                </tr>
-                <tr>
-                  <td>Claire</td>
-                  <td>Supervisor</td>
-                  <td>1</td>
-                  <td>1</td>
-                  <td><span class="pill warn">Perlu Tambahan</span></td>
-                  <td>Prioritaskan pekan depan</td>
-                </tr>
-                <tr>
-                  <td>Belinda</td>
-                  <td>Kameramen</td>
-                  <td>0</td>
-                  <td>2</td>
-                  <td><span class="pill danger">Kritis</span></td>
-                  <td>Belum masuk roster bulan ini</td>
-                </tr>
+              <tbody id="monitoringTable">
+                <!-- Populated by JavaScript -->
               </tbody>
             </table>
           </div>
@@ -399,8 +587,106 @@
     </main>
   </div>
 
+  <div id="scheduleModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="modalTitle">Jadwalkan Tugas Anggota</h3>
+        <button class="modal-close" type="button">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <label>Nama Anggota</label>
+          <input id="scheduleMemberName" type="text" disabled style="background: #f5f5f5;">
+        </div>
+        <div class="control-group">
+          <label for="scheduleDate">Pilih Tanggal</label>
+          <select id="scheduleDate">
+            <option value="">-- Pilih Tanggal --</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="scheduleRole">Pilih Role / Posisi</label>
+          <select id="scheduleRole">
+            <option value="">-- Pilih Role --</option>
+            <option value="Operator">Operator</option>
+            <option value="Kameramen">Kameramen</option>
+            <option value="Supervisor">Supervisor</option>
+            <option value="Editor">Editor</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="scheduleNotes">Catatan (Opsional)</label>
+          <input id="scheduleNotes" type="text" placeholder="Catatan tambahan...">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="modalCancelBtn" class="btn-modal secondary" type="button">Batal</button>
+        <button id="modalSaveBtn" class="btn-modal primary" type="button">Jadwalkan</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // Default member data
+    const DEFAULT_MEMBERS = [
+      { nama: "Rikha", role: "Operator", catatan: "Distribusi merata" },
+      { nama: "Jeni", role: "Kameramen", catatan: "" },
+      { nama: "Claire", role: "Supervisor", catatan: "Prioritaskan pekan depan" },
+      { nama: "Belinda", role: "Kameramen", catatan: "Belum masuk roster bulan ini" },
+      { nama: "Doni", role: "Editor", catatan: "" },
+      { nama: "Rudi", role: "Operator", catatan: "" },
+      { nama: "Sinta", role: "Supervisor", catatan: "" },
+      { nama: "Tejo", role: "Kameramen", catatan: "" }
+    ];
+
+    const DEFAULT_SCHEDULE = [
+      { date: "2026-03-05", time: "06:45", title: "Misa Subuh", status: "Siap" },
+      { date: "2026-03-05", time: "11:00", title: "Misa Siang", status: "Siap" },
+      { date: "2026-03-07", time: "18:30", title: "Misa Sore", status: "Siap" },
+      { date: "2026-03-12", time: "06:45", title: "Misa Subuh", status: "Siap" },
+      { date: "2026-03-15", time: "11:00", title: "Misa Siang", status: "Siap" }
+    ];
+
+    // DOM Elements
     const liveDateTime = document.getElementById("liveDateTime");
+    const monthSelector = document.getElementById("monthSelector");
+    const targetMinInput = document.getElementById("targetMinInput");
+    const periodChip = document.getElementById("periodChip");
+    const searchFilter = document.getElementById("searchFilter");
+    const roleFilter = document.getElementById("roleFilter");
+    const statusFilter = document.getElementById("statusFilter");
+    const monitoringTable = document.getElementById("monitoringTable");
+    const totalMembers = document.getElementById("totalMembers");
+    const completedMembers = document.getElementById("completedMembers");
+    const shortage1Members = document.getElementById("shortage1Members");
+    const shortageMultiMembers = document.getElementById("shortageMultiMembers");
+
+    // Modal elements
+    const scheduleModal = document.getElementById("scheduleModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const scheduleMemberName = document.getElementById("scheduleMemberName");
+    const scheduleDate = document.getElementById("scheduleDate");
+    const scheduleRole = document.getElementById("scheduleRole");
+    const scheduleNotes = document.getElementById("scheduleNotes");
+    const modalCancelBtn = document.getElementById("modalCancelBtn");
+    const modalSaveBtn = document.getElementById("modalSaveBtn");
+    const modalCloseBtn = document.querySelector(".modal-close");
+
+    // State variables
+    let currentMonth = 2;
+    let targetMinimum = 2;
+    let currentSortColumn = null;
+    let sortDirection = "asc";
+    let currentSchedulingMember = null;
+
+    // Initialize
+    function init() {
+      updateLiveDateTime();
+      setInterval(updateLiveDateTime, 1000);
+      loadMemberTasks();
+      populateScheduleDates();
+      render();
+    }
 
     function updateLiveDateTime() {
       const now = new Date();
@@ -416,8 +702,234 @@
       liveDateTime.textContent = day + ", " + date + " " + month + " " + year + " " + hour + ":" + minute + ":" + second;
     }
 
-    updateLiveDateTime();
-    setInterval(updateLiveDateTime, 1000);
+    function getMemberTasks(memberName, monthIndex) {
+      const key = "crembo-member-tasks-" + memberName + "-" + monthIndex;
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : [];
+    }
+
+    function saveMemberTasks(memberName, monthIndex, tasks) {
+      const key = "crembo-member-tasks-" + memberName + "-" + monthIndex;
+      localStorage.setItem(key, JSON.stringify(tasks));
+    }
+
+    function loadMemberTasks() {
+      // Initialize with default tasks if not present
+      DEFAULT_MEMBERS.forEach(function (member) {
+        [0, 1, 2, 3, 4].forEach(function (month) {
+          if (!localStorage.getItem("crembo-member-tasks-" + member.nama + "-" + month)) {
+            const defaultCount = member.nama === "Rikha" && month === 2 ? 3 : 
+                                 member.nama === "Jeni" && month === 2 ? 2 :
+                                 member.nama === "Claire" && month === 2 ? 1 : 0;
+            const tasks = [];
+            for (let i = 0; i < defaultCount; i++) {
+              tasks.push({ date: DEFAULT_SCHEDULE[i % DEFAULT_SCHEDULE.length].date, role: "Operator" });
+            }
+            saveMemberTasks(member.nama, month, tasks);
+          }
+        });
+      });
+    }
+
+    function getMonthName(monthIndex) {
+      const names = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+      return names[monthIndex];
+    }
+
+    function getCurrentYear() {
+      return new Date().getFullYear();
+    }
+
+    function populateScheduleDates() {
+      const options = [];
+      DEFAULT_SCHEDULE.forEach(function (item) {
+        const dateStr = item.date + " (" + item.title + ")";
+        if (!options.includes(dateStr)) {
+          const optEl = document.createElement("option");
+          optEl.value = item.date;
+          optEl.textContent = dateStr;
+          scheduleDate.appendChild(optEl);
+        }
+      });
+    }
+
+    function calculateStatus(totalTasks) {
+      if (totalTasks >= targetMinimum) {
+        return { label: "Aman", class: "ok" };
+      } else if (totalTasks === targetMinimum - 1) {
+        return { label: "Perlu Tambahan", class: "warn" };
+      } else {
+        return { label: "Kritis", class: "danger" };
+      }
+    }
+
+    function renderTable() {
+      const monthIdx = parseInt(monthSelector.value || currentMonth);
+      currentMonth = monthIdx;
+
+      let data = DEFAULT_MEMBERS.map(function (member) {
+        const tasks = getMemberTasks(member.nama, monthIdx);
+        const total = tasks.length;
+        const shortage = Math.max(0, targetMinimum - total);
+        const status = calculateStatus(total);
+        return {
+          nama: member.nama,
+          role: member.role,
+          total: total,
+          shortage: shortage,
+          status: status.label,
+          statusClass: status.class,
+          catatan: member.catatan
+        };
+      });
+
+      // Apply filters
+      const searchTerm = searchFilter.value.toLowerCase();
+      const selectedRole = roleFilter.value;
+      const selectedStatus = statusFilter.value;
+
+      data = data.filter(function (item) {
+        const matchName = searchTerm === "" || item.nama.toLowerCase().includes(searchTerm);
+        const matchRole = selectedRole === "" || item.role === selectedRole;
+        const matchStatus = selectedStatus === "" || item.status === selectedStatus;
+        return matchName && matchRole && matchStatus;
+      });
+
+      // Apply sorting
+      if (currentSortColumn) {
+        data.sort(function (a, b) {
+          let aVal = a[currentSortColumn];
+          let bVal = b[currentSortColumn];
+          if (typeof aVal === "string") {
+            aVal = aVal.toLowerCase();
+            bVal = bVal.toLowerCase();
+          }
+          if (sortDirection === "asc") {
+            return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+          } else {
+            return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+          }
+        });
+      }
+
+      // Render rows
+      monitoringTable.innerHTML = data.map(function (item) {
+        return '<tr>' +
+          '<td>' + item.nama + '</td>' +
+          '<td>' + item.role + '</td>' +
+          '<td>' + item.total + '</td>' +
+          '<td>' + item.shortage + '</td>' +
+          '<td><span class="pill ' + item.statusClass + '">' + item.status + '</span></td>' +
+          '<td>' + item.catatan + '</td>' +
+          '<td>' + (item.shortage > 0 ? '<button class="action-btn schedule-btn" data-member="' + item.nama + '">Jadwalkan</button>' : '-') + '</td>' +
+          '</tr>';
+      }).join("");
+
+      // Attach event listeners
+      document.querySelectorAll(".schedule-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          openScheduleModal(btn.getAttribute("data-member"));
+        });
+      });
+
+      // Update summary
+      const total = DEFAULT_MEMBERS.length;
+      const completed = data.filter(function (d) { return d.shortage === 0; }).length;
+      const shortage1 = data.filter(function (d) { return d.shortage === 1; }).length;
+      const shortageMulti = data.filter(function (d) { return d.shortage > 1; }).length;
+
+      totalMembers.textContent = total;
+      completedMembers.textContent = completed;
+      shortage1Members.textContent = shortage1;
+      shortageMultiMembers.textContent = shortageMulti;
+
+      periodChip.textContent = "Periode: " + getMonthName(monthIdx) + " " + getCurrentYear();
+    }
+
+    function render() {
+      renderTable();
+      updateSortHeaders();
+    }
+
+    function updateSortHeaders() {
+      document.querySelectorAll(".sortable-header").forEach(function (header) {
+        const col = header.getAttribute("data-sort");
+        header.classList.remove("asc", "desc");
+        if (currentSortColumn === col) {
+          header.classList.add(sortDirection);
+        }
+      });
+    }
+
+    function openScheduleModal(memberName) {
+      currentSchedulingMember = memberName;
+      scheduleMemberName.value = memberName;
+      scheduleDate.value = "";
+      scheduleRole.value = "";
+      scheduleNotes.value = "";
+      scheduleModal.classList.add("show");
+    }
+
+    function closeScheduleModal() {
+      scheduleModal.classList.remove("show");
+      currentSchedulingMember = null;
+    }
+
+    function saveScheduledTask() {
+      if (!currentSchedulingMember || !scheduleDate.value || !scheduleRole.value) {
+        alert("Harap isi semua field yang diperlukan");
+        return;
+      }
+
+      const monthIdx = parseInt(monthSelector.value || currentMonth);
+      const tasks = getMemberTasks(currentSchedulingMember, monthIdx);
+      tasks.push({
+        date: scheduleDate.value,
+        role: scheduleRole.value,
+        notes: scheduleNotes.value
+      });
+      saveMemberTasks(currentSchedulingMember, monthIdx, tasks);
+      
+      alert("Tugas berhasil dijadwalkan untuk " + currentSchedulingMember);
+      closeScheduleModal();
+      render();
+    }
+
+    // Event listeners
+    monthSelector.addEventListener("change", render);
+    targetMinInput.addEventListener("change", function () {
+      targetMinimum = parseInt(this.value) || 2;
+      render();
+    });
+
+    searchFilter.addEventListener("input", render);
+    roleFilter.addEventListener("change", render);
+    statusFilter.addEventListener("change", render);
+
+    document.querySelectorAll(".sortable-header").forEach(function (header) {
+      header.addEventListener("click", function () {
+        const col = this.getAttribute("data-sort");
+        if (currentSortColumn === col) {
+          sortDirection = sortDirection === "asc" ? "desc" : "asc";
+        } else {
+          currentSortColumn = col;
+          sortDirection = "asc";
+        }
+        render();
+      });
+    });
+
+    modalCancelBtn.addEventListener("click", closeScheduleModal);
+    modalCloseBtn.addEventListener("click", closeScheduleModal);
+    modalSaveBtn.addEventListener("click", saveScheduledTask);
+
+    scheduleModal.addEventListener("click", function (e) {
+      if (e.target === scheduleModal) {
+        closeScheduleModal();
+      }
+    });
+
+    init();
   </script>
 </body>
 </html>
