@@ -514,6 +514,200 @@
       margin-top: 10px;
     }
 
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: #fff;
+      border: 2px solid #1f1f1f;
+      border-radius: 14px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid #c8c8c8;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-head h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: #5b5b5b;
+    }
+
+    .modal-body {
+      padding: 16px;
+    }
+
+    .control-group {
+      margin-bottom: 12px;
+    }
+
+    .control-group label {
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: #5b5b5b;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .control-group input {
+      width: 100%;
+      border: 1px solid #b7b7b7;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+
+    .time-preview {
+      margin-top: 6px;
+      border: 1px dashed #c8c8c8;
+      border-radius: 8px;
+      background: #f9f9f9;
+      padding: 7px 9px;
+      font-size: 0.78rem;
+      color: #4b5563;
+    }
+
+    .weekly-settings {
+      border: 1px dashed #c8c8c8;
+      border-radius: 10px;
+      padding: 10px;
+      background: #fcfcfc;
+    }
+
+    .weekly-settings h4 {
+      margin: 0 0 8px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: #4b5563;
+    }
+
+    .weekday-grid {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .weekday-grid label {
+      margin: 0;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #4b5563;
+    }
+
+    .weekday-grid input {
+      width: 100%;
+      border: 1px solid #b7b7b7;
+      border-radius: 8px;
+      padding: 7px 8px;
+      font-size: 0.82rem;
+      font-family: inherit;
+    }
+
+    .settings-note {
+      font-size: 0.74rem;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+
+    .blackout-list {
+      border: 1px solid #d1d1d1;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      background: #fafafa;
+    }
+
+    .blackout-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border-bottom: 1px solid #e1e1e1;
+      font-size: 0.85rem;
+    }
+
+    .blackout-item:last-child {
+      border-bottom: none;
+    }
+
+    .blackout-item button {
+      border: 1px solid #ef4444;
+      background: #fff1f1;
+      color: #b42323;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      padding: 12px 16px;
+      border-top: 1px solid #d1d1d1;
+      background: #fafafa;
+    }
+
+    .btn-modal {
+      border: 1px solid #b7b7b7;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-modal.primary {
+      background: #2563eb;
+      color: #fff;
+      border-color: #2563eb;
+    }
+
+    .btn-modal.secondary {
+      background: #fff;
+      color: #111;
+      border-color: #b7b7b7;
+    }
+
     @media (max-width: 1220px) {
       .cards { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
       .raya-grid { grid-template-columns: 1fr; }
@@ -612,6 +806,47 @@
         </article>
       </section>
 
+      <section id="weeklySettingsPanel" class="panel" aria-label="Pengaturan jam misa rutin otomatis">
+        <header class="panel-head">
+          <h2>Pengaturan Jam Misa Rutin Otomatis</h2>
+          <button id="toggleWeeklySettingsBtn" class="btn ghost" type="button" aria-expanded="false" aria-controls="weeklySettingsBody">Tampilkan</button>
+        </header>
+        <div id="weeklySettingsBody" class="panel-body" hidden>
+          <div class="weekly-settings">
+            <div class="weekday-grid">
+              <label for="timeSun">Minggu</label>
+              <input id="timeSun" type="text" placeholder="07:30, 10:00, 16:30, 18:00">
+            </div>
+            <div class="weekday-grid">
+              <label for="timeMon">Senin</label>
+              <input id="timeMon" type="text" placeholder="18:00">
+            </div>
+            <div class="weekday-grid">
+              <label for="timeTue">Selasa</label>
+              <input id="timeTue" type="text" placeholder="18:00">
+            </div>
+            <div class="weekday-grid">
+              <label for="timeWed">Rabu</label>
+              <input id="timeWed" type="text" placeholder="18:00">
+            </div>
+            <div class="weekday-grid">
+              <label for="timeThu">Kamis</label>
+              <input id="timeThu" type="text" placeholder="18:00">
+            </div>
+            <div class="weekday-grid">
+              <label for="timeFri">Jumat</label>
+              <input id="timeFri" type="text" placeholder="18:00">
+            </div>
+            <div class="weekday-grid">
+              <label for="timeSat">Sabtu</label>
+              <input id="timeSat" type="text" placeholder="18:00">
+            </div>
+            <button id="saveWeeklyTimesBtn" class="btn-modal primary" type="button">Simpan Jam Rutin</button>
+            <div class="settings-note">Format jam: HH:MM. Jika lebih dari satu jam, pisahkan dengan koma. Contoh: 07:30, 10:00, 16:30, 18:00</div>
+          </div>
+        </div>
+      </section>
+
       <section class="panel" aria-label="Filter dan mode jadwal">
         <header class="panel-head">
           <h2>Filter & Mode Jadwal</h2>
@@ -646,6 +881,7 @@
             </div>
             <div class="action-set">
               <button id="addScheduleBtn" class="btn primary" type="button">+ Tambah Jadwal</button>
+              <button id="manageBlackoutBtn" class="btn ghost" type="button">Atur Tanggal Ditiadakan</button>
             </div>
           </div>
           <p class="helper-note" id="roleNote">-</p>
@@ -686,54 +922,58 @@
         </div>
       </section>
     </main>
+
+    <div id="blackoutModal" class="modal-overlay">
+      <div class="modal">
+        <div class="modal-head">
+          <h3>Atur Tanggal Misa Ditiadakan</h3>
+          <button class="modal-close" type="button">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="control-group">
+            <label for="blackoutDateInput">Tanggal Misa Ditiadakan</label>
+            <input id="blackoutDateInput" type="date">
+            <div id="blackoutTimePreview" class="time-preview">Pilih tanggal terlebih dahulu untuk melihat jam yang akan ditiadakan.</div>
+          </div>
+          <div class="control-group">
+            <label for="blackoutTimeInput">Jam Misa Ditiadakan (pilih sendiri)</label>
+            <input id="blackoutTimeInput" type="time" step="60">
+          </div>
+          <div class="control-group">
+            <label>Daftar Tanggal Ditiadakan</label>
+            <div id="blackoutList" class="blackout-list">
+              <div style="padding: 12px; text-align: center; color: #999;">Belum ada tanggal ditiadakan</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="blackoutAddBtn" class="btn-modal primary" type="button">Tambah Tanggal</button>
+          <button id="blackoutCloseBtn" class="btn-modal secondary" type="button">Tutup</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
     const REGULAR_KEY = "crembo-admin-streaming-schedule";
     const RAYA_KEY = "crembo-admin-streaming-raya";
+    const BLACKOUT_KEY = "crembo-admin-streaming-blackout";
+    const WEEKLY_TIMES_KEY = "crembo-admin-weekly-mass-times";
 
-    const DEFAULT_REGULAR = [
-      {
-        id: "reg-1",
-        date: "2026-03-01",
-        time: "18:00",
-        title: "Misa Minggu Biasa",
-        operator: "Rikha",
-        camera: "Jeni",
-        supervisor: "Tyas",
-        status: "siap"
-      },
-      {
-        id: "reg-2",
-        date: "2026-03-08",
-        time: "18:00",
-        title: "Misa Minggu Biasa",
-        operator: "Lisa",
-        camera: "Evan",
-        supervisor: "Jose",
-        status: "siap"
-      },
-      {
-        id: "reg-3",
-        date: "2026-03-15",
-        time: "18:00",
-        title: "Misa Minggu Biasa",
-        operator: "",
-        camera: "Kanes",
-        supervisor: "Claire",
-        status: "pending"
-      },
-      {
-        id: "reg-4",
-        date: "2026-03-22",
-        time: "18:00",
-        title: "Misa Minggu Biasa",
-        operator: "Asha",
-        camera: "Paul",
-        supervisor: "Christoforus",
-        status: "siap"
-      }
-    ];
+    const DEFAULT_REGULAR = [];
+
+    const DEFAULT_WEEKLY_TIMES = {
+      0: ["07:30", "10:00", "16:30", "18:00"],
+      1: ["18:00"],
+      2: ["18:00"],
+      3: ["18:00"],
+      4: ["18:00"],
+      5: ["18:00"],
+      6: ["18:00"]
+    };
+    const OPERATOR_POOL = ["Rikha", "Lisa", "Asha", "Nadia", "Tita", "Vio", "Belinda", "Doni"];
+    const CAMERA_POOL = ["Jeni", "Evan", "Kanes", "Paul", "Reva", "Arya", "Chessa", "Jose"];
+    const SUPERVISOR_POOL = ["Tyas", "Claire", "Christoforus", "Luciana", "Panji", "Stella", "Bolun", "There"];
 
     const DEFAULT_RAYA = [
       {
@@ -796,6 +1036,27 @@
     const metricPending = document.getElementById("metricPending");
 
     const addScheduleBtn = document.getElementById("addScheduleBtn");
+    const manageBlackoutBtn = document.getElementById("manageBlackoutBtn");
+    const blackoutModal = document.getElementById("blackoutModal");
+    const blackoutDateInput = document.getElementById("blackoutDateInput");
+    const blackoutList = document.getElementById("blackoutList");
+    const blackoutAddBtn = document.getElementById("blackoutAddBtn");
+    const blackoutCloseBtn = document.getElementById("blackoutCloseBtn");
+    const blackoutTimePreview = document.getElementById("blackoutTimePreview");
+    const blackoutTimeInput = document.getElementById("blackoutTimeInput");
+    const saveWeeklyTimesBtn = document.getElementById("saveWeeklyTimesBtn");
+    const toggleWeeklySettingsBtn = document.getElementById("toggleWeeklySettingsBtn");
+    const weeklySettingsBody = document.getElementById("weeklySettingsBody");
+    const weeklyTimeInputs = {
+      0: document.getElementById("timeSun"),
+      1: document.getElementById("timeMon"),
+      2: document.getElementById("timeTue"),
+      3: document.getElementById("timeWed"),
+      4: document.getElementById("timeThu"),
+      5: document.getElementById("timeFri"),
+      6: document.getElementById("timeSat")
+    };
+    const modalCloseBtn = blackoutModal.querySelector(".modal-close");
 
     function getCurrentRole() {
       const params = new URLSearchParams(window.location.search);
@@ -838,12 +1099,173 @@
       }
     }
 
+    function toIsoDate(year, month, day) {
+      return String(year) + "-" + String(month).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+    }
+
+    function normalizeTimesArray(times) {
+      const seen = {};
+      return times.filter(function (time) {
+        return /^([01]\d|2[0-3]):[0-5]\d$/.test(time);
+      }).filter(function (time) {
+        if (seen[time]) {
+          return false;
+        }
+        seen[time] = true;
+        return true;
+      }).sort();
+    }
+
+    function parseTimesInput(rawValue) {
+      const parts = String(rawValue || "")
+        .split(",")
+        .map(function (item) { return item.trim(); })
+        .filter(function (item) { return item.length > 0; });
+      return normalizeTimesArray(parts);
+    }
+
+    function getWeeklyTimesConfig() {
+      let stored = null;
+      try {
+        const raw = localStorage.getItem(WEEKLY_TIMES_KEY);
+        stored = raw ? JSON.parse(raw) : null;
+      } catch (error) {
+        stored = null;
+      }
+
+      const result = {};
+      for (let day = 0; day <= 6; day += 1) {
+        const source = stored && Array.isArray(stored[day]) ? stored[day] : DEFAULT_WEEKLY_TIMES[day];
+        result[day] = normalizeTimesArray(source);
+      }
+      return result;
+    }
+
+    function saveWeeklyTimesConfig(config) {
+      localStorage.setItem(WEEKLY_TIMES_KEY, JSON.stringify(config));
+    }
+
+    function renderWeeklyTimesInputs() {
+      const config = getWeeklyTimesConfig();
+      for (let day = 0; day <= 6; day += 1) {
+        weeklyTimeInputs[day].value = config[day].join(", ");
+      }
+    }
+
+    function getMassTimesByWeekday(dayOfWeek) {
+      const config = getWeeklyTimesConfig();
+      return config[dayOfWeek] || [];
+    }
+
+    function getMassTitleByWeekday(dayOfWeek) {
+      return dayOfWeek === 0 ? "Misa Minggu" : "Misa Harian";
+    }
+
+    function getTimesByDate(dateStr) {
+      const dateObj = new Date(dateStr + "T00:00:00");
+      return getMassTimesByWeekday(dateObj.getDay());
+    }
+
+    function buildRoutineMonth(year, month) {
+      const totalDays = new Date(year, month, 0).getDate();
+      const rows = [];
+      let idx = 0;
+
+      for (let day = 1; day <= totalDays; day += 1) {
+        const dateObj = new Date(year, month - 1, day);
+        const dayOfWeek = dateObj.getDay();
+        const dateStr = toIsoDate(year, month, day);
+        const times = getMassTimesByWeekday(dayOfWeek);
+
+        times.forEach(function (time, timeIndex) {
+          const seed = idx + timeIndex;
+          const operator = OPERATOR_POOL[seed % OPERATOR_POOL.length];
+          const camera = CAMERA_POOL[(seed + 2) % CAMERA_POOL.length];
+          const supervisor = SUPERVISOR_POOL[(seed + 4) % SUPERVISOR_POOL.length];
+          const pending = day % 7 === 0 && time === "18:00";
+
+          rows.push({
+            id: "reg-" + dateStr + "-" + time.replace(":", ""),
+            date: dateStr,
+            time: time,
+            title: getMassTitleByWeekday(dayOfWeek),
+            operator: pending ? "" : operator,
+            camera: camera,
+            supervisor: supervisor,
+            status: pending ? "pending" : "siap"
+          });
+        });
+
+        idx += 1;
+      }
+
+      return rows;
+    }
+
     function getRegularData() {
-      return readJsonArray(REGULAR_KEY, DEFAULT_REGULAR);
+      const monthValue = monthFilter ? monthFilter.value : "all";
+      const yearValue = yearFilter ? yearFilter.value : String(new Date().getFullYear());
+      const year = Number(yearValue);
+
+      if (monthValue === "all") {
+        const merged = [];
+        for (let month = 1; month <= 12; month += 1) {
+          merged.push.apply(merged, buildRoutineMonth(year, month));
+        }
+        return merged;
+      }
+
+      return buildRoutineMonth(year, Number(monthValue));
     }
 
     function getRayaData() {
       return readJsonArray(RAYA_KEY, DEFAULT_RAYA);
+    }
+
+    function getBlackoutEntries() {
+      return readJsonArray(BLACKOUT_KEY, []).filter(function (item) {
+        return typeof item === "string" && item.trim() !== "";
+      });
+    }
+
+    function saveBlackoutEntries(entries) {
+      localStorage.setItem(BLACKOUT_KEY, JSON.stringify(entries));
+    }
+
+    function makeBlackoutKey(dateStr, timeStr) {
+      return dateStr + "|" + timeStr;
+    }
+
+    function parseBlackoutKey(key) {
+      if (key.indexOf("|") === -1) {
+        return { date: key, time: "*" };
+      }
+      const parts = key.split("|");
+      return { date: parts[0], time: parts[1] || "*" };
+    }
+
+    function addBlackoutSlot(dateStr, timeStr) {
+      const entries = getBlackoutEntries();
+      const key = makeBlackoutKey(dateStr, timeStr);
+      if (!entries.includes(key)) {
+        entries.push(key);
+        entries.sort();
+        saveBlackoutEntries(entries);
+      }
+    }
+
+    function removeBlackoutSlot(key) {
+      const entries = getBlackoutEntries().filter(function (item) {
+        return item !== key;
+      });
+      saveBlackoutEntries(entries);
+    }
+
+    function isBlackoutSlot(dateStr, timeStr) {
+      return getBlackoutEntries().some(function (key) {
+        const parsed = parseBlackoutKey(key);
+        return parsed.date === dateStr && (parsed.time === "*" || parsed.time === timeStr);
+      });
     }
 
     function statusBadge(status) {
@@ -891,6 +1313,9 @@
       const rows = getRegularData().filter(function (item) {
         return matchesFilter(item, monthValue, yearValue, keyword);
       });
+      const filteredRows = rows.filter(function (item) {
+        return !isBlackoutSlot(item.date, item.time);
+      });
 
       regularRows.innerHTML = "";
 
@@ -899,7 +1324,12 @@
         return;
       }
 
-      regularRows.innerHTML = rows.map(function (item) {
+      if (!filteredRows.length) {
+        regularRows.innerHTML = '<tr><td colspan="8">Tidak ada jadwal untuk filter saat ini (ada jadwal tapi ditiadakan).</td></tr>';
+        return;
+      }
+
+      regularRows.innerHTML = filteredRows.map(function (item) {
         const actionBtn = role === "super_admin"
           ? '<a class="btn ghost" href="penugasan-petugas-misa.html">Atur Petugas</a>'
           : '<button class="btn ghost" type="button">Lihat Detail</button>';
@@ -977,14 +1407,12 @@
 
     function updateRoleUi(role) {
       roleChip.textContent = "Role: " + formatRole(role);
-
       if (role === "super_admin") {
         roleNote.textContent = "Mode Super Admin: dapat menambah jadwal dan mengatur petugas semua sesi.";
-        addScheduleBtn.hidden = false;
       } else {
         roleNote.textContent = "Mode Admin: fokus monitoring jadwal dan detail tim, dapat mengajukan update jadwal.";
-        addScheduleBtn.hidden = false;
       }
+      addScheduleBtn.hidden = false;
     }
 
     function updateLiveDateTime() {
@@ -1001,6 +1429,47 @@
       liveDateTime.textContent = day + ", " + date + " " + month + " " + year + " " + hour + ":" + minute + ":" + second;
     }
 
+    function renderBlackoutList(role) {
+      const entries = getBlackoutEntries();
+      if (!entries.length) {
+        blackoutList.innerHTML = '<div style="padding: 12px; text-align: center; color: #999;">Belum ada tanggal ditiadakan</div>';
+        return;
+      }
+
+      blackoutList.innerHTML = entries.map(function (key) {
+        const parsed = parseBlackoutKey(key);
+        const dateObj = new Date(parsed.date + "T00:00:00");
+        const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+        const dayName = dayNames[dateObj.getDay()];
+        const timeLabel = parsed.time === "*" ? "Semua jam" : parsed.time;
+        return '<div class="blackout-item" data-key="' + key + '">' +
+          '<span>' + parsed.date + ' (' + dayName + ') - Jam: ' + timeLabel + '</span>' +
+          '<button type="button" class="remove-blackout">Hapus</button>' +
+        '</div>';
+      }).join("");
+
+      blackoutList.querySelectorAll(".remove-blackout").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          const key = btn.closest(".blackout-item").getAttribute("data-key");
+          removeBlackoutSlot(key);
+          renderBlackoutList(role);
+          rerender(role);
+        });
+      });
+    }
+
+    function openBlackoutModal(role) {
+      blackoutDateInput.value = "";
+      blackoutTimeInput.value = "";
+      blackoutTimePreview.textContent = "Pilih tanggal terlebih dahulu untuk melihat jam yang akan ditiadakan.";
+      renderBlackoutList(role);
+      blackoutModal.classList.add("show");
+    }
+
+    function closeBlackoutModal() {
+      blackoutModal.classList.remove("show");
+    }
+
     function rerender(role) {
       renderMetrics();
       renderRegularRows(role);
@@ -1009,19 +1478,126 @@
 
     const currentRole = getCurrentRole();
     updateRoleUi(currentRole);
+    renderWeeklyTimesInputs();
     updateLiveDateTime();
     setInterval(updateLiveDateTime, 1000);
     rerender(currentRole);
 
-    tabRegular.addEventListener("click", function () { setTab("regular"); });
-    tabRaya.addEventListener("click", function () { setTab("raya"); });
+    tabRegular.addEventListener("click", function () {
+      setTab("regular");
+    });
+    tabRaya.addEventListener("click", function () {
+      setTab("raya");
+    });
 
-    monthFilter.addEventListener("change", function () { rerender(currentRole); });
-    yearFilter.addEventListener("change", function () { rerender(currentRole); });
-    searchFilter.addEventListener("input", function () { rerender(currentRole); });
+    monthFilter.addEventListener("change", function () {
+      rerender(currentRole);
+    });
+    yearFilter.addEventListener("change", function () {
+      rerender(currentRole);
+    });
+    searchFilter.addEventListener("input", function () {
+      rerender(currentRole);
+    });
 
     addScheduleBtn.addEventListener("click", function () {
       window.location.href = "registrasi-tugas-misa-besar.html";
+    });
+
+    manageBlackoutBtn.addEventListener("click", function () {
+      openBlackoutModal(currentRole);
+    });
+
+    blackoutAddBtn.addEventListener("click", function () {
+      const dateStr = blackoutDateInput.value;
+      const timeStr = blackoutTimeInput.value;
+      if (!dateStr) {
+        window.alert("Silakan pilih tanggal terlebih dahulu");
+        return;
+      }
+      if (!timeStr) {
+        window.alert("Silakan pilih jam peniadaan terlebih dahulu");
+        return;
+      }
+
+      const allowedTimes = getTimesByDate(dateStr);
+      if (!allowedTimes.length) {
+        window.alert("Tidak ada jam misa rutin untuk tanggal ini. Atur dulu di Pengaturan Jam Misa Rutin Otomatis.");
+        return;
+      }
+      if (!allowedTimes.includes(timeStr)) {
+        window.alert("Jam tidak sesuai jadwal rutin tanggal ini. Jam yang tersedia: " + allowedTimes.join(", "));
+        return;
+      }
+
+      addBlackoutSlot(dateStr, timeStr);
+      blackoutDateInput.value = "";
+      blackoutTimeInput.value = "";
+      blackoutTimePreview.textContent = "Pilih tanggal terlebih dahulu untuk melihat jam yang akan ditiadakan.";
+      renderBlackoutList(currentRole);
+      rerender(currentRole);
+    });
+
+    blackoutDateInput.addEventListener("change", function () {
+      const dateStr = blackoutDateInput.value;
+      if (!dateStr) {
+        blackoutTimePreview.textContent = "Pilih tanggal terlebih dahulu untuk melihat jam yang akan ditiadakan.";
+        blackoutTimeInput.value = "";
+        return;
+      }
+      const times = getTimesByDate(dateStr);
+      blackoutTimePreview.textContent = "Jam yang tersedia untuk tanggal ini: " + (times.length ? times.join(", ") : "Tidak ada jam rutin");
+      blackoutTimeInput.value = times[0] || "";
+    });
+
+    saveWeeklyTimesBtn.addEventListener("click", function () {
+      const config = {};
+      for (let day = 0; day <= 6; day += 1) {
+        const times = parseTimesInput(weeklyTimeInputs[day].value);
+        config[day] = times;
+      }
+
+      const hasAnyTime = Object.keys(config).some(function (key) {
+        return config[key].length > 0;
+      });
+
+      if (!hasAnyTime) {
+        window.alert("Minimal harus ada satu jam misa rutin yang diatur.");
+        return;
+      }
+
+      saveWeeklyTimesConfig(config);
+      renderWeeklyTimesInputs();
+
+      if (blackoutDateInput.value) {
+        const times = getTimesByDate(blackoutDateInput.value);
+        blackoutTimePreview.textContent = "Jam yang tersedia untuk tanggal ini: " + (times.length ? times.join(", ") : "Tidak ada jam rutin");
+        blackoutTimeInput.value = times[0] || "";
+      }
+
+      rerender(currentRole);
+      window.alert("Jam misa rutin berhasil disimpan.");
+    });
+
+    toggleWeeklySettingsBtn.addEventListener("click", function () {
+      const isHidden = weeklySettingsBody.hasAttribute("hidden");
+      if (isHidden) {
+        weeklySettingsBody.removeAttribute("hidden");
+        toggleWeeklySettingsBtn.textContent = "Sembunyikan";
+        toggleWeeklySettingsBtn.setAttribute("aria-expanded", "true");
+      } else {
+        weeklySettingsBody.setAttribute("hidden", "");
+        toggleWeeklySettingsBtn.textContent = "Tampilkan";
+        toggleWeeklySettingsBtn.setAttribute("aria-expanded", "false");
+      }
+    });
+
+    blackoutCloseBtn.addEventListener("click", closeBlackoutModal);
+    modalCloseBtn.addEventListener("click", closeBlackoutModal);
+    blackoutModal.addEventListener("click", function (event) {
+      if (event.target === blackoutModal) {
+        closeBlackoutModal();
+      }
     });
   </script>
 </body>
