@@ -555,7 +555,7 @@
       <div class="menu-group">
         <button class="group-toggle" type="button">Tugas Streaming <span>-</span></button>
         <div class="group-items">
-          <a class="menu-link active" href="jadwal-tugas-streaming-admin.html">Jadwal Streaming / Multimedia</a>
+          <a class="menu-link active" href="jadwal-tugas-streaming-admin.html">Jadwal Streaming</a>
           <a class="menu-link" href="registrasi-tugas-misa-besar.html">Registrasi Tugas Misa Besar</a>
           <a class="menu-link" href="penugasan-petugas-misa.html">Penugasan Petugas Misa</a>
           <a class="menu-link" href="monitoring-tugas-anggota.html">Monitoring Tugas Anggota</a>
@@ -646,7 +646,6 @@
             </div>
             <div class="action-set">
               <button id="addScheduleBtn" class="btn primary" type="button">+ Tambah Jadwal</button>
-              <button id="syncBtn" class="btn ghost" type="button">Sinkronkan Registrasi</button>
             </div>
           </div>
           <p class="helper-note" id="roleNote">-</p>
@@ -797,7 +796,6 @@
     const metricPending = document.getElementById("metricPending");
 
     const addScheduleBtn = document.getElementById("addScheduleBtn");
-    const syncBtn = document.getElementById("syncBtn");
 
     function getCurrentRole() {
       const params = new URLSearchParams(window.location.search);
@@ -903,7 +901,7 @@
 
       regularRows.innerHTML = rows.map(function (item) {
         const actionBtn = role === "super_admin"
-          ? '<a class="btn ghost" href="monitoring-tugas-anggota.html">Atur Petugas</a>'
+          ? '<a class="btn ghost" href="penugasan-petugas-misa.html">Atur Petugas</a>'
           : '<button class="btn ghost" type="button">Lihat Detail</button>';
 
         return '<tr>' +
@@ -981,13 +979,11 @@
       roleChip.textContent = "Role: " + formatRole(role);
 
       if (role === "super_admin") {
-        roleNote.textContent = "Mode Super Admin: dapat menambah jadwal, mengatur petugas semua sesi, dan sinkronisasi data registrasi misa besar lintas tim.";
+        roleNote.textContent = "Mode Super Admin: dapat menambah jadwal dan mengatur petugas semua sesi.";
         addScheduleBtn.hidden = false;
-        syncBtn.hidden = false;
       } else {
-        roleNote.textContent = "Mode Admin: fokus monitoring jadwal dan detail tim, dapat mengajukan update jadwal namun sinkronisasi lintas tim dikunci.";
+        roleNote.textContent = "Mode Admin: fokus monitoring jadwal dan detail tim, dapat mengajukan update jadwal.";
         addScheduleBtn.hidden = false;
-        syncBtn.hidden = true;
       }
     }
 
@@ -1026,10 +1022,6 @@
 
     addScheduleBtn.addEventListener("click", function () {
       window.location.href = "registrasi-tugas-misa-besar.html";
-    });
-
-    syncBtn.addEventListener("click", function () {
-      window.alert("Wireframe: sinkronisasi registrasi misa besar dijalankan.");
     });
   </script>
 </body>
