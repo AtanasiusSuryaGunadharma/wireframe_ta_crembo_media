@@ -199,6 +199,7 @@
 
     input[type="text"],
     input[type="number"],
+    input[type="file"],
     textarea,
     select {
       width: 100%;
@@ -413,10 +414,109 @@
       color: #616161;
     }
 
+    .action-stack {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
     @media (max-width: 1080px) {
       .layout { grid-template-columns: 1fr; }
       .sidebar { position: static; height: auto; }
       .form-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .main { padding: 10px; }
+
+      .header,
+      .panel-head,
+      .panel-body {
+        padding: 10px;
+      }
+
+      .header h1 {
+        font-size: 1.55rem;
+      }
+
+      .image-meta {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .form-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .form-actions .btn {
+        width: 100%;
+      }
+
+      .table-wrap {
+        overflow: visible;
+        border: 0;
+        background: transparent;
+      }
+
+      table {
+        min-width: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tbody {
+        display: grid;
+        gap: 10px;
+      }
+
+      tr {
+        display: block;
+        border: 1px solid #cfcfcf;
+        border-radius: 10px;
+        background: #fff;
+        overflow: hidden;
+      }
+
+      td {
+        display: grid;
+        grid-template-columns: 94px 1fr;
+        gap: 8px;
+        border: 0;
+        border-bottom: 1px dashed #d6d6d6;
+        padding: 8px 10px;
+        text-align: left;
+      }
+
+      td:last-child {
+        border-bottom: 0;
+      }
+
+      td::before {
+        content: attr(data-label);
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #4f4f4f;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+
+      .preview-box {
+        width: 100%;
+        max-width: 180px;
+      }
+
+      .action-stack {
+        width: 100%;
+      }
+
+      .action-stack .btn {
+        flex: 1 1 120px;
+      }
     }
   </style>
 </head>
@@ -762,17 +862,17 @@
           : "";
 
         tr.innerHTML =
-          '<td><span class="drag-handle" title="Drag untuk ubah urutan">::</span></td>' +
-          '<td><div class="preview-box"' + previewStyle + '>' + (slide.backgroundImage ? "" : "Tanpa Gambar") + '</div></td>' +
-          '<td><strong>' + escapeHtml(slide.title || "-") + '</strong><br><small>' + escapeHtml(slide.description || "-") + '</small></td>' +
-          '<td><span class="slug-pill">' + escapeHtml(slide.slug || "-") + '</span></td>' +
-          '<td><a href="' + escapeHtml(slide.link || "#") + '" target="_blank" rel="noopener">' + escapeHtml(slide.link || "-") + '</a></td>' +
-          '<td>' + escapeHtml(String(slide.order)) + '</td>' +
-          '<td><span class="state-pill' + (slide.active ? ' active' : '') + '">' + (slide.active ? 'Aktif' : 'Nonaktif') + '</span></td>' +
-          '<td>' +
-            '<button class="btn ghost" type="button" data-edit-id="' + escapeHtml(slide.id) + '">Edit</button> ' +
+          '<td data-label="Urut"><span class="drag-handle" title="Drag untuk ubah urutan">::</span></td>' +
+          '<td data-label="Preview"><div class="preview-box"' + previewStyle + '>' + (slide.backgroundImage ? "" : "Tanpa Gambar") + '</div></td>' +
+          '<td data-label="Judul"><strong>' + escapeHtml(slide.title || "-") + '</strong><br><small>' + escapeHtml(slide.description || "-") + '</small></td>' +
+          '<td data-label="Slug"><span class="slug-pill">' + escapeHtml(slide.slug || "-") + '</span></td>' +
+          '<td data-label="Link"><a href="' + escapeHtml(slide.link || "#") + '" target="_blank" rel="noopener">' + escapeHtml(slide.link || "-") + '</a></td>' +
+          '<td data-label="Urutan">' + escapeHtml(String(slide.order)) + '</td>' +
+          '<td data-label="Status"><span class="state-pill' + (slide.active ? ' active' : '') + '">' + (slide.active ? 'Aktif' : 'Nonaktif') + '</span></td>' +
+          '<td data-label="Aksi"><div class="action-stack">' +
+            '<button class="btn ghost" type="button" data-edit-id="' + escapeHtml(slide.id) + '">Edit</button>' +
             '<button class="btn warn" type="button" data-delete-id="' + escapeHtml(slide.id) + '">Hapus</button>' +
-          '</td>';
+          '</div></td>';
 
         tr.addEventListener("dragstart", function () {
           draggingSlideId = slide.id;
