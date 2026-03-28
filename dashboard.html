@@ -825,20 +825,19 @@
 
     function renderContentMenu(currentRole) {
       const baseItems = [
-        "Kelola Carousel Home",
-        "Kelola Konten Tentang Crembo",
-        "Kelola Embed YouTube",
-        "Kelola Embed Google Maps",
-        "Kelola Embed Instagram",
-        "Kelola Jadwal Streaming Home",
-        "Kelola Agenda Home",
-        "Kelola Pengumuman / Berita Home",
-        "Kelola Form Pendaftaran Home"
+        { label: "Kelola Carousel Home", href: "kelola-carousel-home.html" },
+        { label: "Kelola Konten Tentang Crembo", href: "#" },
+        { label: "Kelola Embed YouTube", href: "#" },
+        { label: "Kelola Embed Google Maps", href: "#" },
+        { label: "Kelola Embed Instagram", href: "#" },
+        { label: "Kelola Jadwal Streaming Home", href: "#" },
+        { label: "Kelola Agenda Home", href: "#" },
+        { label: "Kelola Pengumuman / Berita Home", href: "#" },
+        { label: "Kelola Form Pendaftaran Home", href: "#" }
       ];
 
       const extraSuperAdmin = [
-        "Persetujuan Publikasi Konten",
-        "Riwayat Versi Konten Utama"
+        { label: "Riwayat Versi Konten Utama", href: "#" }
       ];
 
       const list = currentRole === "super_admin"
@@ -848,7 +847,7 @@
       contentMenu.innerHTML = list
         .map(function (item, index) {
           const activeClass = index === 0 ? " active" : "";
-          return '<a class="menu-link' + activeClass + '" href="#">' + item + "</a>";
+          return '<a class="menu-link' + activeClass + '" href="' + item.href + '">' + item.label + "</a>";
         })
         .join("");
     }

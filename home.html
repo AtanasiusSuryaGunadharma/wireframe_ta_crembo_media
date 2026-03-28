@@ -226,18 +226,33 @@
 			min-width: 100%;
 			scroll-snap-align: start;
 			border: 2px dashed #7a7a7a;
-			background: repeating-linear-gradient(
-				135deg,
-				#f8f8f8,
-				#f8f8f8 12px,
-				#efefef 12px,
-				#efefef 24px
-			);
 			min-height: 220px;
 			padding: 18px;
 			display: grid;
 			align-content: center;
 			gap: 8px;
+			position: relative;
+			overflow: hidden;
+			isolation: isolate;
+			background: #f5f5f5;
+		}
+
+		.slide::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			z-index: -2;
+			background-image: var(--slide-bg, repeating-linear-gradient(135deg, #f8f8f8, #f8f8f8 12px, #efefef 12px, #efefef 24px));
+			background-size: cover;
+			background-position: center;
+		}
+
+		.slide::after {
+			content: "";
+			position: absolute;
+			inset: 0;
+			z-index: -1;
+			background: linear-gradient(120deg, rgba(255, 255, 255, 0.9) 8%, rgba(255, 255, 255, 0.72) 45%, rgba(255, 255, 255, 0.45) 100%);
 		}
 
 		.slide h3 {
@@ -249,6 +264,36 @@
 			margin: 0;
 			color: #4d4d4d;
 			max-width: 58ch;
+		}
+
+		.slide-slug {
+			display: inline-block;
+			width: fit-content;
+			padding: 2px 9px;
+			border: 1px solid #9a9a9a;
+			background: #f3f3f3;
+			border-radius: 999px;
+			font-size: 0.74rem;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 0.03em;
+		}
+
+		.slide-link {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: fit-content;
+			padding: 8px 12px;
+			border: 1px solid #111;
+			background: #111;
+			color: #fff;
+			font-size: 0.84rem;
+			font-weight: 700;
+		}
+
+		.slide-link:hover {
+			background: #2a2a2a;
 		}
 
 		.carousel-btn {
@@ -838,20 +883,7 @@
 			</div>
 			<div class="carousel-wrap">
 				<button id="carouselPrev" class="carousel-btn prev" type="button" aria-label="Slide sebelumnya">&#8249;</button>
-				<div id="carouselTrack" class="carousel-track" aria-label="Daftar slide carousel">
-					<article class="slide">
-						<h3>Slide 1 - Jadwal Misa Mingguan</h3>
-						<p>Contoh isi bebas: judul, deskripsi singkat, dan call to action sesuai kebutuhan.</p>
-					</article>
-					<article class="slide">
-						<h3>Slide 2 - Open Recruitment Petugas</h3>
-						<p>Anda bisa menambahkan slide baru sebanyak apapun, lalu user bisa scroll ke samping.</p>
-					</article>
-					<article class="slide">
-						<h3>Slide 3 - Pengumuman Agenda</h3>
-						<p>Area ini low-fidelity, jadi konten dipakai sebagai placeholder wireframe yang bisa diganti.</p>
-					</article>
-				</div>
+				<div id="carouselTrack" class="carousel-track" aria-label="Daftar slide carousel"></div>
 				<button id="carouselNext" class="carousel-btn next" type="button" aria-label="Slide berikutnya">&#8250;</button>
 			</div>
 			<div id="carouselDots" class="carousel-dots" aria-hidden="true"></div>
@@ -1157,7 +1189,45 @@
 		const carouselPrev = document.getElementById("carouselPrev");
 		const carouselNext = document.getElementById("carouselNext");
 		const carouselDots = document.getElementById("carouselDots");
-		const slideCount = carouselTrack.children.length;
+		const CAROUSEL_STORAGE_KEY = "crembo-home-carousel-slides";
+		const DEFAULT_CAROUSEL_SLIDES = [
+			{
+				id: "default-1",
+				title: "Jadwal Misa Mingguan",
+				slug: "jadwal-misa",
+				description: "Lihat jadwal pelayanan streaming mingguan terbaru dari tim multimedia.",
+				link: "jadwal-streaming.html",
+				buttonText: "Lihat Jadwal",
+				backgroundImage: "",
+				order: 1,
+				active: true
+			},
+			{
+				id: "default-2",
+				title: "Open Recruitment Petugas",
+				slug: "open-recruitment",
+				description: "Bergabung sebagai petugas multimedia untuk mendukung pelayanan misa.",
+				link: "form-pendaftaran.html",
+				buttonText: "Daftar Sekarang",
+				backgroundImage: "",
+				order: 2,
+				active: true
+			},
+			{
+				id: "default-3",
+				title: "Pengumuman Agenda",
+				slug: "agenda-terbaru",
+				description: "Pantau agenda dan pengumuman terbaru komunitas Crembo Media.",
+				link: "agenda.html",
+				buttonText: "Lihat Agenda",
+				backgroundImage: "",
+				order: 3,
+				active: true
+			}
+		];
+
+		let autoScrollTimer = null;
+		let slideCount = 0;
 
 		function syncStickyOffset() {
 			const headerHeight = topHeader ? topHeader.offsetHeight : 124;
@@ -1178,7 +1248,77 @@
 			window.location.href = "search.html?q=" + encodeURIComponent(keyword);
 		});
 
+		function escapeHtml(text) {
+			return String(text || "")
+				.replace(/&/g, "&amp;")
+				.replace(/</g, "&lt;")
+				.replace(/>/g, "&gt;")
+				.replace(/\"/g, "&quot;")
+				.replace(/'/g, "&#039;");
+		}
+
+		function readCarouselSlides() {
+			try {
+				const raw = localStorage.getItem(CAROUSEL_STORAGE_KEY);
+				if (!raw) {
+					return DEFAULT_CAROUSEL_SLIDES.slice();
+				}
+
+				const parsed = JSON.parse(raw);
+				if (!Array.isArray(parsed) || !parsed.length) {
+					return DEFAULT_CAROUSEL_SLIDES.slice();
+				}
+
+				return parsed.filter(function (item) {
+					return item && item.active !== false;
+				}).sort(function (a, b) {
+					const aOrder = Number(a.order || 0);
+					const bOrder = Number(b.order || 0);
+					return aOrder - bOrder;
+				});
+			} catch (error) {
+				return DEFAULT_CAROUSEL_SLIDES.slice();
+			}
+		}
+
+		function renderCarouselSlides() {
+			const slides = readCarouselSlides();
+			carouselTrack.innerHTML = "";
+
+			if (!slides.length) {
+				carouselTrack.innerHTML =
+					'<article class="slide"><span class="slide-slug">kosong</span><h3>Belum ada slide aktif</h3><p>Admin dapat menambahkan slide melalui menu Kelola Carousel Home.</p></article>';
+				slideCount = 1;
+				return;
+			}
+
+			slides.forEach(function (item) {
+				const article = document.createElement("article");
+				article.className = "slide";
+				if (item.backgroundImage) {
+					article.style.setProperty("--slide-bg", 'url("' + String(item.backgroundImage).replace(/\"/g, "") + '")');
+				}
+
+				const slug = escapeHtml(item.slug || "slide");
+				const title = escapeHtml(item.title || "Tanpa Judul");
+				const description = escapeHtml(item.description || "");
+				const buttonLabel = escapeHtml(item.buttonText || "Lihat Detail");
+				const link = item.link ? String(item.link) : "#";
+
+				article.innerHTML =
+					'<span class="slide-slug">' + slug + '</span>' +
+					'<h3>' + title + '</h3>' +
+					'<p>' + description + '</p>' +
+					'<a class="slide-link" href="' + escapeHtml(link) + '">' + buttonLabel + '</a>';
+
+				carouselTrack.appendChild(article);
+			});
+
+			slideCount = slides.length;
+		}
+
 		function buildDots() {
+			carouselDots.innerHTML = "";
 			for (let i = 0; i < slideCount; i += 1) {
 				const dot = document.createElement("span");
 				dot.className = "dot";
@@ -1190,6 +1330,9 @@
 		}
 
 		function syncActiveDot() {
+			if (!slideCount) {
+				return;
+			}
 			const slideWidth = carouselTrack.clientWidth;
 			const activeIndex = Math.round(carouselTrack.scrollLeft / slideWidth);
 			const dots = carouselDots.querySelectorAll(".dot");
@@ -1199,14 +1342,45 @@
 		}
 
 		function scrollCarousel(direction) {
+			if (!slideCount) {
+				return;
+			}
 			const step = carouselTrack.clientWidth;
 			carouselTrack.scrollBy({ left: direction * step, behavior: "smooth" });
 		}
 
+		function startAutoScroll() {
+			if (autoScrollTimer) {
+				clearInterval(autoScrollTimer);
+			}
+
+			if (slideCount <= 1) {
+				return;
+			}
+
+			autoScrollTimer = setInterval(function () {
+				const step = carouselTrack.clientWidth;
+				const atEnd = carouselTrack.scrollLeft + step >= carouselTrack.scrollWidth - 2;
+				if (atEnd) {
+					carouselTrack.scrollTo({ left: 0, behavior: "smooth" });
+					return;
+				}
+				carouselTrack.scrollBy({ left: step, behavior: "smooth" });
+			}, 5000);
+		}
+
+		renderCarouselSlides();
 		buildDots();
 		carouselTrack.addEventListener("scroll", syncActiveDot);
 		carouselPrev.addEventListener("click", function () { scrollCarousel(-1); });
 		carouselNext.addEventListener("click", function () { scrollCarousel(1); });
+		carouselTrack.addEventListener("mouseenter", function () {
+			if (autoScrollTimer) {
+				clearInterval(autoScrollTimer);
+			}
+		});
+		carouselTrack.addEventListener("mouseleave", startAutoScroll);
+		startAutoScroll();
 
 	
     (function () {
