@@ -255,7 +255,7 @@
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(3, minmax(150px, 1fr));
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
       gap: 10px;
     }
 
@@ -266,6 +266,25 @@
       padding: 14px;
       box-shadow: var(--soft-shadow);
       border-left: 4px solid #6b7280;
+    }
+
+    .stat-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .metric-range-select {
+      border: 1px solid #b8b8b8;
+      border-radius: 999px;
+      background: #ffffff;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      color: #4b5563;
+      font-weight: 700;
+      font-family: inherit;
     }
 
     .stat.yellow { border-left-color: var(--yellow); }
@@ -461,6 +480,17 @@
       padding: 3px 7px;
       border-radius: 999px;
       background: #fafafa;
+    }
+
+    .chart-range-select {
+      border: 1px solid #b7b7b7;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 0.74rem;
+      color: #4b5563;
+      background: #ffffff;
+      font-weight: 700;
+      font-family: inherit;
     }
 
     .chart-area {
@@ -661,23 +691,48 @@
       <div class="content">
         <section class="stats" aria-label="Ringkasan tugas anggota">
           <article class="stat">
-            <p>Jadwal Tersedia Minggu Ini</p>
-            <h2>7</h2>
+            <div class="stat-head">
+              <p id="metricScheduleLabel">Jadwal Tersedia Minggu Ini</p>
+              <select id="metricScheduleRange" class="metric-range-select" aria-label="Rentang jadwal tersedia">
+                <option value="week">Minggu Ini</option>
+                <option value="month">Bulan Ini</option>
+                <option value="year">Tahun Ini</option>
+              </select>
+            </div>
+            <h2 id="metricScheduleValue">7</h2>
           </article>
           <article class="stat yellow">
             <p>Tugas Belum Dipenuhi</p>
-            <h2>2</h2>
+            <h2 id="pendingTaskValue">2</h2>
+          </article>
+          <article class="stat">
+            <p>Tugas Yang Akan Datang</p>
+            <h2 id="upcomingTaskValue">0</h2>
           </article>
           <article class="stat green">
-            <p>Tugas Selesai Bulan Ini</p>
-            <h2>5</h2>
+            <div class="stat-head">
+              <p id="metricDoneLabel">Tugas Selesai Bulan Ini</p>
+              <select id="metricDoneRange" class="metric-range-select" aria-label="Rentang tugas selesai">
+                <option value="week">Minggu Ini</option>
+                <option value="month" selected>Bulan Ini</option>
+                <option value="year">Tahun Ini</option>
+              </select>
+            </div>
+            <h2 id="metricDoneValue">5</h2>
           </article>
         </section>
 
         <section class="chart-panel" aria-label="Grafik request tugas per bulan">
           <header class="chart-head">
-            <h2>Grafik Request Tugas per Bulan</h2>
-            <span class="chart-note">12 Bulan</span>
+            <h2 id="requestChartTitle">Grafik Request Tugas per Bulan</h2>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <span id="requestChartNote" class="chart-note">12 Bulan</span>
+              <select id="requestChartRange" class="chart-range-select" aria-label="Rentang grafik request tugas">
+                <option value="week">Minggu Ini</option>
+                <option value="month" selected>Bulan Ini</option>
+                <option value="year">Tahun Ini</option>
+              </select>
+            </div>
           </header>
           <div class="chart-area">
             <svg id="requestTugasChart" viewBox="0 0 560 220" aria-label="Grafik request tugas bulanan"></svg>
@@ -800,6 +855,221 @@
     }
 
     const liveDateTime = document.getElementById("liveDateTime");
+    const metricScheduleRange = document.getElementById("metricScheduleRange");
+    const metricScheduleLabel = document.getElementById("metricScheduleLabel");
+    const metricScheduleValue = document.getElementById("metricScheduleValue");
+    const pendingTaskValue = document.getElementById("pendingTaskValue");
+    const upcomingTaskValue = document.getElementById("upcomingTaskValue");
+    const metricDoneRange = document.getElementById("metricDoneRange");
+    const metricDoneLabel = document.getElementById("metricDoneLabel");
+    const metricDoneValue = document.getElementById("metricDoneValue");
+    const requestChartRange = document.getElementById("requestChartRange");
+    const requestChartTitle = document.getElementById("requestChartTitle");
+    const requestChartNote = document.getElementById("requestChartNote");
+
+    const TASK_REQUEST_STORAGE_KEY = "crembo-member-task-requests";
+
+    function titleByRange(range) {
+      if (range === "week") {
+        return "Minggu Ini";
+      }
+      if (range === "month") {
+        return "Bulan Ini";
+      }
+      return "Tahun Ini";
+    }
+
+    function getDaysInMonth(year, monthIndex) {
+      return new Date(year, monthIndex + 1, 0).getDate();
+    }
+
+    function normalizeDateOnly(value) {
+      const raw = String(value || "").trim();
+      if (!raw) {
+        return "";
+      }
+      if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+        return raw;
+      }
+      const parsed = new Date(raw);
+      if (Number.isNaN(parsed.getTime())) {
+        return "";
+      }
+      const year = parsed.getFullYear();
+      const month = String(parsed.getMonth() + 1).padStart(2, "0");
+      const date = String(parsed.getDate()).padStart(2, "0");
+      return year + "-" + month + "-" + date;
+    }
+
+    function readTaskRequests() {
+      const raw = localStorage.getItem(TASK_REQUEST_STORAGE_KEY);
+      let parsed = null;
+      if (raw) {
+        try {
+          parsed = JSON.parse(raw);
+        } catch (error) {
+          parsed = null;
+        }
+      }
+
+      if (Array.isArray(parsed) && parsed.length) {
+        return parsed;
+      }
+
+      // Fallback demo data bila modul request belum menyimpan data ke localStorage.
+      return [
+        { requestDate: "2026-04-01", startDate: "2026-04-12", status: "Menunggu Mulai" },
+        { requestDate: "2026-04-03", startDate: "2026-04-18", status: "Menunggu Mulai" },
+        { requestDate: "2026-03-18", startDate: "2026-03-20", status: "Selesai" },
+        { requestDate: "2026-02-10", startDate: "2026-02-12", status: "Selesai" }
+      ];
+    }
+
+    function isWithinRange(dateText, range, now) {
+      const date = new Date(dateText + "T00:00:00");
+      if (Number.isNaN(date.getTime())) {
+        return false;
+      }
+
+      if (range === "year") {
+        return date.getFullYear() === now.getFullYear();
+      }
+
+      if (range === "month") {
+        return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+      }
+
+      const day = now.getDay();
+      const diffToMonday = day === 0 ? 6 : day - 1;
+      const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 7);
+      return date >= weekStart && date < weekEnd;
+    }
+
+    function buildScheduleSeries(range) {
+      const now = new Date();
+      const year = now.getFullYear();
+      const monthIndex = now.getMonth();
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+      if (range === "week") {
+        const labels = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
+        const values = labels.map(function (_, index) {
+          return index >= 5 ? 3 : (index === 2 ? 2 : 1);
+        });
+        return { labels: labels, values: values };
+      }
+
+      if (range === "month") {
+        const totalDays = getDaysInMonth(year, monthIndex);
+        const labels = [];
+        const values = [];
+        for (let day = 1; day <= totalDays; day += 1) {
+          const dayOfWeek = new Date(year, monthIndex, day).getDay();
+          labels.push((day === 1 || day === totalDays || day % 3 === 0) ? String(day) : "");
+          values.push(dayOfWeek === 0 ? 4 : (dayOfWeek === 6 ? 2 : 1));
+        }
+        return { labels: labels, values: values };
+      }
+
+      const labels = monthNames;
+      const values = labels.map(function (_, index) {
+        const totalDays = getDaysInMonth(year, index);
+        let count = 0;
+        for (let day = 1; day <= totalDays; day += 1) {
+          const dayOfWeek = new Date(year, index, day).getDay();
+          count += dayOfWeek === 0 ? 4 : (dayOfWeek === 6 ? 2 : 1);
+        }
+        return count;
+      });
+      return { labels: labels, values: values };
+    }
+
+    function buildDoneTaskSeries(range) {
+      if (range === "week") {
+        return { labels: ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"], values: [0, 1, 1, 0, 1, 0, 1] };
+      }
+      if (range === "month") {
+        return { labels: ["M1", "M2", "M3", "M4"], values: [1, 2, 1, 1] };
+      }
+      return { labels: ["Q1", "Q2", "Q3", "Q4"], values: [8, 10, 9, 11] };
+    }
+
+    function buildTaskRequestSeries(range) {
+      const now = new Date();
+      const year = now.getFullYear();
+      const monthIndex = now.getMonth();
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+      if (range === "week") {
+        return {
+          labels: ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"],
+          values: [1, 2, 1, 2, 3, 1, 2]
+        };
+      }
+
+      if (range === "month") {
+        const totalDays = getDaysInMonth(year, monthIndex);
+        const labels = [];
+        const values = [];
+
+        for (let day = 1; day <= totalDays; day += 1) {
+          const dayOfWeek = new Date(year, monthIndex, day).getDay();
+          labels.push((day === 1 || day === totalDays || day % 3 === 0) ? String(day) : "");
+          values.push(dayOfWeek === 0 ? 1 : (dayOfWeek === 6 ? 2 : (day % 5 === 0 ? 3 : 1)));
+        }
+        return { labels: labels, values: values };
+      }
+
+      return {
+        labels: monthNames,
+        values: [1, 2, 1, 3, 2, 2, 3, 2, 4, 3, 5, 3]
+      };
+    }
+
+    function renderScheduleMetric() {
+      const range = metricScheduleRange.value;
+      const series = buildScheduleSeries(range);
+      const total = series.values.reduce(function (sum, value) {
+        return sum + value;
+      }, 0);
+      metricScheduleLabel.textContent = "Jadwal Tersedia " + titleByRange(range);
+      metricScheduleValue.textContent = String(total);
+    }
+
+    function renderDoneMetric() {
+      const range = metricDoneRange.value;
+      const series = buildDoneTaskSeries(range);
+      const total = series.values.reduce(function (sum, value) {
+        return sum + value;
+      }, 0);
+      metricDoneLabel.textContent = "Tugas Selesai " + titleByRange(range);
+      metricDoneValue.textContent = String(total);
+    }
+
+    function renderPendingAndUpcomingMetric() {
+      const now = new Date();
+      const todayText = normalizeDateOnly(now.toISOString());
+      const taskRequests = readTaskRequests();
+
+      const pending = taskRequests.filter(function (item) {
+        const status = String(item && item.status ? item.status : "").toLowerCase();
+        return status.includes("pending") || status.includes("menunggu");
+      }).length;
+
+      const upcoming = taskRequests.filter(function (item) {
+        const startDate = normalizeDateOnly(item && item.startDate ? item.startDate : "");
+        const status = String(item && item.status ? item.status : "").toLowerCase();
+        if (!startDate) {
+          return false;
+        }
+        return startDate > todayText && (status.includes("request") || status.includes("menunggu") || status.includes("pending") || !status);
+      }).length;
+
+      pendingTaskValue.textContent = String(pending);
+      upcomingTaskValue.textContent = String(upcoming);
+    }
     function updateLiveDateTime() {
       const now = new Date();
       const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
@@ -895,9 +1165,22 @@
       });
     }
 
-    const monthLabels = ["Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des", "Jan", "Feb", "Mar"];
-    const requestTugasData = [1, 2, 1, 3, 2, 2, 3, 2, 4, 3, 5, 3];
-    renderLineChart("requestTugasChart", monthLabels, requestTugasData, "#2d2d2d");
+    function renderRequestTaskChart() {
+      const range = requestChartRange.value;
+      const series = buildTaskRequestSeries(range);
+      requestChartTitle.textContent = "Grafik Request Tugas " + titleByRange(range);
+      requestChartNote.textContent = range === "year" ? "12 Bulan" : (range === "month" ? "Harian Bulan Ini" : "7 Hari");
+      renderLineChart("requestTugasChart", series.labels, series.values, "#2d2d2d");
+    }
+
+    renderScheduleMetric();
+    renderDoneMetric();
+    renderPendingAndUpcomingMetric();
+    renderRequestTaskChart();
+
+    metricScheduleRange.addEventListener("change", renderScheduleMetric);
+    metricDoneRange.addEventListener("change", renderDoneMetric);
+    requestChartRange.addEventListener("change", renderRequestTaskChart);
   </script>
 </body>
 </html>
