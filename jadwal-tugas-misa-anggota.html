@@ -408,6 +408,28 @@
       color: #1f2937;
     }
 
+    .btn.disabled {
+      background: #d1d5db;
+      color: #6b7280;
+      border: 1px solid #c4cad4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .summary-tools {
+      padding: 0 12px 12px;
+    }
+
+    .summary-search {
+      width: min(360px, 100%);
+      border: 1px solid #c8d2df;
+      border-radius: 10px;
+      background: #fff;
+      padding: 8px 10px;
+      font-size: 0.84rem;
+      color: #1f2937;
+    }
+
     .table-wrap {
       padding: 12px;
       overflow-x: auto;
@@ -577,13 +599,17 @@
             <h2>Ringkasan Jadwal</h2>
             <span class="chip">Terpisah dari Request</span>
           </header>
+          <div class="summary-tools">
+            <input id="summarySearch" class="summary-search" type="search" placeholder="Cari jadwal, jam, role, atau nama petugas..." aria-label="Cari ringkasan jadwal">
+          </div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
                   <th>Jenis</th>
                   <th>Jadwal</th>
-                  <th>Role</th>
+                  <th>Jam</th>
+                  <th>Petugas Terdaftar</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -596,19 +622,6 @@
   </div>
 
   <script>
-    const schedules = {
-      biasa: [
-        { title: "Misa Harian Senin", schedule: "30 Mar 2026 17:00", role: "Operator", status: "Terbuka" },
-        { title: "Misa Harian Selasa", schedule: "31 Mar 2026 17:00", role: "Kameramen", status: "Terbuka" },
-        { title: "Misa Mingguan", schedule: "05 Apr 2026 08:00", role: "Supervisor", status: "Terbuka" }
-      ],
-      besar: [
-        { title: "Misa Kamis Putih", schedule: "02 Apr 2026 18:00", role: "Kameramen", status: "Terbuka" },
-        { title: "Misa Jumat Agung", schedule: "03 Apr 2026 17:30", role: "Operator", status: "Terbuka" },
-        { title: "Misa Vigili Paskah", schedule: "04 Apr 2026 19:00", role: "Fotografer", status: "Terbuka" }
-      ]
-    };
-
     const sidebar = document.getElementById("sidebar");
     const mobileMenuBtn = document.getElementById("mobileMenuBtn");
     const memberName = document.getElementById("memberName");
@@ -618,6 +631,7 @@
     const yearSelect = document.getElementById("yearSelect");
     const scheduleGrid = document.getElementById("scheduleGrid");
     const summaryRows = document.getElementById("summaryRows");
+    const summarySearch = document.getElementById("summarySearch");
 
     let activeJenis = "biasa";
 
@@ -627,19 +641,6 @@
       } catch (error) {
         return null;
       }
-    }
-
-    function formatRangeLabel(value) {
-      if (value === "week") {
-        return "Minggu Ini";
-      }
-      if (value === "month") {
-        return "Bulan Ini";
-      }
-      if (value === "year") {
-        return "Tahun Ini";
-      }
-      return "Jadwal Mendatang";
     }
 
     function getDaysInMonth(year, monthIndex) {
@@ -671,18 +672,34 @@
         const date = new Date(monthYear.year, monthYear.monthIndex, day);
         const dayName = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"][date.getDay()];
         const isBlocked = blockedDays.includes(day) || date.getDay() === 0;
+        const operator = operatorNames[day % operatorNames.length];
+        const cameramen = cameramenNames[day % cameramenNames.length];
+        const supervisor = supervisorNames[day % supervisorNames.length];
+        const fullByPattern = day % 5 === 0 || day % 8 === 0;
+        const assignments = isBlocked
+          ? { operator: "-", cameramen: "-", supervisor: "-" }
+          : (fullByPattern
+            ? { operator: operator, cameramen: cameramen, supervisor: supervisor }
+            : {
+                operator: day % 3 === 0 ? "-" : operator,
+                cameramen: day % 4 === 0 ? "-" : cameramen,
+                supervisor: day % 6 === 0 ? "-" : supervisor
+              });
+        const isFull = !isBlocked && assignments.operator !== "-" && assignments.cameramen !== "-" && assignments.supervisor !== "-";
+        const isOpen = !isBlocked && !isFull;
         list.push({
           day: day,
           title: day === 1 ? "Misa Awal Bulan" : (day === totalDays ? "Misa Akhir Bulan" : "Misa Harian"),
           schedule: String(day).padStart(2, "0") + " " + formatMonthLabel(monthYear.monthIndex, monthYear.year),
           dayName: dayName,
           time: isBlocked ? "-" : "18:00",
-          role: isBlocked ? "Hari Raya / Libur" : ["Operator", "Kameramen", "Supervisor"][day % 3],
-          status: isBlocked ? "Diblok" : "Terbuka",
+          role: "Operator, Kameramen, Supervisor",
+          status: isBlocked ? "Tertutup" : (isFull ? "Tertutup" : "Terbuka"),
           blocked: isBlocked,
-          operator: operatorNames[day % operatorNames.length],
-          cameramen: cameramenNames[day % cameramenNames.length],
-          supervisor: supervisorNames[day % supervisorNames.length]
+          isOpen: isOpen,
+          operator: assignments.operator,
+          cameramen: assignments.cameramen,
+          supervisor: assignments.supervisor
         });
       }
       return list;
@@ -692,42 +709,29 @@
       const monthYear = getSelectedMonthYear();
       return [
         { title: "Misa Minggu Palma", date: "10 " + formatMonthLabel(monthYear.monthIndex, monthYear.year), sessions: [
-          { label: "Misa 1 - Jam 07:30", operator: "Ketrin, Deva", cameramen: "Jeni, Rikha, Jose", supervisor: "Nadia, Luciana Tyas", fotografer: "Aoki, Aruna" },
-          { label: "Misa 2 - Jam 16:30", operator: "Vio, Oly", cameramen: "Reva, Kane, Arya", supervisor: "Evan, There, Panji", fotografer: "Belinda, Bian" }
+          { label: "Misa 1", time: "07:30", operator: "Ketrin, Deva", cameramen: "Jeni, Rikha, Jose", supervisor: "Nadia, Luciana Tyas", status: "Tertutup" },
+          { label: "Misa 2", time: "16:30", operator: "Vio, Oly", cameramen: "Reva, Kane, Arya", supervisor: "Evan, There, Panji", status: "Tertutup" }
         ] },
         { title: "Misa Kamis Putih", date: "18 " + formatMonthLabel(monthYear.monthIndex, monthYear.year), sessions: [
-          { label: "Misa 1 - Jam 17:00", operator: "Bian, Belinda", cameramen: "Lisa, Reva, Vio", supervisor: "Panji, Arya, Evan", fotografer: "Aurel, Dhani" },
-          { label: "Misa 2 - Jam 19:30", operator: "Tita, Rossa", cameramen: "Chessa, Rikha, Jeni", supervisor: "Stella, Arya, Bolun", fotografer: "Claire, Nawung" }
+          { label: "Misa 1", time: "17:00", operator: "Bian, Belinda", cameramen: "Lisa, Reva, Vio", supervisor: "Panji, Arya, Evan", status: "Tertutup" },
+          { label: "Misa 2", time: "19:30", operator: "Tita, Rossa", cameramen: "Chessa, Rikha, Jeni", supervisor: "Stella, Arya, Bolun", status: "Tertutup" }
         ] },
         { title: "Misa Malam Paskah", date: "04 " + formatMonthLabel(monthYear.monthIndex, monthYear.year), sessions: [
-          { label: "Misa 1 - Jam 17:00", operator: "Niko, Vio", cameramen: "Dhani, Evan, Bian", supervisor: "Panji, There, Arya", fotografer: "Weka, Kane" },
-          { label: "Misa 2 - Jam 20:30", operator: "Pria, Asha", cameramen: "Wima, Rafael, Nadia", supervisor: "Panji, Egi, Tyas", fotografer: "Nawung, Paul" }
+          { label: "Misa 1", time: "17:00", operator: "Niko, Vio", cameramen: "Dhani, Evan, Bian", supervisor: "Panji, There, Arya", status: "Tertutup" },
+          { label: "Misa 2", time: "20:30", operator: "Pria, Asha", cameramen: "Wima, Rafael, Nadia", supervisor: "Panji, Egi, Tyas", status: "Tertutup" }
         ] }
       ];
     }
 
-    function matchesRange(text, range) {
-      const date = new Date(text.replace(/(\d{2}:\d{2})$/, "$1:00"));
-      if (Number.isNaN(date.getTime())) {
-        return false;
+    function requestActionButton(isOpen, jenis) {
+      if (!isOpen) {
+        return '<button class="btn disabled" type="button">Slot Penuh / Ditutup</button>';
       }
+      return '<a class="btn" href="request-tugas-anggota.html?jenis=' + jenis + '">Request Tugas</a>';
+    }
 
-      const now = new Date();
-      if (range === "year") {
-        return date.getFullYear() === now.getFullYear();
-      }
-      if (range === "month") {
-        return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
-      }
-      if (range === "week") {
-        const day = now.getDay();
-        const diffToMonday = day === 0 ? 6 : day - 1;
-        const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekEnd.getDate() + 7);
-        return date >= weekStart && date < weekEnd;
-      }
-      return date >= now;
+    function buildPetugasText(item) {
+      return 'Operator: ' + item.operator + '<br>Kameramen: ' + item.cameramen + '<br>Supervisor: ' + item.supervisor;
     }
 
     function renderSchedules() {
@@ -744,21 +748,29 @@
             + '<span>Status: ' + item.status + '</span>'
             + '</div>'
             + '<p><strong>Operator:</strong> ' + item.operator + '<br><strong>Kameramen:</strong> ' + item.cameramen + '<br><strong>Supervisor:</strong> ' + item.supervisor + '</p>'
-            + '<a class="btn" href="request-tugas-anggota.html?jenis=biasa">Request Tugas</a>'
+            + requestActionButton(item.isOpen, "biasa")
             + '</article>';
         }).join("");
       } else {
         const events = getSpecialEvents();
         scheduleGrid.innerHTML = events.map(function (event) {
+          const sessionHtml = event.sessions.map(function (session) {
+            return '<div class="session">'
+              + '<h4>' + session.label + ' - Jam ' + session.time + '</h4>'
+              + '<p><strong>Operator:</strong> ' + session.operator + '<br><strong>Kameramen:</strong> ' + session.cameramen + '<br><strong>Supervisor:</strong> ' + session.supervisor + '</p>'
+              + '<p class="note">Status: ' + session.status + '</p>'
+              + '</div>';
+          }).join("");
           return '<article class="schedule-card">'
             + '<span class="schedule-pill">Misa Besar</span>'
             + '<h3>' + event.title + '</h3>'
             + '<p>' + event.date + '</p>'
             + '<div class="schedule-meta">'
             + '<span>Sesi: ' + event.sessions.length + '</span>'
-            + '<span>Status: Terbuka</span>'
+            + '<span>Status: Tertutup</span>'
             + '</div>'
-            + '<a class="btn" href="request-tugas-anggota.html?jenis=besar">Request Tugas</a>'
+            + sessionHtml
+            + requestActionButton(false, "besar")
             + '</article>';
         }).join("");
       }
@@ -769,14 +781,29 @@
     }
 
     function renderSummary() {
+      const keyword = summarySearch.value.trim().toLowerCase();
+
       if (activeJenis === "biasa") {
-        const rows = buildMonthlyRegularSchedule();
+        const rows = buildMonthlyRegularSchedule().filter(function (item) {
+          const text = [
+            "misa biasa",
+            item.title,
+            item.schedule,
+            item.time,
+            item.operator,
+            item.cameramen,
+            item.supervisor,
+            item.status
+          ].join(" ").toLowerCase();
+          return !keyword || text.includes(keyword);
+        });
         summaryRows.innerHTML = rows.map(function (item) {
           return '<tr>'
             + '<td>Misa Biasa</td>'
             + '<td>' + item.title + ' - ' + item.schedule + '</td>'
-            + '<td>' + item.role + '</td>'
-            + '<td><span class="' + (item.blocked ? 'status-wait' : 'status-ok') + '">' + item.status + '</span></td>'
+            + '<td>' + item.time + '</td>'
+            + '<td>' + buildPetugasText(item) + '</td>'
+            + '<td><span class="' + (item.status === 'Tertutup' ? 'status-wait' : 'status-ok') + '">' + item.status + '</span></td>'
             + '</tr>';
         }).join("");
       } else {
@@ -786,24 +813,29 @@
             return {
               jenis: "Misa Besar",
               jadwal: event.title + ' - ' + event.date + ' - ' + session.label,
-              role: "Sesi khusus",
-              status: "Terbuka"
+              jam: session.time,
+              petugas: 'Operator: ' + session.operator + '<br>Kameramen: ' + session.cameramen + '<br>Supervisor: ' + session.supervisor,
+              status: session.status
             };
           });
+        }).filter(function (item) {
+          const text = [item.jenis, item.jadwal, item.jam, item.petugas, item.status].join(" ").toLowerCase();
+          return !keyword || text.includes(keyword);
         });
 
         summaryRows.innerHTML = rows.map(function (item) {
           return '<tr>'
             + '<td>' + item.jenis + '</td>'
             + '<td>' + item.jadwal + '</td>'
-            + '<td>' + item.role + '</td>'
-            + '<td><span class="status-ok">' + item.status + '</span></td>'
+            + '<td>' + item.jam + '</td>'
+            + '<td>' + item.petugas + '</td>'
+            + '<td><span class="status-wait">' + item.status + '</span></td>'
             + '</tr>';
         }).join("");
       }
 
       if (!summaryRows.innerHTML.trim()) {
-        summaryRows.innerHTML = '<tr><td colspan="4">Tidak ada jadwal pada bulan ini.</td></tr>';
+        summaryRows.innerHTML = '<tr><td colspan="5">Tidak ada jadwal yang cocok dengan pencarian.</td></tr>';
       }
     }
 
@@ -841,6 +873,10 @@
 
     yearSelect.addEventListener("change", function () {
       renderSchedules();
+      renderSummary();
+    });
+
+    summarySearch.addEventListener("input", function () {
       renderSummary();
     });
 
