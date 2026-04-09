@@ -110,10 +110,12 @@
     .menu-toggle:hover { background: rgba(255, 255, 255, 0.1); }
 
     .menu-items {
-      display: block;
+      display: none;
       border-top: 1px solid rgba(255, 255, 255, 0.18);
       padding: 6px;
     }
+
+    .menu-group.open .menu-items { display: block; }
 
     .menu-link {
       display: block;
@@ -196,6 +198,11 @@
       background: #fff;
       text-decoration: none;
       color: #374151;
+    }
+
+    .home-globe svg {
+      width: 16px;
+      height: 16px;
     }
 
     .home-globe:hover { background: #eef2f7; }
@@ -520,18 +527,82 @@
       </div>
 
       <div class="menu-group open">
+        <button class="menu-toggle" type="button">Dashboard Utama <span>-</span></button>
+        <div class="menu-items">
+          <a class="menu-link" href="dashboard-anggota.html?role=anggota">Ringkasan Dashboard</a>
+          <a class="menu-link" href="profil-anggota.html">Profil Saya</a>
+          <a class="menu-link" href="#">Log Aktivitas Saya</a>
+        </div>
+      </div>
+
+      <div class="menu-group open">
         <button class="menu-toggle" type="button">Tugas Streaming / Multimedia <span>-</span></button>
         <div class="menu-items">
-          <a class="menu-link" href="dashboard-anggota.html?role=anggota">Dashboard Anggota</a>
           <a class="menu-link active" href="jadwal-tugas-misa-anggota.html">Jadwal Tugas Misa Biasa/Misa Besar</a>
-          <a class="menu-link" href="request-tugas-anggota.html">Jadwal &amp; Request Tugas</a>
-          <a class="menu-link" href="profil-anggota.html">Profil Anggota</a>
+          <a class="menu-link" href="request-tugas-anggota.html">Request Tugas Anggota</a>
+          <a class="menu-link" href="#">Pembatalan Tugas (maks H-3)</a>
+          <a class="menu-link" href="#">Penukaran Jadwal Tugas</a>
+          <a class="menu-link" href="#">Riwayat Tugas Saya</a>
+        </div>
+      </div>
+
+      <div class="menu-group">
+        <button class="menu-toggle" type="button">Monitoring Kewajiban Tugas <span>+</span></button>
+        <div class="menu-items">
+          <a class="menu-link" href="#">Progres Tugas Bulan Berjalan</a>
+          <a class="menu-link" href="#">Kekurangan Tugas Bulan Lalu</a>
+          <a class="menu-link" href="#">Target Tugas Bulan Depan</a>
+          <a class="menu-link" href="#">Statistik Tugas Personal</a>
+        </div>
+      </div>
+
+      <div class="menu-group">
+        <button class="menu-toggle" type="button">Peminjaman Barang <span>+</span></button>
+        <div class="menu-items">
+          <a class="menu-link" href="#">Daftar Barang Dapat Dipinjam</a>
+          <a class="menu-link" href="#">Pengajuan Peminjaman</a>
+          <a class="menu-link" href="#">Status Pengajuan</a>
+          <a class="menu-link" href="#">Input Pengambilan Barang</a>
+          <a class="menu-link" href="#">Input Pengembalian Barang</a>
+          <a class="menu-link" href="#">Pembatalan Pengajuan</a>
+          <a class="menu-link" href="#">Riwayat Peminjaman Saya</a>
+        </div>
+      </div>
+
+      <div class="menu-group">
+        <button class="menu-toggle" type="button">Kegiatan & Informasi <span>+</span></button>
+        <div class="menu-items">
+          <a class="menu-link" href="#">Form Pendaftaran Kegiatan</a>
+          <a class="menu-link" href="#">Status Pendaftaran</a>
+          <a class="menu-link" href="#">Agenda Kegiatan Aktif</a>
+          <a class="menu-link" href="#">Pengumuman Aktif</a>
+          <a class="menu-link" href="#">Detail Agenda / Pengumuman</a>
+        </div>
+      </div>
+
+      <div class="menu-group">
+        <button class="menu-toggle" type="button">Evaluasi & Notifikasi <span>+</span></button>
+        <div class="menu-items">
+          <a class="menu-link" href="#">Form Evaluasi Streaming (Operator)</a>
+          <a class="menu-link" href="#">Notifikasi Pengingat Tugas</a>
+          <a class="menu-link" href="#">Notifikasi Tukar Jadwal</a>
+          <a class="menu-link" href="#">Notifikasi Peminjaman</a>
+          <a class="menu-link" href="#">Notifikasi Agenda/Pengumuman</a>
+          <a class="menu-link" href="#">Notifikasi Status Keanggotaan</a>
+        </div>
+      </div>
+
+      <div class="menu-group">
+        <button class="menu-toggle" type="button">Akun & Keanggotaan <span>+</span></button>
+        <div class="menu-items">
+          <a class="menu-link" href="profil-anggota.html">Profil Anggota (Semua Pengaturan)</a>
+          <a class="menu-link" href="sertifikat-anggota.html">Unduh Sertifikat Anggota</a>
         </div>
       </div>
 
       <div class="side-bottom">
-        <a class="side-action" href="dashboard-anggota.html?role=anggota">Kembali ke Dashboard Anggota</a>
-        <a class="side-action" href="request-tugas-anggota.html">Buka Form Request Tugas</a>
+        <a class="side-action" href="home.html?session=active">Kembali ke Home (Tetap Login)</a>
+        <a class="side-action" href="login.html">Keluar</a>
       </div>
     </aside>
 
@@ -541,7 +612,14 @@
         <div class="header-right">
           <button id="mobileMenuBtn" class="mobile-menu" type="button">Menu</button>
           <span id="liveDateTime">-</span>
-          <a class="home-globe" href="home.html?session=active" title="Kembali ke Home (tetap login)">●</a>
+          <a class="home-globe" href="home.html?session=active" title="Kembali ke Home (tetap login)">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"></circle>
+              <path d="M3 12H21" stroke="currentColor" stroke-width="1.8"></path>
+              <path d="M12 3C14.3 5.5 15.6 8.7 15.6 12C15.6 15.3 14.3 18.5 12 21" stroke="currentColor" stroke-width="1.8"></path>
+              <path d="M12 3C9.7 5.5 8.4 8.7 8.4 12C8.4 15.3 9.7 18.5 12 21" stroke="currentColor" stroke-width="1.8"></path>
+            </svg>
+          </a>
         </div>
       </header>
 
