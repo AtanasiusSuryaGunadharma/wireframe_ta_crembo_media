@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pengambilan Barang - Crembo Media</title>
+  <style>
+    :root {
+      --bg: #ececec;
+      --panel: #ffffff;
+      --line: #1f1f1f;
+      --text: #111111;
+      --side-text: #f4f4f4;
+      --radius: 16px;
+      --shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 20% 10%, #f8f8f8 0%, #ececec 38%, #e3e3e3 100%);
+      min-height: 100vh;
+    }
+    .layout { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+    .sidebar {
+      background: linear-gradient(180deg, #181818 0%, #0f0f0f 100%);
+      color: var(--side-text);
+      border-right: 2px solid var(--line);
+      padding: 18px 14px;
+      overflow-y: auto;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    .brand { border: 1px solid #838383; background: rgba(255,255,255,.04); padding: 12px; border-radius: 12px; margin-bottom: 16px; }
+    .brand h1 { margin: 0; font-size: 1rem; text-transform: uppercase; }
+    .brand p { margin: 6px 0 0; color: #cdcdcd; font-size: .82rem; }
+    .menu-group { border: 1px solid #656565; border-radius: 12px; background: rgba(255,255,255,.03); margin-bottom: 10px; overflow: hidden; }
+    .group-toggle { width: 100%; text-align: left; border: 0; background: transparent; color: var(--side-text); font-weight: 700; font-size: .88rem; padding: 11px 12px; display: flex; justify-content: space-between; }
+    .group-items { display: block; border-top: 1px solid #525252; padding: 6px; background: rgba(255,255,255,.02); }
+    .menu-link { display: block; text-decoration: none; color: #e5e5e5; border: 1px solid transparent; border-radius: 10px; padding: 8px 10px; font-size: .83rem; margin-bottom: 4px; }
+    .menu-link.active { border-color: #cfcfcf; background: #e9e9e9; color: #151515; font-weight: 700; }
+    .side-actions { margin-top: 16px; display: grid; gap: 8px; }
+    .side-actions a { text-decoration: none; border: 1px solid #8d8d8d; color: #ebebeb; text-align: center; padding: 9px 10px; border-radius: 10px; font-size: .82rem; }
+
+    .main { padding: 16px; }
+    .headline, .toolbar, .panel {
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .headline h1 { margin: 0; font-size: clamp(1.2rem, 2.2vw, 2rem); }
+    .headline p { margin: 4px 0 0; color: #4b5563; font-size: .9rem; }
+
+    .toolbar-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr auto; gap: 8px; align-items: end; }
+    .field { display: grid; gap: 6px; }
+    .field label { font-size: .84rem; color: #444; }
+    input, select {
+      width: 100%; border: 1px solid #bdbdbd; border-radius: 10px; padding: 8px 10px; font-size: .88rem; font-family: inherit; background: #fff;
+    }
+
+    .btn, .btn-ghost {
+      border-radius: 9px; font-weight: 700; padding: 8px 12px; font-size: .82rem; cursor: pointer;
+    }
+    .btn { border: 1px solid #1f2937; background: linear-gradient(180deg, #4b5563 0%, #1f2937 100%); color: #fff; }
+    .btn-ghost { border: 1px solid #9ca3af; background: #fff; color: #1f2937; }
+
+    .summary-grid { display: grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap: 8px; margin-top: 10px; }
+    .summary-item { border: 1px solid #c7c7c7; background: #fafafa; padding: 10px; }
+    .summary-item p { margin: 0; font-size: .8rem; color: #565656; }
+    .summary-item strong { display: block; margin-top: 4px; font-size: 1.15rem; }
+
+    .table-scroll { border: 1px solid #c5c5c5; overflow: auto; background: #fff; }
+    .table-scroll table { min-width: 1300px; width: 100%; border-collapse: collapse; font-size: .84rem; }
+    th, td { border: 1px solid #cbcbcb; padding: 8px; text-align: left; vertical-align: top; }
+    th { background: #efefef; font-size: .76rem; text-transform: uppercase; letter-spacing: .02em; }
+
+    .status-pill { display: inline-block; border-radius: 999px; padding: 3px 8px; font-size: .74rem; border: 1px solid #c4c4c4; background: #f6f6f6; }
+    .status-pill.approved { border-color: #91c89c; background: #ecf8ef; color: #235c2d; }
+    .status-pill.borrowed { border-color: #9bb6d4; background: #edf4ff; color: #1f4f7a; }
+    .status-pill.done { border-color: #b6b6b6; background: #f3f4f6; color: #424242; }
+
+    .empty-note { margin: 10px 0 0; border: 1px dashed #adadad; background: #fbfbfb; padding: 10px; font-size: .86rem; color: #616161; }
+
+    .modal {
+      position: fixed; inset: 0; z-index: 3000; display: grid; place-items: center; padding: 14px; background: rgba(0,0,0,.42);
+    }
+    .modal[hidden] { display: none; }
+    .dialog {
+      width: min(720px, 95vw); max-height: 90vh; overflow: auto; background: #fff; border: 2px solid var(--line); border-radius: 14px; box-shadow: var(--shadow);
+    }
+    .dialog-head {
+      display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid #d0d0d0; background: #f6f6f6;
+    }
+    .dialog-head h3 { margin: 0; font-size: 1rem; }
+    .dialog-body { padding: 12px; display: grid; gap: 10px; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 0 12px 12px; }
+
+    @media (max-width: 1080px) {
+      .toolbar-grid { grid-template-columns: 1fr 1fr; }
+      .summary-grid { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+    }
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; }
+    }
+    @media (max-width: 620px) {
+      .toolbar-grid, .summary-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Sidebar admin">
+      <div class="brand">
+        <h1>Crembo Media Panel</h1>
+        <p>Modul inventaris admin/super admin</p>
+      </div>
+
+      <div class="menu-group">
+        <button class="group-toggle" type="button">Ringkasan <span>-</span></button>
+        <div class="group-items">
+          <a class="menu-link" href="dashboard.html">Dashboard Utama</a>
+        </div>
+      </div>
+
+      <div class="menu-group open">
+        <button class="group-toggle" type="button">Inventaris &amp; Peminjaman <span>-</span></button>
+        <div class="group-items">
+          <a class="menu-link" href="data-inventaris-barang.html">Data Inventaris Barang</a>
+          <a class="menu-link" href="persetujuan-peminjaman.html">Persetujuan Peminjaman</a>
+          <a class="menu-link active" href="pengambilan-barang.html">Pengambilan Barang</a>
+          <a class="menu-link" href="riwayat-peminjaman-pengembalian.html">Riwayat Peminjaman &amp; Pengembalian</a>
+        </div>
+      </div>
+
+      <div class="side-actions">
+        <a href="dashboard.html">Kembali ke Dashboard</a>
+        <a href="home.html">Kembali ke Beranda</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="headline">
+        <h1>Pengambilan dan Pengembalian Barang</h1>
+        <p>Pencatatan bukti pengambilan dan pengembalian barang sesuai persetujuan admin.</p>
+      </section>
+
+      <section class="toolbar">
+        <div class="toolbar-grid">
+          <div class="field">
+            <label for="searchInput">Cari transaksi</label>
+            <input id="searchInput" type="search" placeholder="Kode, peminjam, barang...">
+          </div>
+          <div class="field">
+            <label for="statusFilter">Status Proses</label>
+            <select id="statusFilter">
+              <option value="all">Semua</option>
+              <option value="Disetujui">Siap Diambil</option>
+              <option value="Sedang Dipinjam">Sedang Dipinjam</option>
+              <option value="Selesai">Selesai</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fromDate">Tanggal pinjam dari</label>
+            <input id="fromDate" type="date">
+          </div>
+          <div class="field" style="display:flex; gap:8px;">
+            <button id="downloadExcelBtn" class="btn-ghost" type="button">Download Excel</button>
+            <button id="downloadPdfBtn" class="btn-ghost" type="button">Download PDF</button>
+          </div>
+        </div>
+        <div class="summary-grid" id="summaryGrid"></div>
+      </section>
+
+      <section class="panel">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Kode</th>
+                <th>Peminjam</th>
+                <th>Barang</th>
+                <th>Qty</th>
+                <th>Tanggal Pinjam</th>
+                <th>Target Kembali</th>
+                <th>Status</th>
+                <th>Pengambilan</th>
+                <th>Pengembalian</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <p id="emptyState" class="empty-note" hidden>Tidak ada data sesuai filter.</p>
+      </section>
+    </main>
+  </div>
+
+  <section id="processModal" class="modal" hidden>
+    <article class="dialog">
+      <header class="dialog-head">
+        <h3 id="modalTitle">Proses</h3>
+        <button id="closeModalBtn" class="btn-ghost" type="button">Tutup</button>
+      </header>
+      <form id="processForm" class="dialog-body">
+        <input id="requestIdInput" type="hidden">
+        <input id="processTypeInput" type="hidden">
+
+        <div class="field">
+          <label for="timeInput">Tanggal &amp; Jam</label>
+          <input id="timeInput" type="datetime-local" required>
+        </div>
+        <div class="field">
+          <label for="locationInput">Lokasi</label>
+          <input id="locationInput" type="text" required placeholder="Contoh: Gudang Multimedia">
+        </div>
+        <div class="field">
+          <label for="officerInput">Petugas Verifikasi</label>
+          <input id="officerInput" type="text" required placeholder="Nama admin/petugas">
+        </div>
+        <div class="field" id="conditionWrap" hidden>
+          <label for="conditionInput">Kondisi Saat Kembali</label>
+          <select id="conditionInput">
+            <option value="Baik">Baik</option>
+            <option value="Rusak Ringan">Rusak Ringan</option>
+            <option value="Rusak Berat">Rusak Berat</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="photoInput">Foto Bukti</label>
+          <input id="photoInput" type="file" accept="image/*" required>
+        </div>
+
+        <div class="dialog-actions">
+          <button class="btn-ghost" type="button" id="cancelModalBtn">Batal</button>
+          <button class="btn" type="submit">Simpan</button>
+        </div>
+      </form>
+    </article>
+  </section>
+
+  <script>
+    const INVENTORY_KEY = "crembo-inventaris-barang";
+    const REQUEST_KEY = "crembo-peminjaman-requests";
+
+    const searchInput = document.getElementById("searchInput");
+    const statusFilter = document.getElementById("statusFilter");
+    const fromDate = document.getElementById("fromDate");
+    const summaryGrid = document.getElementById("summaryGrid");
+    const rows = document.getElementById("rows");
+    const emptyState = document.getElementById("emptyState");
+    const downloadExcelBtn = document.getElementById("downloadExcelBtn");
+    const downloadPdfBtn = document.getElementById("downloadPdfBtn");
+
+    const processModal = document.getElementById("processModal");
+    const processForm = document.getElementById("processForm");
+    const modalTitle = document.getElementById("modalTitle");
+    const requestIdInput = document.getElementById("requestIdInput");
+    const processTypeInput = document.getElementById("processTypeInput");
+    const timeInput = document.getElementById("timeInput");
+    const locationInput = document.getElementById("locationInput");
+    const officerInput = document.getElementById("officerInput");
+    const conditionWrap = document.getElementById("conditionWrap");
+    const conditionInput = document.getElementById("conditionInput");
+    const photoInput = document.getElementById("photoInput");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const cancelModalBtn = document.getElementById("cancelModalBtn");
+
+    let pendingPhotoData = "";
+
+    function escapeHtml(text) {
+      return String(text || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function readRequests() {
+      try {
+        const raw = localStorage.getItem(REQUEST_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveRequests(list) {
+      localStorage.setItem(REQUEST_KEY, JSON.stringify(list));
+    }
+
+    function readInventory() {
+      try {
+        const raw = localStorage.getItem(INVENTORY_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveInventory(list) {
+      localStorage.setItem(INVENTORY_KEY, JSON.stringify(list));
+    }
+
+    function formatDateTime(value) {
+      const date = new Date(value || "");
+      if (Number.isNaN(date.getTime())) {
+        return "-";
+      }
+      return date.toLocaleString("id-ID", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }) + " WIB";
+    }
+
+    function getStatusClass(status) {
+      if (status === "Disetujui") {
+        return "approved";
+      }
+      if (status === "Sedang Dipinjam") {
+        return "borrowed";
+      }
+      return "done";
+    }
+
+    function filteredList() {
+      const keyword = searchInput.value.trim().toLowerCase();
+      const selectedStatus = statusFilter.value;
+      const start = fromDate.value;
+
+      return readRequests().filter(function (item) {
+        const isBorrowFlow = ["Disetujui", "Sedang Dipinjam", "Selesai"].indexOf(item.status) !== -1;
+        if (!isBorrowFlow) {
+          return false;
+        }
+
+        const text = [item.code, item.borrowerName, item.itemCode, item.itemName, item.purpose].join(" ").toLowerCase();
+        const matchesKeyword = !keyword || text.indexOf(keyword) !== -1;
+        const matchesStatus = selectedStatus === "all" || item.status === selectedStatus;
+        const matchesStart = !start || (item.borrowDate || "") >= start;
+        return matchesKeyword && matchesStatus && matchesStart;
+      }).sort(function (a, b) {
+        return new Date(b.createdAt || "1970-01-01").getTime() - new Date(a.createdAt || "1970-01-01").getTime();
+      });
+    }
+
+    function renderSummary(list) {
+      const readyPickup = list.filter(function (item) { return item.status === "Disetujui"; }).length;
+      const onLoan = list.filter(function (item) { return item.status === "Sedang Dipinjam"; }).length;
+      const done = list.filter(function (item) { return item.status === "Selesai"; }).length;
+
+      summaryGrid.innerHTML =
+        '<article class="summary-item"><p>Total Transaksi</p><strong>' + list.length + '</strong></article>' +
+        '<article class="summary-item"><p>Siap Diambil</p><strong>' + readyPickup + '</strong></article>' +
+        '<article class="summary-item"><p>Sedang Dipinjam</p><strong>' + onLoan + '</strong></article>' +
+        '<article class="summary-item"><p>Selesai</p><strong>' + done + '</strong></article>';
+    }
+
+    function renderTable() {
+      const list = filteredList();
+      renderSummary(list);
+      if (!list.length) {
+        rows.innerHTML = "";
+        emptyState.hidden = false;
+        return;
+      }
+      emptyState.hidden = true;
+
+      rows.innerHTML = list.map(function (item) {
+        let actionHtml = '<button class="btn-ghost" type="button" data-detail-id="' + escapeHtml(item.id) + '">Detail</button>';
+        if (item.status === "Disetujui") {
+          actionHtml += ' <button class="btn" type="button" data-pickup-id="' + escapeHtml(item.id) + '">Konfirmasi Pengambilan</button>';
+        }
+        if (item.status === "Sedang Dipinjam") {
+          actionHtml += ' <button class="btn" type="button" data-return-id="' + escapeHtml(item.id) + '">Konfirmasi Pengembalian</button>';
+        }
+
+        const pickupText = item.pickup
+          ? escapeHtml(formatDateTime(item.pickup.time)) + '<br><small>' + escapeHtml(item.pickup.location || '-') + '</small>'
+          : '-';
+        const returnText = item.returnInfo
+          ? escapeHtml(formatDateTime(item.returnInfo.time)) + '<br><small>' + escapeHtml(item.returnInfo.location || '-') + '</small>'
+          : '-';
+
+        return '<tr>' +
+          '<td>' + escapeHtml(item.code || '-') + '</td>' +
+          '<td>' + escapeHtml(item.borrowerName || '-') + '</td>' +
+          '<td>' + escapeHtml(item.itemName || '-') + '<br><small>' + escapeHtml(item.itemCode || '-') + '</small></td>' +
+          '<td>' + escapeHtml(item.quantity || 1) + '</td>' +
+          '<td>' + escapeHtml(item.borrowDate || '-') + '</td>' +
+          '<td>' + escapeHtml(item.expectedReturnDate || '-') + '</td>' +
+          '<td><span class="status-pill ' + getStatusClass(item.status) + '">' + escapeHtml(item.status) + '</span></td>' +
+          '<td>' + pickupText + '</td>' +
+          '<td>' + returnText + '</td>' +
+          '<td>' + actionHtml + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function openModal(id, type) {
+      requestIdInput.value = id;
+      processTypeInput.value = type;
+      timeInput.value = "";
+      locationInput.value = "";
+      officerInput.value = "";
+      photoInput.value = "";
+      pendingPhotoData = "";
+
+      if (type === "pickup") {
+        modalTitle.textContent = "Konfirmasi Pengambilan Barang";
+        conditionWrap.hidden = true;
+      } else {
+        modalTitle.textContent = "Konfirmasi Pengembalian Barang";
+        conditionWrap.hidden = false;
+      }
+
+      processModal.hidden = false;
+    }
+
+    function closeModal() {
+      processModal.hidden = true;
+      processForm.reset();
+      pendingPhotoData = "";
+    }
+
+    function updateInventoryOnReturn(req, returnCondition) {
+      const inventory = readInventory();
+      const index = inventory.findIndex(function (item) {
+        return item.id === req.itemId || item.code === req.itemCode;
+      });
+      if (index === -1) {
+        return;
+      }
+
+      const item = Object.assign({}, inventory[index]);
+      const total = Math.max(1, Number(item.totalUnit || 1));
+      const available = Math.max(0, Number(item.availableUnit || 0));
+      const qty = Math.max(1, Number(req.quantity || 1));
+
+      item.availableUnit = Math.min(total, available + qty);
+      item.borrowedUnit = total - item.availableUnit;
+      item.status = item.availableUnit > 0 ? "Tersedia" : "Dipinjam";
+      item.condition = returnCondition || item.condition || "Baik";
+      item.updatedAt = new Date().toISOString();
+
+      inventory[index] = item;
+      saveInventory(inventory);
+    }
+
+    function readImageToBase64(file, callback) {
+      if (!file) {
+        callback("");
+        return;
+      }
+      if (!file.type || file.type.indexOf("image/") !== 0) {
+        window.alert("File bukti harus berupa gambar.");
+        callback("");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function () {
+        callback(String(reader.result || ""));
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function processTransaction(event) {
+      event.preventDefault();
+
+      const requestId = requestIdInput.value;
+      const type = processTypeInput.value;
+      const time = timeInput.value;
+      const location = locationInput.value.trim();
+      const officer = officerInput.value.trim();
+      const file = photoInput.files && photoInput.files[0];
+
+      if (!requestId || !type || !time || !location || !officer || !file) {
+        window.alert("Semua field wajib diisi termasuk foto bukti.");
+        return;
+      }
+
+      readImageToBase64(file, function (photoData) {
+        if (!photoData) {
+          return;
+        }
+
+        const list = readRequests();
+        const index = list.findIndex(function (item) { return item.id === requestId; });
+        if (index === -1) {
+          return;
+        }
+        const req = list[index];
+
+        if (type === "pickup") {
+          if (req.status !== "Disetujui") {
+            window.alert("Pengambilan hanya bisa diproses dari status Disetujui.");
+            return;
+          }
+
+          req.pickup = {
+            time: new Date(time).toISOString(),
+            location: location,
+            officer: officer,
+            proofPhoto: photoData
+          };
+          req.status = "Sedang Dipinjam";
+          req.updatedAt = new Date().toISOString();
+          list[index] = req;
+          saveRequests(list);
+          closeModal();
+          renderTable();
+          return;
+        }
+
+        if (req.status !== "Sedang Dipinjam") {
+          window.alert("Pengembalian hanya bisa diproses dari status Sedang Dipinjam.");
+          return;
+        }
+
+        req.returnInfo = {
+          time: new Date(time).toISOString(),
+          location: location,
+          officer: officer,
+          condition: conditionInput.value,
+          proofPhoto: photoData
+        };
+        req.status = "Selesai";
+        req.updatedAt = new Date().toISOString();
+        list[index] = req;
+        saveRequests(list);
+        updateInventoryOnReturn(req, conditionInput.value);
+        closeModal();
+        renderTable();
+      });
+    }
+
+    function showDetail(id) {
+      const req = readRequests().find(function (item) { return item.id === id; });
+      if (!req) {
+        return;
+      }
+      window.alert(
+        "Kode: " + (req.code || "-") + "\n" +
+        "Peminjam: " + (req.borrowerName || "-") + "\n" +
+        "Barang: " + (req.itemName || "-") + "\n" +
+        "Status: " + (req.status || "-") + "\n" +
+        "Pickup: " + (req.pickup ? formatDateTime(req.pickup.time) + " - " + req.pickup.location : "-") + "\n" +
+        "Return: " + (req.returnInfo ? formatDateTime(req.returnInfo.time) + " - " + req.returnInfo.location : "-")
+      );
+    }
+
+    function downloadExcel() {
+      const list = filteredList();
+      let html = '<html><head><meta charset="UTF-8"></head><body>';
+      html += '<h3>Laporan Pengambilan & Pengembalian Barang</h3>';
+      html += '<table border="1" cellspacing="0" cellpadding="6">';
+      html += '<tr><th>Kode</th><th>Peminjam</th><th>Barang</th><th>Qty</th><th>Status</th><th>Waktu Pengambilan</th><th>Lokasi Pengambilan</th><th>Waktu Pengembalian</th><th>Lokasi Pengembalian</th><th>Kondisi Kembali</th><th>Bukti Pengambilan</th><th>Bukti Pengembalian</th></tr>';
+
+      if (!list.length) {
+        html += '<tr><td colspan="12">Tidak ada data sesuai filter.</td></tr>';
+      } else {
+        list.forEach(function (item) {
+          html += '<tr>' +
+            '<td>' + escapeHtml(item.code || '-') + '</td>' +
+            '<td>' + escapeHtml(item.borrowerName || '-') + '</td>' +
+            '<td>' + escapeHtml(item.itemName || '-') + '</td>' +
+            '<td>' + escapeHtml(item.quantity || 1) + '</td>' +
+            '<td>' + escapeHtml(item.status || '-') + '</td>' +
+            '<td>' + escapeHtml(item.pickup ? formatDateTime(item.pickup.time) : '-') + '</td>' +
+            '<td>' + escapeHtml(item.pickup ? item.pickup.location : '-') + '</td>' +
+            '<td>' + escapeHtml(item.returnInfo ? formatDateTime(item.returnInfo.time) : '-') + '</td>' +
+            '<td>' + escapeHtml(item.returnInfo ? item.returnInfo.location : '-') + '</td>' +
+            '<td>' + escapeHtml(item.returnInfo ? item.returnInfo.condition : '-') + '</td>' +
+            '<td>' + (item.pickup && item.pickup.proofPhoto ? 'Ada' : 'Tidak') + '</td>' +
+            '<td>' + (item.returnInfo && item.returnInfo.proofPhoto ? 'Ada' : 'Tidak') + '</td>' +
+          '</tr>';
+        });
+      }
+
+      html += '</table></body></html>';
+      const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'laporan-pengambilan-pengembalian.xls';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadPdf() {
+      const list = filteredList();
+      const popup = window.open('', '_blank', 'width=1120,height=800');
+      if (!popup) {
+        return;
+      }
+
+      const bodyRows = list.length
+        ? list.map(function (item) {
+            return '<tr>' +
+              '<td>' + escapeHtml(item.code || '-') + '</td>' +
+              '<td>' + escapeHtml(item.borrowerName || '-') + '</td>' +
+              '<td>' + escapeHtml(item.itemName || '-') + '</td>' +
+              '<td>' + escapeHtml(item.status || '-') + '</td>' +
+              '<td>' + escapeHtml(item.pickup ? formatDateTime(item.pickup.time) : '-') + '</td>' +
+              '<td>' + escapeHtml(item.returnInfo ? formatDateTime(item.returnInfo.time) : '-') + '</td>' +
+            '</tr>';
+          }).join('')
+        : '<tr><td colspan="6">Tidak ada data sesuai filter.</td></tr>';
+
+      popup.document.write(
+        '<!doctype html><html><head><meta charset="utf-8"><title>Laporan Pengambilan & Pengembalian</title>' +
+        '<style>body{font-family:Arial,sans-serif;padding:20px;color:#111}h2{margin:0 0 8px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #888;padding:6px;font-size:12px;text-align:left;vertical-align:top}th{background:#f2f2f2}</style>' +
+        '</head><body><h2>Laporan Pengambilan & Pengembalian Barang</h2>' +
+        '<table><thead><tr><th>Kode</th><th>Peminjam</th><th>Barang</th><th>Status</th><th>Waktu Pengambilan</th><th>Waktu Pengembalian</th></tr></thead><tbody>' + bodyRows + '</tbody></table>' +
+        '</body></html>'
+      );
+      popup.document.close();
+      popup.focus();
+      popup.print();
+    }
+
+    rows.addEventListener('click', function (event) {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) {
+        return;
+      }
+
+      const detailId = target.getAttribute('data-detail-id') || '';
+      if (detailId) {
+        showDetail(detailId);
+        return;
+      }
+      const pickupId = target.getAttribute('data-pickup-id') || '';
+      if (pickupId) {
+        openModal(pickupId, 'pickup');
+        return;
+      }
+      const returnId = target.getAttribute('data-return-id') || '';
+      if (returnId) {
+        openModal(returnId, 'return');
+      }
+    });
+
+    searchInput.addEventListener('input', renderTable);
+    statusFilter.addEventListener('change', renderTable);
+    fromDate.addEventListener('change', renderTable);
+    downloadExcelBtn.addEventListener('click', downloadExcel);
+    downloadPdfBtn.addEventListener('click', downloadPdf);
+
+    processForm.addEventListener('submit', processTransaction);
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelModalBtn.addEventListener('click', closeModal);
+    processModal.addEventListener('click', function (event) {
+      if (event.target === processModal) {
+        closeModal();
+      }
+    });
+
+    renderTable();
+  </script>
+</body>
+</html>
