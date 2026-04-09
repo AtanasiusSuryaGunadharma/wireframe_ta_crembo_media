@@ -716,6 +716,7 @@
     const shortcutRows = document.getElementById("shortcutRows");
     const params = new URLSearchParams(window.location.search);
     let currentMemberName = "";
+    const BIG_MASS_STORAGE_KEY = "crembo-registrasi-misa-besar-schedules";
 
     function getDaysInMonth(year, monthIndex) {
       return new Date(year, monthIndex + 1, 0).getDate();
@@ -769,27 +770,125 @@
     }
 
     function buildBigMassRows(monthIndex, year) {
-      const events = [
-        { title: "Misa Kamis Putih", day: 2, time: "18:00" },
-        { title: "Misa Jumat Agung", day: 3, time: "17:30" },
-        { title: "Misa Vigili Paskah", day: 4, time: "19:00" }
-      ];
+      function safeReadPublishedMassSchedules() {
+        try {
+          const raw = localStorage.getItem(BIG_MASS_STORAGE_KEY);
+          const parsed = raw ? JSON.parse(raw) : [];
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+          return [];
+        }
+      }
 
-      return events.map(function (event) {
-        const dateObj = new Date(year, monthIndex, event.day);
+      function getRoleMembers(roleItem) {
+        if (Array.isArray(roleItem.members) && roleItem.members.length) {
+          return roleItem.members.filter(function (member) {
+            return String(member || "").trim().length > 0;
+          });
+        }
+        const single = String(roleItem.member || "").trim();
+        return single ? [single] : [];
+      }
+
+      const registeredSchedules = safeReadPublishedMassSchedules().filter(function (item) {
+        if (!item || !item.date) {
+          return false;
+        }
+        const dateObj = new Date(item.date + "T00:00:00");
+        return !Number.isNaN(dateObj.getTime())
+          && dateObj.getMonth() === monthIndex
+          && dateObj.getFullYear() === year;
+      });
+
+      if (!registeredSchedules.length) {
+        const fallbackEvents = [
+          { title: "Misa Kamis Putih", day: 2, time: "18:00" },
+          { title: "Misa Jumat Agung", day: 3, time: "17:30" },
+          { title: "Misa Vigili Paskah", day: 4, time: "19:00" }
+        ];
+
+        return fallbackEvents.map(function (event) {
+          const dateObj = new Date(year, monthIndex, event.day);
+          return {
+            title: event.title,
+            date: formatDateText(dateObj),
+            time: event.time,
+            need: "Tim sudah lengkap",
+            registered: "Operator: Bian, Belinda<br>Kameramen: Lisa, Reva, Vio<br>Supervisor: Panji, Arya, Evan",
+            status: "Tertutup",
+            openForRequest: false
+          };
+        });
+      }
+
+      return registeredSchedules.map(function (item) {
+        const dateObj = new Date(item.date + "T00:00:00");
+        const roles = Array.isArray(item.roles) ? item.roles : [];
+        const roleInfo = roles.map(function (roleItem) {
+          const roleName = String(roleItem.role || "-").trim();
+          const members = getRoleMembers(roleItem);
+          return {
+            roleName: roleName,
+            members: members
+          };
+        });
+
+        const emptyRoles = roleInfo.filter(function (entry) {
+          return entry.roleName && entry.roleName !== "-" && entry.members.length === 0;
+        }).map(function (entry) {
+          return entry.roleName;
+        });
+
+        const filledRolesText = roleInfo.filter(function (entry) {
+          return entry.members.length > 0;
+        }).map(function (entry) {
+          return entry.roleName + ": " + entry.members.join(", ");
+        }).join("<br>");
+
+        const allowRequest = !!item.allowMemberRequest;
+        const openForRequest = allowRequest && emptyRoles.length > 0;
+
         return {
-          title: event.title,
+          title: item.name || "Misa Besar",
           date: formatDateText(dateObj),
-          time: event.time,
-          need: "Tim sudah lengkap",
-          registered: event.title === "Misa Kamis Putih"
-            ? "Operator: Bian, Belinda<br>Kameramen: Lisa, Reva, Vio<br>Supervisor: Panji, Arya, Evan"
-            : (event.title === "Misa Jumat Agung"
-              ? "Operator: Tita, Rossa<br>Kameramen: Chessa, Rikha, Jeni<br>Supervisor: Stella, Arya, Bolun"
-              : "Operator: Niko, Vio<br>Kameramen: Dhani, Evan, Bian<br>Supervisor: Panji, There, Arya"),
-          status: "Tertutup"
+          time: item.time || "-",
+          need: openForRequest
+            ? "Menunggu request: " + emptyRoles.join(", ")
+            : (allowRequest ? "Semua role sudah terisi" : "Request ditutup admin"),
+          registered: filledRolesText || "Belum ada petugas terdaftar",
+          status: openForRequest ? "Terbuka" : "Tertutup",
+          openForRequest: openForRequest
         };
       });
+    }
+
+    function getBigMassRequestOptions() {
+      try {
+        const raw = localStorage.getItem(BIG_MASS_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        const list = Array.isArray(parsed) ? parsed : [];
+
+        function hasEmptyRole(item) {
+          const roles = Array.isArray(item.roles) ? item.roles : [];
+          return roles.some(function (roleItem) {
+            const members = Array.isArray(roleItem.members)
+              ? roleItem.members.filter(function (member) { return String(member || "").trim(); })
+              : (String(roleItem.member || "").trim() ? [roleItem.member] : []);
+            return members.length === 0;
+          });
+        }
+
+        const options = list.filter(function (item) {
+          return item && item.name && item.date && item.time && !!item.allowMemberRequest && hasEmptyRole(item);
+        }).map(function (item) {
+          const dateObj = new Date(item.date + "T00:00:00");
+          return (item.name + " - " + formatDateText(dateObj) + " " + item.time);
+        });
+
+        return options;
+      } catch (error) {
+        return [];
+      }
     }
 
     function getFilteredShortcutRows() {
@@ -870,11 +969,19 @@
 
     function renderScheduleOptions() {
       const jenis = jenisMisa.value;
-      jadwalMisa.innerHTML = schedules[jenis]
+      const source = jenis === "besar"
+        ? (getBigMassRequestOptions().length ? getBigMassRequestOptions() : schedules[jenis])
+        : schedules[jenis];
+
+      jadwalMisa.innerHTML = source
         .map(function (item) {
           return '<option value="' + item + '">' + item + "</option>";
         })
         .join("");
+
+      if (!source.length) {
+        jadwalMisa.innerHTML = '<option value="">Tidak ada jadwal terbuka</option>';
+      }
     }
 
     jenisMisa.addEventListener("change", renderScheduleOptions);

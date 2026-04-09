@@ -252,6 +252,26 @@
 
     .field { display: grid; gap: 5px; }
 
+    .check-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      padding: 8px 10px;
+      border: 1px dashed #b9b9b9;
+      border-radius: 8px;
+      background: #fafafa;
+      font-size: 0.84rem;
+      color: #2f2f2f;
+      font-weight: 600;
+    }
+
+    .check-field input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+    }
+
     label {
       font-size: 0.8rem;
       color: #3d3d3d;
@@ -752,6 +772,11 @@
               <input id="misaNote" type="text" placeholder="Catatan untuk 1 misa, bukan per anggota">
             </div>
           </div>
+          <label class="check-field" for="allowMemberRequest">
+            <input id="allowMemberRequest" type="checkbox">
+            Boleh diisi lewat request tugas anggota
+          </label>
+          <p class="schedule-note">Jika dicentang, role yang belum punya petugas boleh kosong dulu dan akan menunggu request anggota.</p>
         </div>
       </section>
 
@@ -880,6 +905,7 @@
                   <th>Jenis</th>
                   <th>Lokasi</th>
                   <th>Keterangan</th>
+                  <th>Request Anggota</th>
                   <th>Status</th>
                   <th>Aksi</th>
                 </tr>
@@ -948,6 +974,7 @@
     const misaDateInput = document.getElementById("misaDate");
     const misaTimeInput = document.getElementById("misaTime");
     const misaNoteInput = document.getElementById("misaNote");
+    const allowMemberRequestToggle = document.getElementById("allowMemberRequest");
     const cancelEditBtn = document.getElementById("cancelEditBtn");
 
     const DRAFT_STORAGE_KEY = "crembo-registrasi-misa-besar-drafts";
@@ -1016,7 +1043,8 @@
         return Object.assign({}, item, {
           id: defaultId,
           source: "default",
-          status: "published"
+          status: "published",
+          allowMemberRequest: false
         });
       }).filter(function (item) {
         return hiddenDefaultIds.indexOf(item.id) === -1 && savedIds.indexOf(item.id) === -1;
@@ -1033,7 +1061,8 @@
           misaNote: item.misaNote || "",
           roles: Array.isArray(item.roles) ? item.roles : [],
           source: "draft",
-          status: "draft"
+          status: "draft",
+          allowMemberRequest: !!item.allowMemberRequest
         };
       });
 
@@ -1104,6 +1133,9 @@
       scheduleRows.innerHTML = rows.map(function (item) {
         const typeClass = item.type === "Misa Besar" ? "raya" : "biasa";
         const scheduleNote = item.note || item.misaNote || "-";
+        const requestChip = item.allowMemberRequest
+          ? '<span class="schedule-chip biasa">Dibuka</span>'
+          : '<span class="schedule-chip">Ditutup</span>';
         const isDraft = item.status === "draft";
         const statusChip = isDraft
           ? '<span class="schedule-chip">Draft</span>'
@@ -1126,6 +1158,7 @@
           '<td><span class="schedule-chip ' + typeClass + '">' + escapeHtml(item.type) + '</span></td>' +
           '<td>' + escapeHtml(item.location) + '</td>' +
           '<td><span>' + escapeHtml(scheduleNote) + '</span>' + (item.misaNote ? '<span class="schedule-note-inline">Keterangan misa ini ikut tampil di jadwal lain.</span>' : '') + '</td>' +
+          '<td>' + requestChip + '</td>' +
           '<td>' + statusChip + '</td>' +
           '<td>' + actions + '</td>' +
         '</tr>';
@@ -1349,7 +1382,8 @@
         note: entry.misaNote || "-",
         misaNote: entry.misaNote || "",
         roles: Array.isArray(entry.roles) ? entry.roles : [],
-        source: "registrasi"
+        source: "registrasi",
+        allowMemberRequest: !!entry.allowMemberRequest
       };
 
       const existingIndex = schedules.findIndex(function (item) {
@@ -1566,6 +1600,7 @@
       misaDateInput.value = "";
       misaTimeInput.value = "";
       misaNoteInput.value = "";
+      allowMemberRequestToggle.checked = false;
       rolesBody.innerHTML = "";
       roleSelect.value = "";
       customRoleInput.value = "";
@@ -1597,6 +1632,7 @@
         const scheduleLabel = [draft.misaDate || "-", draft.misaTime || "-"].join(" ");
         const roleCount = Array.isArray(draft.roles) ? draft.roles.length : 0;
         const updatedAtLabel = draft.updatedAt ? new Date(draft.updatedAt).toLocaleString("id-ID") : "-";
+        const requestLabel = draft.allowMemberRequest ? "Dibuka" : "Ditutup";
 
         return '<article class="draft-card">' +
           '<div class="draft-card-head">' +
@@ -1605,6 +1641,7 @@
               '<p class="draft-meta">' +
                 'Jadwal: ' + escapeHtml(scheduleLabel) + '<br>' +
                 'Keterangan: ' + escapeHtml(draft.misaNote || "-") + '<br>' +
+                'Request anggota: ' + escapeHtml(requestLabel) + '<br>' +
                 'Role terisi: ' + roleCount + '<br>' +
                 'Update: ' + escapeHtml(updatedAtLabel) +
               '</p>' +
@@ -1637,6 +1674,7 @@
       misaDateInput.value = schedule.date || "";
       misaTimeInput.value = schedule.time || "";
       misaNoteInput.value = schedule.misaNote || schedule.note || "";
+      allowMemberRequestToggle.checked = !!schedule.allowMemberRequest;
       rolesBody.innerHTML = "";
 
       (Array.isArray(schedule.roles) ? schedule.roles : []).forEach(function (roleItem) {
@@ -1673,7 +1711,8 @@
 
       draftDetailBody.innerHTML = '' +
         '<p class="draft-detail-summary"><strong>' + escapeHtml(draft.misaName || "Draft tanpa judul") + '</strong><br>' +
-        'Jadwal: ' + escapeHtml([draft.misaDate || "-", draft.misaTime || "-"].join(" ")) + '</p>' +
+        'Jadwal: ' + escapeHtml([draft.misaDate || "-", draft.misaTime || "-"].join(" ")) + '<br>' +
+        'Request anggota: ' + escapeHtml(draft.allowMemberRequest ? "Dibuka" : "Ditutup") + '</p>' +
         '<p class="draft-detail-note"><strong>Keterangan Misa:</strong> ' + escapeHtml(draft.misaNote || "-") + '</p>' +
         roleItems;
       draftDetailPanel.hidden = false;
@@ -1695,6 +1734,7 @@
       misaDateInput.value = draft.misaDate || "";
       misaTimeInput.value = draft.misaTime || "";
       misaNoteInput.value = draft.misaNote || "";
+      allowMemberRequestToggle.checked = !!draft.allowMemberRequest;
       rolesBody.innerHTML = "";
 
       (Array.isArray(draft.roles) ? draft.roles : []).forEach(function (roleItem) {
@@ -1727,6 +1767,7 @@
         misaDate: schedule.date || "",
         misaTime: schedule.time || "",
         misaNote: schedule.misaNote || schedule.note || "",
+        allowMemberRequest: !!schedule.allowMemberRequest,
         roles: Array.isArray(schedule.roles) ? schedule.roles : [],
         updatedAt: new Date().toISOString()
       };
@@ -1740,6 +1781,7 @@
         existingDraft.misaDate = payload.misaDate;
         existingDraft.misaTime = payload.misaTime;
         existingDraft.misaNote = payload.misaNote;
+        existingDraft.allowMemberRequest = payload.allowMemberRequest;
         existingDraft.roles = payload.roles;
         existingDraft.updatedAt = new Date().toISOString();
         saveDrafts(readDrafts().map(function (item) {
@@ -1825,6 +1867,7 @@
         misaDate: misaDate,
         misaTime: misaTime,
         misaNote: misaNote,
+        allowMemberRequest: !!allowMemberRequestToggle.checked,
         roles: roles,
         updatedAt: new Date().toISOString()
       };
