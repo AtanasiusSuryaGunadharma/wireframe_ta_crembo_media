@@ -140,7 +140,6 @@
         <div class="group-items">
           <a class="menu-link" href="data-inventaris-barang.html">Data Inventaris Barang</a>
           <a class="menu-link active" href="persetujuan-peminjaman.html">Persetujuan Peminjaman</a>
-          <a class="menu-link" href="pengambilan-barang.html">Konfirmasi Pengembalian</a>
           <a class="menu-link" href="riwayat-peminjaman-pengembalian.html">Riwayat Peminjaman &amp; Pengembalian</a>
         </div>
       </div>
@@ -170,8 +169,6 @@
               <option value="Pending">Pending</option>
               <option value="Disetujui">Disetujui</option>
               <option value="Ditolak">Ditolak</option>
-              <option value="Sedang Dipinjam">Sedang Dipinjam</option>
-              <option value="Selesai">Selesai</option>
             </select>
           </div>
           <div class="field">
@@ -220,7 +217,7 @@
     const INVENTORY_KEY = "crembo-inventaris-barang";
     const REQUEST_KEY = "crembo-peminjaman-requests";
     const REQUEST_SEED_KEY = "crembo-peminjaman-seed-version";
-    const REQUEST_SEED_VERSION = "v2";
+    const REQUEST_SEED_VERSION = "v5";
 
     const searchInput = document.getElementById("searchInput");
     const statusFilter = document.getElementById("statusFilter");
@@ -253,6 +250,32 @@
 
     function saveInventory(items) {
       localStorage.setItem(INVENTORY_KEY, JSON.stringify(items));
+    }
+
+    function resetInventoryForTesting(items) {
+      return items.map(function (item) {
+        const totalUnit = Math.max(1, Number(item.totalUnit || 1));
+        const canBorrow = item.canBorrow !== false;
+        return Object.assign({}, item, {
+          availableUnit: totalUnit,
+          borrowedUnit: 0,
+          status: canBorrow ? "Tersedia" : item.status,
+          updatedAt: new Date().toISOString()
+        });
+      });
+    }
+
+    function resetProcessedRequest(item) {
+      const cleaned = Object.assign({}, item);
+      if (cleaned.status === "Disetujui" || cleaned.status === "Sedang Dipinjam") {
+        cleaned.status = "Pending";
+        cleaned.adminNote = "";
+        cleaned.approvedBy = "";
+        cleaned.approvedAt = "";
+        cleaned.pickup = null;
+        cleaned.returnInfo = null;
+      }
+      return cleaned;
     }
 
     function normalizeRequest(item, index) {
@@ -333,10 +356,7 @@
           purpose: "Liputan Misa Harian",
           borrowDate: new Date(now - day).toISOString().slice(0, 10),
           expectedReturnDate: new Date(now + day).toISOString().slice(0, 10),
-          status: "Disetujui",
-          approvedBy: "Admin Inventaris",
-          approvedAt: new Date(now - day / 2).toISOString(),
-          adminNote: "Silakan ambil di gudang multimedia."
+          status: "Pending"
         }, 3),
         normalizeRequest({
           id: "req-seed-004",
@@ -367,16 +387,7 @@
           purpose: "Dokumentasi latihan paduan suara",
           borrowDate: new Date(now - 3 * day).toISOString().slice(0, 10),
           expectedReturnDate: new Date(now + day).toISOString().slice(0, 10),
-          status: "Sedang Dipinjam",
-          approvedBy: "Admin Inventaris",
-          approvedAt: new Date(now - 3 * day + 3 * 60 * 60 * 1000).toISOString(),
-          adminNote: "Sudah diambil peminjam.",
-          pickup: {
-            time: new Date(now - 3 * day + 6 * 60 * 60 * 1000).toISOString(),
-            location: "Gudang Multimedia",
-            officer: "Admin Inventaris",
-            proofPhoto: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='90'%3E%3Crect width='100%25' height='100%25' fill='%23dbeafe'/%3E%3Ctext x='10' y='48' font-size='12' fill='%231e3a8a'%3EBukti Ambil%3C/text%3E%3C/svg%3E"
-          }
+          status: "Pending"
         }, 5),
         normalizeRequest({
           id: "req-seed-006",
@@ -390,23 +401,7 @@
           purpose: "Pelatihan operator baru",
           borrowDate: new Date(now - 7 * day).toISOString().slice(0, 10),
           expectedReturnDate: new Date(now - 3 * day).toISOString().slice(0, 10),
-          status: "Selesai",
-          approvedBy: "Admin Inventaris",
-          approvedAt: new Date(now - 7 * day + 90 * 60 * 1000).toISOString(),
-          adminNote: "Transaksi selesai.",
-          pickup: {
-            time: new Date(now - 7 * day + 4 * 60 * 60 * 1000).toISOString(),
-            location: "Ruang Audio",
-            officer: "Admin Inventaris",
-            proofPhoto: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='90'%3E%3Crect width='100%25' height='100%25' fill='%23dbeafe'/%3E%3Ctext x='10' y='48' font-size='12' fill='%231e3a8a'%3EBukti Ambil%3C/text%3E%3C/svg%3E"
-          },
-          returnInfo: {
-            time: new Date(now - 3 * day + 5 * 60 * 60 * 1000).toISOString(),
-            location: "Ruang Audio",
-            officer: "Admin Inventaris",
-            condition: "Baik",
-            proofPhoto: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='90'%3E%3Crect width='100%25' height='100%25' fill='%23dcfce7'/%3E%3Ctext x='10' y='48' font-size='12' fill='%2314532d'%3EBukti Kembali%3C/text%3E%3C/svg%3E"
-          }
+          status: "Pending"
         }, 6),
         normalizeRequest({
           id: "req-seed-007",
@@ -436,6 +431,118 @@
           expectedReturnDate: new Date(now + 4 * day).toISOString().slice(0, 10),
           status: "Pending"
         }, 8)
+        ,normalizeRequest({
+          id: "req-seed-009",
+          code: "REQ-0009",
+          borrowerName: "Hendri Gunawan",
+          borrowerPhone: "081255566677",
+          itemId: first.id || "",
+          itemCode: first.code || "CAM-001",
+          itemName: first.name || "Kamera",
+          quantity: 1,
+          purpose: "Perekaman video pembinaan",
+          borrowDate: new Date(now + 5 * day).toISOString().slice(0, 10),
+          expectedReturnDate: new Date(now + 7 * day).toISOString().slice(0, 10),
+          status: "Pending"
+        }, 9),
+        normalizeRequest({
+          id: "req-seed-010",
+          code: "REQ-0010",
+          borrowerName: "Irene Natalia",
+          borrowerPhone: "081299988877",
+          itemId: second.id || "",
+          itemCode: second.code || "AUD-004",
+          itemName: second.name || "Wireless Microphone Set",
+          quantity: 1,
+          purpose: "Kegiatan live streaming komunitas",
+          borrowDate: new Date(now + 1 * day).toISOString().slice(0, 10),
+          expectedReturnDate: new Date(now + 3 * day).toISOString().slice(0, 10),
+          status: "Pending"
+        }, 10),
+        normalizeRequest({
+          id: "req-seed-011",
+          code: "REQ-0011",
+          borrowerName: "Joko Wiratama",
+          borrowerPhone: "081233322211",
+          itemId: first.id || "",
+          itemCode: first.code || "CAM-001",
+          itemName: first.name || "Kamera",
+          quantity: 1,
+          purpose: "Dokumentasi acara kategorial",
+          borrowDate: new Date(now + 2 * day).toISOString().slice(0, 10),
+          expectedReturnDate: new Date(now + 5 * day).toISOString().slice(0, 10),
+          status: "Pending"
+        }, 11),
+        normalizeRequest({
+          id: "req-seed-012",
+          code: "REQ-0012",
+          borrowerName: "Lukas Pradana",
+          borrowerPhone: "081322244466",
+          itemId: second.id || "",
+          itemCode: second.code || "AUD-004",
+          itemName: second.name || "Wireless Microphone Set",
+          quantity: 1,
+          purpose: "Pelayanan OMK",
+          borrowDate: new Date(now + 3 * day).toISOString().slice(0, 10),
+          expectedReturnDate: new Date(now + 6 * day).toISOString().slice(0, 10),
+          status: "Pending"
+        }, 12),
+        normalizeRequest({
+          id: "req-seed-013",
+          code: "REQ-0013",
+          borrowerName: "Maya Salsabila",
+          borrowerPhone: "081388877766",
+          itemId: first.id || "",
+          itemCode: first.code || "CAM-001",
+          itemName: first.name || "Kamera",
+          quantity: 1,
+          purpose: "Kegiatan sekolah minggu",
+          borrowDate: new Date(now + 4 * day).toISOString().slice(0, 10),
+          expectedReturnDate: new Date(now + 7 * day).toISOString().slice(0, 10),
+          status: "Pending"
+        }, 13),
+        normalizeRequest({
+          id: "req-seed-014",
+          code: "REQ-0014",
+          borrowerName: "Nando Firmansyah",
+          borrowerPhone: "081366655544",
+          itemId: second.id || "",
+          itemCode: second.code || "AUD-004",
+          itemName: second.name || "Wireless Microphone Set",
+          quantity: 1,
+          purpose: "Penguatan tim multimedia",
+          borrowDate: new Date(now + 5 * day).toISOString().slice(0, 10),
+          expectedReturnDate: new Date(now + 8 * day).toISOString().slice(0, 10),
+          status: "Pending"
+        }, 14),
+        normalizeRequest({
+          id: "req-seed-015",
+          code: "REQ-0015",
+          borrowerName: "Olivia Tanjung",
+          borrowerPhone: "081377799900",
+          itemId: first.id || "",
+          itemCode: first.code || "CAM-001",
+          itemName: first.name || "Kamera",
+          quantity: 1,
+          purpose: "Kegiatan lingkungan wilayah",
+          borrowDate: new Date(now + 6 * day).toISOString().slice(0, 10),
+          expectedReturnDate: new Date(now + 9 * day).toISOString().slice(0, 10),
+          status: "Pending"
+        }, 15),
+        normalizeRequest({
+          id: "req-seed-016",
+          code: "REQ-0016",
+          borrowerName: "Prasetya Hadi",
+          borrowerPhone: "081388811122",
+          itemId: second.id || "",
+          itemCode: second.code || "AUD-004",
+          itemName: second.name || "Wireless Microphone Set",
+          quantity: 1,
+          purpose: "Misa khusus keluarga muda",
+          borrowDate: new Date(now + 7 * day).toISOString().slice(0, 10),
+          expectedReturnDate: new Date(now + 10 * day).toISOString().slice(0, 10),
+          status: "Pending"
+        }, 16)
       ];
       let existing = [];
       try {
@@ -453,7 +560,9 @@
         byCode[codeKey] = normalized;
       });
 
-      localStorage.setItem(REQUEST_KEY, JSON.stringify(Object.keys(byCode).map(function (key) { return byCode[key]; })));
+      const mergedRequests = Object.keys(byCode).map(function (key) { return resetProcessedRequest(byCode[key]); });
+      localStorage.setItem(REQUEST_KEY, JSON.stringify(mergedRequests));
+      saveInventory(resetInventoryForTesting(inventory));
       localStorage.setItem(REQUEST_SEED_KEY, REQUEST_SEED_VERSION);
     }
 
@@ -490,7 +599,7 @@
     }
 
     function getStatusClass(status) {
-      if (status === "Disetujui" || status === "Sedang Dipinjam" || status === "Selesai") {
+      if (status === "Disetujui") {
         return "approved";
       }
       if (status === "Ditolak") {
@@ -522,15 +631,13 @@
 
     function renderSummary(list) {
       const pending = list.filter(function (item) { return item.status === "Pending"; }).length;
-      const approved = list.filter(function (item) {
-        return ["Disetujui", "Sedang Dipinjam", "Selesai"].indexOf(item.status) !== -1;
-      }).length;
+      const approved = list.filter(function (item) { return item.status === "Disetujui"; }).length;
       const rejected = list.filter(function (item) { return item.status === "Ditolak"; }).length;
 
       summaryGrid.innerHTML =
         '<article class="summary-item"><p>Total Pengajuan</p><strong>' + list.length + '</strong></article>' +
         '<article class="summary-item"><p>Menunggu Persetujuan</p><strong>' + pending + '</strong></article>' +
-        '<article class="summary-item"><p>Disetujui (Termasuk Berjalan/Selesai)</p><strong>' + approved + '</strong></article>' +
+        '<article class="summary-item"><p>Disetujui</p><strong>' + approved + '</strong></article>' +
         '<article class="summary-item"><p>Ditolak</p><strong>' + rejected + '</strong></article>';
     }
 
@@ -583,6 +690,9 @@
       if (!item.canBorrow) {
         return { ok: false, message: "Barang tidak dapat dipinjam." };
       }
+      if (String(item.status || "").toLowerCase() === "dipinjam" || available <= 0) {
+        return { ok: false, message: "Barang sedang penuh dipinjam atau stok tersedia habis." };
+      }
       if (available < quantity) {
         return { ok: false, message: "Unit tersedia tidak mencukupi." };
       }
@@ -614,10 +724,12 @@
         return;
       }
 
+      const approvalNote = window.prompt("Catatan persetujuan (opsional):", "") || "";
+
       req.status = "Disetujui";
       req.approvedBy = "Admin Inventaris";
       req.approvedAt = new Date().toISOString();
-      req.adminNote = "Disetujui untuk proses pengambilan barang.";
+      req.adminNote = approvalNote.trim();
       list[index] = req;
       saveRequests(list);
       renderTable();
