@@ -198,6 +198,25 @@
       padding: 12px;
     }
 
+    .stat-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .metric-range-select {
+      border: 1px solid #b8b8b8;
+      border-radius: 999px;
+      background: #ffffff;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      color: #4b5563;
+      font-weight: 700;
+      font-family: inherit;
+    }
+
     .stat-card p { margin: 0 0 6px; color: var(--muted); font-size: 0.8rem; }
     .stat-card strong { font-size: 1.3rem; }
 
@@ -374,15 +393,22 @@
       <div class="content">
         <section class="stats">
           <article class="stat-card">
-            <p>Total Tugas</p>
+            <div class="stat-head">
+              <p id="totalLabel">Total Tugas Bulan Ini</p>
+              <select id="historyStatsRange" class="metric-range-select" aria-label="Rentang statistik riwayat">
+                <option value="week">Minggu Ini</option>
+                <option value="month" selected>Bulan Ini</option>
+                <option value="year">Tahun Ini</option>
+              </select>
+            </div>
             <strong id="totalCount">0</strong>
           </article>
           <article class="stat-card">
-            <p>Tugas Selesai</p>
+            <p id="completedLabel">Tugas Selesai Bulan Ini</p>
             <strong id="completedCount">0</strong>
           </article>
           <article class="stat-card">
-            <p>Pertukaran / Pengganti</p>
+            <p id="swapLabel">Pertukaran / Pengganti Bulan Ini</p>
             <strong id="swapCount">0</strong>
           </article>
         </section>
@@ -469,10 +495,14 @@
     const historyYear = document.getElementById("historyYear");
     const historySort = document.getElementById("historySort");
     const historyRows = document.getElementById("historyRows");
+    const historyStatsRange = document.getElementById("historyStatsRange");
 
     const totalCount = document.getElementById("totalCount");
     const completedCount = document.getElementById("completedCount");
     const swapCount = document.getElementById("swapCount");
+    const totalLabel = document.getElementById("totalLabel");
+    const completedLabel = document.getElementById("completedLabel");
+    const swapLabel = document.getElementById("swapLabel");
 
     function safeParse(raw, fallback) {
       try {
@@ -567,6 +597,38 @@
       return '<span class="status-chip">' + status + '</span>';
     }
 
+    function titleByRange(range) {
+      if (range === "week") {
+        return "Minggu Ini";
+      }
+      if (range === "month") {
+        return "Bulan Ini";
+      }
+      return "Tahun Ini";
+    }
+
+    function isWithinRange(dateText, range, now) {
+      const date = new Date(dateText + "T00:00:00");
+      if (Number.isNaN(date.getTime())) {
+        return false;
+      }
+
+      if (range === "year") {
+        return date.getFullYear() === now.getFullYear();
+      }
+
+      if (range === "month") {
+        return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+      }
+
+      const day = now.getDay();
+      const diffToMonday = day === 0 ? 6 : day - 1;
+      const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 7);
+      return date >= weekStart && date < weekEnd;
+    }
+
     function filterHistory(items) {
       const search = historySearch.value.trim().toLowerCase();
       const selectedMonth = historyMonth.value;
@@ -607,11 +669,21 @@
     }
 
     function renderStats(allItems) {
-      totalCount.textContent = String(allItems.length);
-      completedCount.textContent = String(allItems.filter(function (item) {
+      const now = new Date();
+      const range = historyStatsRange.value;
+      const filtered = allItems.filter(function (item) {
+        return isWithinRange(item.date, range, now);
+      });
+
+      totalLabel.textContent = "Total Tugas " + titleByRange(range);
+      completedLabel.textContent = "Tugas Selesai " + titleByRange(range);
+      swapLabel.textContent = "Pertukaran / Pengganti " + titleByRange(range);
+
+      totalCount.textContent = String(filtered.length);
+      completedCount.textContent = String(filtered.filter(function (item) {
         return item.status === "Selesai";
       }).length);
-      swapCount.textContent = String(allItems.filter(function (item) {
+      swapCount.textContent = String(filtered.filter(function (item) {
         return item.status === "Ditukar" || item.status === "Digantikan";
       }).length);
     }
@@ -682,6 +754,7 @@
     historyMonth.addEventListener("change", renderHistoryTable);
     historyYear.addEventListener("change", renderHistoryTable);
     historySort.addEventListener("change", renderHistoryTable);
+    historyStatsRange.addEventListener("change", renderHistoryTable);
 
     seedHistoryIfEmpty();
     setYearOptions();

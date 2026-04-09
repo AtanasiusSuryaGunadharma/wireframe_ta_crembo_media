@@ -444,6 +444,48 @@
       font-weight: 700;
     }
 
+    .status-danger {
+      display: inline-block;
+      font-size: 0.73rem;
+      color: #991b1b;
+      border: 1px solid #f4b0b0;
+      background: #fff1f1;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-weight: 700;
+    }
+
+    .mini-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .mini-btn {
+      text-decoration: none;
+      border: 0;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #4b5563 0%, #1f2937 100%);
+      color: #fff;
+      font-weight: 700;
+      padding: 5px 9px;
+      font-size: 0.74rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mini-btn.ghost {
+      border: 1px solid #aeb9c8;
+      background: #fff;
+      color: #1f2937;
+    }
+
+    .mini-btn.danger {
+      background: #b91c1c;
+    }
+
     .cta-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(180px, 1fr));
@@ -741,7 +783,7 @@
         <section class="panel" aria-label="Tugas yang perlu diambil">
           <header class="panel-head">
             <h2>Tugas yang Perlu Diambil</h2>
-            <a class="panel-link" href="#">Lihat Semua</a>
+            <a class="panel-link" href="request-tugas-anggota.html">Lihat Semua</a>
           </header>
           <div class="task-grid">
             <article class="task-card">
@@ -771,8 +813,38 @@
         <section class="panel" aria-label="Tugas terdaftar">
           <header class="panel-head">
             <h2>Tugas Saya yang Sudah Terdaftar</h2>
-            <a class="panel-link" href="#">Buka Jadwal</a>
+            <a class="panel-link" href="jadwal-tugas-misa-anggota.html">Buka Jadwal</a>
           </header>
+          <div style="padding: 12px; border-bottom: 1px solid var(--line); display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 0.8rem;">
+              Bulan:
+              <select id="taskFilterMonth" style="border: 1px solid #b8b8b8; border-radius: 6px; padding: 4px 8px; font-size: 0.8rem; font-family: inherit;">
+                <option value="">Semua</option>
+                <option value="01">Januari</option>
+                <option value="02">Februari</option>
+                <option value="03">Maret</option>
+                <option value="04" selected>April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+            </label>
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 0.8rem;">
+              Tahun:
+              <select id="taskFilterYear" style="border: 1px solid #b8b8b8; border-radius: 6px; padding: 4px 8px; font-size: 0.8rem; font-family: inherit;">
+                <option value="">Semua</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+              </select>
+            </label>
+          </div>
           <div class="table-wrap">
             <table>
               <thead>
@@ -784,22 +856,7 @@
                   <th>Aksi</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>Misa Mingguan - Minggu, 29 Mar 2026 08:00</td>
-                  <td>Operator</td>
-                  <td><span class="status-ok">Aktif</span></td>
-                  <td><span class="status-warn">Belum Diisi</span></td>
-                  <td>Ajukan Tukar Jadwal</td>
-                </tr>
-                <tr>
-                  <td>Misa Harian - Selasa, 24 Mar 2026 17:00</td>
-                  <td>Supervisor</td>
-                  <td><span class="status-ok">Selesai</span></td>
-                  <td><span class="status-ok">Sudah Diisi</span></td>
-                  <td>Lihat Histori</td>
-                </tr>
-              </tbody>
+              <tbody id="registeredTaskRows"></tbody>
             </table>
           </div>
         </section>
@@ -865,8 +922,15 @@
     const requestChartRange = document.getElementById("requestChartRange");
     const requestChartTitle = document.getElementById("requestChartTitle");
     const requestChartNote = document.getElementById("requestChartNote");
+    const registeredTaskRows = document.getElementById("registeredTaskRows");
+    const taskFilterMonthSelect = document.getElementById("taskFilterMonth");
+    const taskFilterYearSelect = document.getElementById("taskFilterYear");
 
     const TASK_REQUEST_STORAGE_KEY = "crembo-member-task-requests";
+    const MEMBER_TASK_STORAGE_KEY = "crembo-member-registered-tasks";
+    
+    let taskFilterMonth = "04";
+    let taskFilterYear = "2026";
 
     function titleByRange(range) {
       if (range === "week") {
@@ -898,6 +962,92 @@
       const month = String(parsed.getMonth() + 1).padStart(2, "0");
       const date = String(parsed.getDate()).padStart(2, "0");
       return year + "-" + month + "-" + date;
+    }
+
+    function safeParse(raw, fallback) {
+      try {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : fallback;
+      } catch (error) {
+        return fallback;
+      }
+    }
+
+    function seedMemberTasksIfEmpty() {
+      if (localStorage.getItem(MEMBER_TASK_STORAGE_KEY)) {
+        return;
+      }
+      const demo = [
+        { id: "task-1", title: "Misa Mingguan", date: "2026-04-13", time: "08:00", role: "Operator", status: "Terdaftar", evaluation: "Belum Diisi" },
+        { id: "task-2", title: "Misa Harian", date: "2026-04-03", time: "17:00", role: "Supervisor", status: "Selesai", evaluation: "Sudah Diisi" }
+      ];
+      localStorage.setItem(MEMBER_TASK_STORAGE_KEY, JSON.stringify(demo));
+    }
+
+    function readMemberTasks() {
+      return safeParse(localStorage.getItem(MEMBER_TASK_STORAGE_KEY), []);
+    }
+
+    function saveMemberTasks(items) {
+      localStorage.setItem(MEMBER_TASK_STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function renderRegisteredTaskSection() {
+      const tasks = readMemberTasks();
+      const now = new Date();
+      const todayText = normalizeDateOnly(now.toISOString());
+      
+      let filtered = tasks;
+      if (taskFilterMonth) {
+        filtered = filtered.filter(function (task) {
+          return task.date.substring(5, 7) === taskFilterMonth;
+        });
+      }
+      if (taskFilterYear) {
+        filtered = filtered.filter(function (task) {
+          return task.date.substring(0, 4) === taskFilterYear;
+        });
+      }
+      
+      if (!filtered.length) {
+        registeredTaskRows.innerHTML = '<tr><td colspan="5">Belum ada tugas terdaftar.</td></tr>';
+        return;
+      }
+
+      registeredTaskRows.innerHTML = filtered.map(function (item) {
+        const scheduleLabel = item.title + " - " + item.date + " " + item.time;
+        let statusHtml = '<span class="status-warn">' + item.status + '</span>';
+        if (item.status === "Terdaftar") {
+          statusHtml = '<span class="status-ok">Aktif</span>';
+        } else if (item.status === "Selesai") {
+          statusHtml = '<span class="status-ok">Selesai</span>';
+        } else if (item.status === "Dibatalkan") {
+          statusHtml = '<span class="status-danger">Dibatalkan</span>';
+        }
+
+        let evaluationHtml = '<span class="status-warn">Pending</span>';
+        if (item.date <= todayText) {
+          evaluationHtml = item.evaluation === "Sudah Diisi"
+            ? '<span class="status-ok">Sudah Diisi</span>'
+            : '<span class="status-warn">Belum Diisi</span>';
+        }
+
+        let actionHtml = '<a class="mini-btn ghost" href="riwayat-tugas-saya.html">Lihat Histori</a>';
+        if (item.status === "Terdaftar") {
+          actionHtml = '<div class="mini-actions">'
+            + '<button class="mini-btn danger" type="button" data-action="cancel" data-id="' + item.id + '">Batalkan</button>'
+            + '<a class="mini-btn ghost" href="penukaran-jadwal-tugas-anggota.html">Ajukan Tukar</a>'
+            + '</div>';
+        }
+
+        return '<tr>'
+          + '<td>' + scheduleLabel + '</td>'
+          + '<td>' + item.role + '</td>'
+          + '<td>' + statusHtml + '</td>'
+          + '<td>' + evaluationHtml + '</td>'
+          + '<td>' + actionHtml + '</td>'
+          + '</tr>';
+      }).join("");
     }
 
     function readTaskRequests() {
@@ -1172,10 +1322,49 @@
       renderLineChart("requestTugasChart", series.labels, series.values, "#2d2d2d");
     }
 
+    seedMemberTasksIfEmpty();
+    renderRegisteredTaskSection();
+
     renderScheduleMetric();
     renderDoneMetric();
     renderPendingAndUpcomingMetric();
     renderRequestTaskChart();
+
+    registeredTaskRows.addEventListener("click", function (event) {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) {
+        return;
+      }
+      const action = target.getAttribute("data-action");
+      const id = target.getAttribute("data-id");
+      if (action !== "cancel" || !id) {
+        return;
+      }
+
+      if (!window.confirm("Batalkan tugas aktif ini?")) {
+        return;
+      }
+
+      const items = readMemberTasks();
+      const task = items.find(function (row) { return row.id === id; });
+      if (!task || task.status !== "Terdaftar") {
+        return;
+      }
+
+      task.status = "Dibatalkan";
+      saveMemberTasks(items);
+      renderRegisteredTaskSection();
+    });
+
+    taskFilterMonthSelect.addEventListener("change", function (event) {
+      taskFilterMonth = event.target.value;
+      renderRegisteredTaskSection();
+    });
+
+    taskFilterYearSelect.addEventListener("change", function (event) {
+      taskFilterYear = event.target.value;
+      renderRegisteredTaskSection();
+    });
 
     metricScheduleRange.addEventListener("change", renderScheduleMetric);
     metricDoneRange.addEventListener("change", renderDoneMetric);
