@@ -579,7 +579,7 @@
         </div>
       </div>
 
-      <div class="menu-group open">
+      <div class="menu-group open" id="streamingMenuGroup">
         <button class="group-toggle" type="button">Tugas Streaming <span>-</span></button>
         <div class="group-items">
           <a class="menu-link" href="jadwal-tugas-streaming-admin.html">Jadwal Streaming</a>
@@ -591,7 +591,7 @@
         </div>
       </div>
 
-      <div class="menu-group">
+      <div class="menu-group" id="inventarisMenuGroup">
         <button class="group-toggle" type="button">Inventaris & Peminjaman <span>+</span></button>
         <div class="group-items">
           <a class="menu-link" href="data-inventaris-barang.html">Data Inventaris Barang</a>
@@ -600,7 +600,7 @@
         </div>
       </div>
 
-      <div class="menu-group">
+      <div class="menu-group" id="publikasiMenuGroup">
         <button class="group-toggle" type="button">Informasi & Publikasi <span>+</span></button>
         <div class="group-items">
           <a class="menu-link" href="manajemen-profil.html">Profil</a>
@@ -610,12 +610,12 @@
         </div>
       </div>
 
-      <div class="menu-group open">
+      <div class="menu-group open" id="kontenMenuGroup">
         <button class="group-toggle" type="button">Konten Utama Website <span>-</span></button>
         <div class="group-items" id="contentMenu"></div>
       </div>
 
-      <div class="menu-group open">
+      <div class="menu-group open" id="keanggotaanMenuGroup">
         <button class="group-toggle" type="button">Keanggotaan <span>-</span></button>
         <div class="group-items" id="anggotaMenu"></div>
       </div>
@@ -814,6 +814,7 @@
     }
 
     const role = params.get("role") || storedRole || "admin";
+    const ADMIN_STORAGE_KEY = "crembo-admin-users";
 
     const roleBadge = document.getElementById("roleBadge");
     const anggotaMenu = document.getElementById("anggotaMenu");
@@ -833,6 +834,11 @@
     const jadwalChartTitle = document.getElementById("jadwalChartTitle");
     const peminjamanChartRange = document.getElementById("peminjamanChartRange");
     const peminjamanChartTitle = document.getElementById("peminjamanChartTitle");
+    const streamingMenuGroup = document.getElementById("streamingMenuGroup");
+    const inventarisMenuGroup = document.getElementById("inventarisMenuGroup");
+    const publikasiMenuGroup = document.getElementById("publikasiMenuGroup");
+    const kontenMenuGroup = document.getElementById("kontenMenuGroup");
+    const keanggotaanMenuGroup = document.getElementById("keanggotaanMenuGroup");
 
     function formatRole(value) {
       if (value === "super_admin") {
@@ -851,7 +857,7 @@
       ];
 
       const extraSuperAdmin = [
-        { label: "Kelola Data Admin", href: "#" },
+        { label: "Kelola Data Admin", href: "kelola-data-admin.html" },
         // "Audit Perubahan Role"
       ];
 
@@ -865,6 +871,143 @@
           return '<a class="menu-link' + activeClass + '" href="' + item.href + '">' + item.label + "</a>";
         })
         .join("");
+    }
+
+    function safeParse(raw) {
+      try {
+        return JSON.parse(raw);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function defaultPermissions() {
+      return {
+        streaming: true,
+        inventaris: true,
+        publikasi: true,
+        konten: true,
+        keanggotaan: true
+      };
+    }
+
+    function normalizePermissions(value) {
+      const base = defaultPermissions();
+      if (!value || typeof value !== "object") {
+        return base;
+      }
+      return {
+        streaming: value.streaming !== false,
+        inventaris: value.inventaris !== false,
+        publikasi: value.publikasi !== false,
+        konten: value.konten !== false,
+        keanggotaan: value.keanggotaan !== false
+      };
+    }
+
+    function seedAdminProfilesIfNeeded() {
+      const existingRaw = localStorage.getItem(ADMIN_STORAGE_KEY);
+      const existing = existingRaw ? safeParse(existingRaw) : null;
+      if (Array.isArray(existing) && existing.length) {
+        return;
+      }
+      const seed = [
+        {
+          id: "adm-1",
+          fullName: "Admin Andi",
+          email: "admin.andi@example.com",
+          loginIdentifier: "admin_andi",
+          role: "admin",
+          status: "Aktif",
+          permissions: {
+            streaming: true,
+            inventaris: true,
+            publikasi: false,
+            konten: false,
+            keanggotaan: false
+          }
+        },
+        {
+          id: "adm-2",
+          fullName: "Admin Maria",
+          email: "admin.maria@example.com",
+          loginIdentifier: "admin_maria",
+          role: "admin",
+          status: "Aktif",
+          permissions: {
+            streaming: false,
+            inventaris: false,
+            publikasi: true,
+            konten: true,
+            keanggotaan: true
+          }
+        }
+      ];
+      localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(seed));
+    }
+
+    function readAdminProfiles() {
+      seedAdminProfilesIfNeeded();
+      const raw = localStorage.getItem(ADMIN_STORAGE_KEY);
+      const parsed = raw ? safeParse(raw) : null;
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+      return parsed;
+    }
+
+    function resolveAdminPermissions() {
+      if (role === "super_admin") {
+        return defaultPermissions();
+      }
+      if (role !== "admin") {
+        return defaultPermissions();
+      }
+
+      const sessionObj = storedSessionRaw ? safeParse(storedSessionRaw) : null;
+      if (sessionObj && sessionObj.adminPermissions) {
+        return normalizePermissions(sessionObj.adminPermissions);
+      }
+
+      const identifier = String(sessionObj && sessionObj.identifier ? sessionObj.identifier : "").trim().toLowerCase();
+      const fullName = String(sessionObj && sessionObj.fullName ? sessionObj.fullName : "").trim().toLowerCase();
+      const admins = readAdminProfiles().filter(function (item) {
+        return String(item && item.role ? item.role : "admin") === "admin"
+          && String(item && item.status ? item.status : "Aktif") === "Aktif";
+      });
+
+      const matched = admins.find(function (item) {
+        const itemName = String(item && item.fullName ? item.fullName : "").trim().toLowerCase();
+        const itemEmail = String(item && item.email ? item.email : "").trim().toLowerCase();
+        const itemLogin = String(item && item.loginIdentifier ? item.loginIdentifier : "").trim().toLowerCase();
+        return (identifier && (itemEmail === identifier || itemLogin === identifier || itemName === identifier))
+          || (fullName && itemName === fullName);
+      });
+
+      return matched ? normalizePermissions(matched.permissions) : defaultPermissions();
+    }
+
+    function applyMenuAccessByPermission() {
+      const permissions = resolveAdminPermissions();
+      if (role === "super_admin") {
+        return;
+      }
+
+      if (streamingMenuGroup) {
+        streamingMenuGroup.style.display = permissions.streaming ? "" : "none";
+      }
+      if (inventarisMenuGroup) {
+        inventarisMenuGroup.style.display = permissions.inventaris ? "" : "none";
+      }
+      if (publikasiMenuGroup) {
+        publikasiMenuGroup.style.display = permissions.publikasi ? "" : "none";
+      }
+      if (kontenMenuGroup) {
+        kontenMenuGroup.style.display = permissions.konten ? "" : "none";
+      }
+      if (keanggotaanMenuGroup) {
+        keanggotaanMenuGroup.style.display = permissions.keanggotaan ? "" : "none";
+      }
     }
 
     function renderContentMenu(currentRole) {
@@ -925,6 +1068,7 @@
     renderContentMenu(role);
     renderRoleNote(role);
     renderLogs(role);
+    applyMenuAccessByPermission();
 
     function updateLiveDateTime() {
       const now = new Date();

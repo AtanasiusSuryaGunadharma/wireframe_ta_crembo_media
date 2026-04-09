@@ -679,6 +679,76 @@
       return Array.isArray(parsed) ? parsed : [];
     }
 
+    function defaultAdminProfiles() {
+      return [
+        {
+          id: "adm-1",
+          fullName: "Admin Andi",
+          email: "admin.andi@example.com",
+          loginIdentifier: "admin_andi",
+          role: "admin",
+          status: "Aktif",
+          permissions: {
+            streaming: true,
+            inventaris: true,
+            publikasi: false,
+            konten: false,
+            keanggotaan: false
+          }
+        },
+        {
+          id: "adm-2",
+          fullName: "Admin Maria",
+          email: "admin.maria@example.com",
+          loginIdentifier: "admin_maria",
+          role: "admin",
+          status: "Aktif",
+          permissions: {
+            streaming: false,
+            inventaris: false,
+            publikasi: true,
+            konten: true,
+            keanggotaan: true
+          }
+        }
+      ];
+    }
+
+    function readAdminProfiles() {
+      const key = "crembo-admin-users";
+      const raw = localStorage.getItem(key);
+      const parsed = raw ? safeParse(raw) : null;
+      if (Array.isArray(parsed) && parsed.length) {
+        return parsed;
+      }
+      const seed = defaultAdminProfiles();
+      localStorage.setItem(key, JSON.stringify(seed));
+      return seed;
+    }
+
+    function fullPermissions() {
+      return {
+        streaming: true,
+        inventaris: true,
+        publikasi: true,
+        konten: true,
+        keanggotaan: true
+      };
+    }
+
+    function findAdminByIdentifier(identifier) {
+      const source = readAdminProfiles();
+      const key = String(identifier || "").trim().toLowerCase();
+
+      return source.find(function (admin) {
+        const name = String(admin && admin.fullName ? admin.fullName : "").trim().toLowerCase();
+        const email = String(admin && admin.email ? admin.email : "").trim().toLowerCase();
+        const loginId = String(admin && admin.loginIdentifier ? admin.loginIdentifier : "").trim().toLowerCase();
+        const status = String(admin && admin.status ? admin.status : "Aktif");
+        return status === "Aktif" && (name === key || email === key || loginId === key);
+      }) || null;
+    }
+
     function findMemberByIdentifier(identifier, type) {
       const source = readMembers();
       if (!source.length) {
@@ -747,6 +817,21 @@
           } else {
             sessionPayload.fullName = pendingLoginData.identifier;
           }
+        } else if (role === "admin") {
+          const matchedAdmin = findAdminByIdentifier(pendingLoginData.identifier);
+          if (matchedAdmin) {
+            sessionPayload.adminId = matchedAdmin.id || "";
+            sessionPayload.fullName = matchedAdmin.fullName || pendingLoginData.identifier;
+            sessionPayload.adminPermissions = Object.assign({}, fullPermissions(), matchedAdmin.permissions || {});
+          } else {
+            sessionPayload.fullName = pendingLoginData.identifier;
+            sessionPayload.adminPermissions = fullPermissions();
+          }
+          sessionPayload.canManageAdminData = false;
+        } else if (role === "super_admin") {
+          sessionPayload.fullName = pendingLoginData.identifier;
+          sessionPayload.adminPermissions = fullPermissions();
+          sessionPayload.canManageAdminData = true;
         }
 
         localStorage.setItem("crembo-login-session", JSON.stringify(sessionPayload));
