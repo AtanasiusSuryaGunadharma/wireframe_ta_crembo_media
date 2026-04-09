@@ -295,6 +295,26 @@
       letter-spacing: 0.04em;
     }
 
+    .metric-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .metric-range-select {
+      border: 1px solid #b8b8b8;
+      border-radius: 999px;
+      background: #ffffff;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      color: #4b5563;
+      font-weight: 700;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
     .metric h3 {
       margin: 8px 0 0;
       font-size: 1.45rem;
@@ -410,7 +430,7 @@
 
     .chart-row {
       display: grid;
-      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
       gap: 12px;
     }
 
@@ -445,6 +465,17 @@
       padding: 3px 7px;
       border-radius: 999px;
       background: #fafafa;
+    }
+
+    .chart-range-select {
+      border: 1px solid #b7b7b7;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 0.74rem;
+      color: #4b5563;
+      background: #ffffff;
+      font-weight: 700;
+      font-family: inherit;
     }
 
     .chart-area {
@@ -635,8 +666,15 @@
 
       <section class="cards" aria-label="Ringkasan metrik">
         <article class="metric">
-          <p>Jadwal minggu ini</p>
-          <h3>14</h3>
+          <div class="metric-head">
+            <p id="metricScheduleLabel">Jadwal Minggu Ini</p>
+            <select id="metricScheduleRange" class="metric-range-select" aria-label="Rentang kartu jadwal">
+              <option value="week">Minggu Ini</option>
+              <option value="month">Bulan Ini</option>
+              <option value="year">Tahun Ini</option>
+            </select>
+          </div>
+          <h3 id="metricScheduleValue">14</h3>
         </article>
         <article class="metric">
           <p>Permintaan peminjaman</p>
@@ -656,28 +694,26 @@
         <div class="chart-row">
           <article class="chart-panel">
             <header class="chart-head">
-              <h2>Grafik Monitoring Tugas (Bulanan)</h2>
-              <span class="chart-note">12 Bulan</span>
+              <h2 id="jadwalChartTitle">Grafik Jadwal Minggu Ini</h2>
+              <select id="jadwalChartRange" class="chart-range-select" aria-label="Rentang grafik jadwal">
+                <option value="week">Minggu Ini</option>
+                <option value="month">Bulan Ini</option>
+                <option value="year">Tahun Ini</option>
+              </select>
             </header>
             <div class="chart-area">
-              <svg id="monitoringChart" viewBox="0 0 560 220" aria-label="Grafik monitoring tugas"></svg>
+              <svg id="jadwalChart" viewBox="0 0 560 220" aria-label="Grafik jadwal"></svg>
             </div>
           </article>
 
           <article class="chart-panel">
             <header class="chart-head">
-              <h2>Grafik Jadwal Minggu Ini (Bulanan)</h2>
-              <span class="chart-note">12 Bulan</span>
-            </header>
-            <div class="chart-area">
-              <svg id="jadwalChart" viewBox="0 0 560 220" aria-label="Grafik jadwal mingguan"></svg>
-            </div>
-          </article>
-
-          <article class="chart-panel">
-            <header class="chart-head">
-              <h2>Grafik Peminjaman Barang (Bulanan)</h2>
-              <span class="chart-note">12 Bulan</span>
+              <h2 id="peminjamanChartTitle">Grafik Peminjaman Barang</h2>
+              <select id="peminjamanChartRange" class="chart-range-select" aria-label="Rentang grafik peminjaman">
+                <option value="week">Minggu Ini</option>
+                <option value="month">Bulan Ini</option>
+                <option value="year" selected>Tahun Ini</option>
+              </select>
             </header>
             <div class="chart-area">
               <svg id="peminjamanChart" viewBox="0 0 560 220" aria-label="Grafik peminjaman barang"></svg>
@@ -791,6 +827,13 @@
     const memberTaskTitle = document.getElementById("memberTaskTitle");
     const memberTaskDesc = document.getElementById("memberTaskDesc");
     const liveDateTime = document.getElementById("liveDateTime");
+    const metricScheduleRange = document.getElementById("metricScheduleRange");
+    const metricScheduleLabel = document.getElementById("metricScheduleLabel");
+    const metricScheduleValue = document.getElementById("metricScheduleValue");
+    const jadwalChartRange = document.getElementById("jadwalChartRange");
+    const jadwalChartTitle = document.getElementById("jadwalChartTitle");
+    const peminjamanChartRange = document.getElementById("peminjamanChartRange");
+    const peminjamanChartTitle = document.getElementById("peminjamanChartTitle");
 
     function formatRole(value) {
       if (value === "super_admin") {
@@ -915,8 +958,9 @@
       const plotHeight = height - top - bottom;
       const maxValue = Math.max.apply(null, data.concat([1]));
 
+      const divider = Math.max(1, data.length - 1);
       const points = data.map(function (value, index) {
-        const x = left + (plotWidth / (data.length - 1)) * index;
+        const x = left + (plotWidth / divider) * index;
         const y = top + plotHeight - (value / maxValue) * plotHeight;
         return { x: x, y: y, value: value };
       });
@@ -949,7 +993,7 @@
       });
 
       labels.forEach(function (label, index) {
-        const x = left + (plotWidth / (labels.length - 1)) * index;
+        const x = left + (plotWidth / Math.max(1, labels.length - 1)) * index;
         html += '<text x="' + x + '" y="' + (height - 18) + '" text-anchor="middle" font-size="10" fill="#525252">' + label + '</text>';
       });
 
@@ -978,14 +1022,126 @@
       });
     }
 
-    const monthLabels = ["Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des", "Jan", "Feb", "Mar"];
-    const monitoringData = [10, 9, 11, 12, 13, 11, 12, 14, 13, 15, 16, 14];
-    const jadwalData = [4, 4, 5, 5, 5, 4, 5, 6, 5, 5, 6, 5];
-    const peminjamanData = [2, 3, 1, 2, 4, 3, 2, 5, 4, 3, 6, 4];
+    function getDaysInMonth(year, monthIndex) {
+      return new Date(year, monthIndex + 1, 0).getDate();
+    }
 
-    renderLineChart("monitoringChart", monthLabels, monitoringData, "#2b2b2b");
-    renderLineChart("jadwalChart", monthLabels, jadwalData, "#4a4a4a");
-    renderLineChart("peminjamanChart", monthLabels, peminjamanData, "#6a6a6a");
+    function titleByRange(range) {
+      if (range === "week") {
+        return "Minggu Ini";
+      }
+      if (range === "month") {
+        return "Bulan Ini";
+      }
+      return "Tahun Ini";
+    }
+
+    function buildScheduleSeries(range) {
+      const now = new Date();
+      const year = now.getFullYear();
+      const monthIndex = now.getMonth();
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+      if (range === "week") {
+        const labels = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
+        const values = labels.map(function (_, index) {
+          return index >= 5 ? 3 : (index === 2 ? 2 : 1);
+        });
+        return { labels: labels, values: values };
+      }
+
+      if (range === "month") {
+        const totalDays = getDaysInMonth(year, monthIndex);
+        const labels = [];
+        const values = [];
+        for (let day = 1; day <= totalDays; day += 1) {
+          const dayOfWeek = new Date(year, monthIndex, day).getDay();
+          labels.push((day === 1 || day === totalDays || day % 3 === 0) ? String(day) : "");
+          values.push(dayOfWeek === 0 ? 4 : (dayOfWeek === 6 ? 2 : 1));
+        }
+        return { labels: labels, values: values };
+      }
+
+      const labels = monthNames;
+      const values = labels.map(function (_, index) {
+        const totalDays = getDaysInMonth(year, index);
+        let count = 0;
+        for (let day = 1; day <= totalDays; day += 1) {
+          const dayOfWeek = new Date(year, index, day).getDay();
+          count += dayOfWeek === 0 ? 4 : (dayOfWeek === 6 ? 2 : 1);
+        }
+        return count;
+      });
+      return { labels: labels, values: values };
+    }
+
+    function renderScheduleMetric() {
+      const range = metricScheduleRange.value;
+      const series = buildScheduleSeries(range);
+      const total = series.values.reduce(function (sum, value) {
+        return sum + value;
+      }, 0);
+
+      metricScheduleLabel.textContent = "Jadwal " + titleByRange(range);
+      metricScheduleValue.textContent = String(total);
+    }
+
+    function renderScheduleChart() {
+      const range = jadwalChartRange.value;
+      const series = buildScheduleSeries(range);
+      jadwalChartTitle.textContent = "Grafik Jadwal " + titleByRange(range);
+      renderLineChart("jadwalChart", series.labels, series.values, "#4a4a4a");
+    }
+
+    function buildBorrowingSeries(range) {
+      const now = new Date();
+      const year = now.getFullYear();
+      const monthIndex = now.getMonth();
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+      if (range === "week") {
+        return {
+          labels: ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"],
+          values: [2, 3, 1, 2, 4, 2, 1]
+        };
+      }
+
+      if (range === "month") {
+        const totalDays = getDaysInMonth(year, monthIndex);
+        const labels = [];
+        const values = [];
+
+        for (let day = 1; day <= totalDays; day += 1) {
+          const dayOfWeek = new Date(year, monthIndex, day).getDay();
+          labels.push((day === 1 || day === totalDays || day % 3 === 0) ? String(day) : "");
+          values.push(dayOfWeek === 0 ? 1 : (dayOfWeek === 6 ? 2 : (day % 5 === 0 ? 3 : 1)));
+        }
+
+        return { labels: labels, values: values };
+      }
+
+      const labels = monthNames;
+      const values = labels.map(function (_, index) {
+        const base = 2 + (index % 4);
+        return base + (index === monthIndex ? 2 : 0);
+      });
+      return { labels: labels, values: values };
+    }
+
+    function renderBorrowingChart() {
+      const range = peminjamanChartRange.value;
+      const series = buildBorrowingSeries(range);
+      peminjamanChartTitle.textContent = "Grafik Peminjaman " + titleByRange(range);
+      renderLineChart("peminjamanChart", series.labels, series.values, "#6a6a6a");
+    }
+
+    renderScheduleMetric();
+    renderScheduleChart();
+    renderBorrowingChart();
+
+    metricScheduleRange.addEventListener("change", renderScheduleMetric);
+    jadwalChartRange.addEventListener("change", renderScheduleChart);
+    peminjamanChartRange.addEventListener("change", renderBorrowingChart);
 
     document.querySelectorAll(".group-toggle").forEach(function (button) {
       button.addEventListener("click", function () {
