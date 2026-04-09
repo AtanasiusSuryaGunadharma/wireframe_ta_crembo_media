@@ -169,6 +169,7 @@
               <option value="Pending">Pending</option>
               <option value="Disetujui">Disetujui</option>
               <option value="Ditolak">Ditolak</option>
+              <option value="Dibatalkan">Dibatalkan</option>
             </select>
           </div>
           <div class="field">
@@ -633,12 +634,13 @@
       const pending = list.filter(function (item) { return item.status === "Pending"; }).length;
       const approved = list.filter(function (item) { return item.status === "Disetujui"; }).length;
       const rejected = list.filter(function (item) { return item.status === "Ditolak"; }).length;
+      const cancelled = list.filter(function (item) { return item.status === "Dibatalkan"; }).length;
 
       summaryGrid.innerHTML =
         '<article class="summary-item"><p>Total Pengajuan</p><strong>' + list.length + '</strong></article>' +
         '<article class="summary-item"><p>Menunggu Persetujuan</p><strong>' + pending + '</strong></article>' +
         '<article class="summary-item"><p>Disetujui</p><strong>' + approved + '</strong></article>' +
-        '<article class="summary-item"><p>Ditolak</p><strong>' + rejected + '</strong></article>';
+        '<article class="summary-item"><p>Ditolak / Dibatalkan</p><strong>' + (rejected + cancelled) + '</strong></article>';
     }
 
     function renderTable() {
@@ -655,6 +657,10 @@
         if (item.status === "Pending") {
           actionHtml += ' <button class="btn" type="button" data-approve-id="' + escapeHtml(item.id) + '">Setujui</button>';
           actionHtml += ' <button class="btn-danger" type="button" data-reject-id="' + escapeHtml(item.id) + '">Tolak</button>';
+          actionHtml += ' <button class="btn-ghost" type="button" data-cancel-id="' + escapeHtml(item.id) + '">Batalkan</button>';
+        }
+        if (item.status === "Disetujui") {
+          actionHtml += ' <button class="btn-ghost" type="button" data-cancel-id="' + escapeHtml(item.id) + '">Batalkan</button>';
         }
 
         return '<tr>' +
@@ -706,6 +712,29 @@
       return { ok: true };
     }
 
+    function rollbackInventoryOnCancel(req) {
+      const inventory = readInventory();
+      const index = inventory.findIndex(function (item) {
+        return item.id === req.itemId || item.code === req.itemCode;
+      });
+      if (index === -1) {
+        return;
+      }
+
+      const item = Object.assign({}, inventory[index]);
+      const total = Math.max(1, Number(item.totalUnit || 1));
+      const available = Math.max(0, Number(item.availableUnit || 0));
+      const quantity = Math.max(1, Number(req.quantity || 1));
+
+      item.availableUnit = Math.min(total, available + quantity);
+      item.borrowedUnit = total - item.availableUnit;
+      item.status = item.availableUnit > 0 ? "Tersedia" : "Dipinjam";
+      item.updatedAt = new Date().toISOString();
+
+      inventory[index] = item;
+      saveInventory(inventory);
+    }
+
     function approveRequest(id) {
       const list = readRequests();
       const index = list.findIndex(function (item) { return item.id === id; });
@@ -754,6 +783,41 @@
       req.approvedBy = "Admin Inventaris";
       req.approvedAt = new Date().toISOString();
       req.adminNote = note.trim();
+      list[index] = req;
+      saveRequests(list);
+      renderTable();
+    }
+
+    function cancelRequest(id) {
+      const list = readRequests();
+      const index = list.findIndex(function (item) { return item.id === id; });
+      if (index === -1) {
+        return;
+      }
+
+      const req = list[index];
+      if (req.status !== "Pending" && req.status !== "Disetujui") {
+        window.alert("Pembatalan hanya bisa untuk status Pending atau Disetujui.");
+        return;
+      }
+
+      const reason = window.prompt("Alasan pembatalan:", "Pengajuan dibatalkan setelah konfirmasi anggota");
+      if (reason === null) {
+        return;
+      }
+      if (!String(reason).trim()) {
+        window.alert("Alasan pembatalan wajib diisi.");
+        return;
+      }
+
+      if (req.status === "Disetujui") {
+        rollbackInventoryOnCancel(req);
+      }
+
+      req.status = "Dibatalkan";
+      req.approvedBy = "Admin Inventaris";
+      req.approvedAt = new Date().toISOString();
+      req.adminNote = String(reason).trim();
       list[index] = req;
       saveRequests(list);
       renderTable();
@@ -868,6 +932,10 @@
       if (rejectId) {
         rejectRequest(rejectId);
         return;
+      }
+      const cancelId = target.getAttribute("data-cancel-id") || "";
+      if (cancelId) {
+        cancelRequest(cancelId);
       }
     });
 
