@@ -499,7 +499,11 @@
         <article class="panel">
           <header class="panel-head">
             <h3>Daftar Anggota & Status</h3>
-            <button id="newMemberBtn" class="btn" type="button">+ Tambah Anggota</button>
+            <div class="inline-actions">
+              <button id="previewMemberReportBtn" class="btn ghost" type="button">Preview PDF</button>
+              <button id="downloadMemberExcelBtn" class="btn ghost" type="button">Download Excel</button>
+              <button id="newMemberBtn" class="btn" type="button">+ Tambah Anggota</button>
+            </div>
           </header>
           <div class="panel-body">
             <div class="filters">
@@ -676,6 +680,8 @@
     const importExcelBtn = document.getElementById("importExcelBtn");
     const downloadCsvTemplateBtn = document.getElementById("downloadCsvTemplateBtn");
     const downloadExcelTemplateBtn = document.getElementById("downloadExcelTemplateBtn");
+    const previewMemberReportBtn = document.getElementById("previewMemberReportBtn");
+    const downloadMemberExcelBtn = document.getElementById("downloadMemberExcelBtn");
 
     const notify = document.getElementById("notify");
 
@@ -1080,6 +1086,135 @@
       return d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
     }
 
+    function formatDateTime(value) {
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return "-";
+      }
+      return date.toLocaleString("id-ID", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+    }
+
+    function memberStatusLabel(member) {
+      if (!member) {
+        return "-";
+      }
+      if (member.status === "Nonaktif" && member.inactiveUntil) {
+        return member.status + " s/d " + formatDate(member.inactiveUntil);
+      }
+      return member.status || "-";
+    }
+
+    function buildMemberReportHtml(rows) {
+      const generatedAt = formatDateTime(new Date());
+      const tableRows = rows.map(function (member, index) {
+        return '<tr>'
+          + '<td>' + (index + 1) + '</td>'
+          + '<td>' + escapeHtml(member.name || "-") + '</td>'
+          + '<td>' + escapeHtml(member.email || "-") + '</td>'
+          + '<td>' + escapeHtml(member.phone || "-") + '</td>'
+          + '<td>' + escapeHtml(member.address || "-") + '</td>'
+          + '<td>' + escapeHtml(formatDate(member.birthDate)) + '</td>'
+          + '<td>' + escapeHtml(roleLabel(member.role)) + '</td>'
+          + '<td>' + escapeHtml(memberStatusLabel(member)) + '</td>'
+          + '</tr>';
+      }).join("");
+
+      return '<!doctype html>'
+        + '<html lang="id"><head><meta charset="utf-8"><title>Laporan Data Anggota</title>'
+        + '<style>'
+        + 'body{font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;margin:0;color:#111;background:#f3f4f6;}'
+        + '.toolbar{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;background:#111;color:#f9fafb;z-index:3;}'
+        + '.toolbar h1{margin:0;font-size:0.95rem;}'
+        + '.toolbar .actions{display:flex;gap:8px;}'
+        + '.toolbar button{border:1px solid #cbd5e1;background:#fff;color:#111827;border-radius:8px;padding:7px 10px;font-weight:700;cursor:pointer;font-size:0.78rem;}'
+        + '.page{max-width:1100px;margin:14px auto;background:#fff;border:1px solid #d1d5db;border-radius:12px;padding:16px;}'
+        + '.meta{display:grid;gap:4px;margin-bottom:12px;font-size:0.82rem;color:#374151;}'
+        + 'table{width:100%;border-collapse:collapse;font-size:0.8rem;}'
+        + 'th,td{border:1px solid #cbd5e1;padding:7px;text-align:left;vertical-align:top;}'
+        + 'th{background:#f3f4f6;text-transform:uppercase;font-size:0.72rem;}'
+        + '@media print{.toolbar{display:none;}body{background:#fff;} .page{margin:0;max-width:none;border:0;border-radius:0;padding:0;}}'
+        + '</style></head><body>'
+        + '<div class="toolbar"><h1>Preview Laporan Data Anggota</h1><div class="actions"><button onclick="window.print()">Download PDF</button><button onclick="window.close()">Tutup</button></div></div>'
+        + '<main class="page">'
+        + '<h2 style="margin:0 0 8px;">Laporan Data Daftar Anggota</h2>'
+        + '<div class="meta"><span>Total data: ' + rows.length + ' anggota</span><span>Dibuat pada: ' + generatedAt + '</span><span>Sumber: Modul Manajemen Data Anggota - Crembo Media</span></div>'
+        + '<table><thead><tr><th>No</th><th>Nama</th><th>Email</th><th>No WA</th><th>Alamat</th><th>Tanggal Lahir</th><th>Role</th><th>Status</th></tr></thead><tbody>'
+        + tableRows
+        + '</tbody></table></main></body></html>';
+    }
+
+    function openMemberReportPreview() {
+      const rows = filteredMembers();
+      if (!rows.length) {
+        showNotify("Tidak ada data anggota untuk dibuat laporan.");
+        return;
+      }
+
+      const newTab = window.open("", "_blank");
+      if (!newTab) {
+        showNotify("Popup diblokir browser. Izinkan popup untuk preview PDF.");
+        return;
+      }
+
+      newTab.document.open();
+      newTab.document.write(buildMemberReportHtml(rows));
+      newTab.document.close();
+    }
+
+    function downloadMemberExcel() {
+      const rows = filteredMembers();
+      if (!rows.length) {
+        showNotify("Tidak ada data anggota untuk diunduh.");
+        return;
+      }
+
+      const tableHeader = '<tr><th>No</th><th>Nama</th><th>Email</th><th>No WA</th><th>Alamat</th><th>Tanggal Lahir</th><th>Role</th><th>Status</th></tr>';
+      const tableBody = rows.map(function (member, index) {
+        return '<tr>'
+          + '<td>' + (index + 1) + '</td>'
+          + '<td>' + escapeHtml(member.name || "-") + '</td>'
+          + '<td>' + escapeHtml(member.email || "-") + '</td>'
+          + '<td>' + escapeHtml(member.phone || "-") + '</td>'
+          + '<td>' + escapeHtml(member.address || "-") + '</td>'
+          + '<td>' + escapeHtml(formatDate(member.birthDate)) + '</td>'
+          + '<td>' + escapeHtml(roleLabel(member.role)) + '</td>'
+          + '<td>' + escapeHtml(memberStatusLabel(member)) + '</td>'
+          + '</tr>';
+      }).join("");
+
+      const excelHtml = '<html><head><meta charset="utf-8"></head><body>'
+        + '<table border="1">'
+        + tableHeader
+        + tableBody
+        + '</table>'
+        + '</body></html>';
+
+      const blob = new Blob(["\ufeff", excelHtml], { type: "application/vnd.ms-excel;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const now = new Date();
+      const fileName = "laporan-data-anggota-"
+        + now.getFullYear()
+        + String(now.getMonth() + 1).padStart(2, "0")
+        + String(now.getDate()).padStart(2, "0")
+        + ".xls";
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showNotify("Laporan Excel berhasil diunduh.");
+    }
+
     function renderRequests() {
       const keyword = requestSearchInput.value.trim().toLowerCase();
       const sortMode = requestSortSelect.value;
@@ -1357,6 +1492,9 @@
     downloadExcelTemplateBtn.addEventListener("click", function () {
       showNotify("Tombol template Excel sudah disiapkan (mode tampilan).");
     });
+
+    previewMemberReportBtn.addEventListener("click", openMemberReportPreview);
+    downloadMemberExcelBtn.addEventListener("click", downloadMemberExcel);
 
     memberTableBody.addEventListener("click", function (event) {
       const button = event.target.closest("button[data-action]");
