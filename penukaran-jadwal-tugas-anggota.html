@@ -264,6 +264,94 @@
 
     textarea { min-height: 72px; resize: vertical; }
 
+    .combo-source { display: none; }
+
+    .slot-combo {
+      position: relative;
+      width: 100%;
+    }
+
+    .slot-trigger {
+      width: 100%;
+      text-align: left;
+      border: 1px solid #c8d2df;
+      border-radius: 9px;
+      padding: 8px 10px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.84rem;
+      color: #111827;
+    }
+
+    .slot-trigger::after {
+      content: "▾";
+      float: right;
+      color: #5c5c5c;
+      font-size: 0.76rem;
+      margin-top: 2px;
+    }
+
+    .slot-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      border: 1px solid #a7a7a7;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
+      z-index: 40;
+      display: none;
+    }
+
+    .slot-panel.show {
+      display: block;
+    }
+
+    .slot-search-box {
+      padding: 7px;
+      border-bottom: 1px solid #dddddd;
+      background: #f7f7f7;
+    }
+
+    .slot-search-input {
+      width: 100%;
+      border: 1px solid #b9b9b9;
+      border-radius: 6px;
+      padding: 6px 7px;
+      font-size: 0.82rem;
+    }
+
+    .slot-options {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .slot-option {
+      width: 100%;
+      border: 0;
+      border-bottom: 1px solid #f0f0f0;
+      border-radius: 0;
+      background: #fff;
+      text-align: left;
+      padding: 8px 10px;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    .slot-option:hover,
+    .slot-option.active {
+      background: #ebebeb;
+    }
+
+    .slot-empty {
+      margin: 0;
+      padding: 8px 10px;
+      font-size: 0.78rem;
+      color: #666;
+      font-style: italic;
+    }
+
     .table-wrap { overflow-x: auto; }
 
     table {
@@ -397,7 +485,7 @@
           <a class="menu-link" href="request-tugas-anggota.html">Request Tugas Anggota</a>
           <a class="menu-link" href="pembatalan-tugas-anggota.html">Pembatalan Tugas (maks H-3)</a>
           <a class="menu-link active" href="penukaran-jadwal-tugas-anggota.html">Penukaran Jadwal Tugas</a>
-          <a class="menu-link" href="#">Riwayat Tugas Saya</a>
+          <a class="menu-link" href="riwayat-tugas-saya.html">Riwayat Tugas Saya</a>
         </div>
       </div>
 
@@ -425,6 +513,124 @@
       </header>
 
       <div class="content">
+        <section class="panel">
+          <header class="panel-head">
+            <h2>Ajukan Penukaran ke Teman</h2>
+          </header>
+          <div class="panel-body">
+            <p class="helper">Anda hanya bisa ajukan penukaran untuk jadwal yang sudah terdaftar atas nama Anda.</p>
+            
+            <!-- Mode Selection -->
+            <div style="margin-bottom:14px;padding:10px;background:#f8fafc;border-radius:9px;border:1px solid var(--line);">
+              <label style="display:block;font-size:0.73rem;text-transform:uppercase;letter-spacing:0.03em;color:#64748b;font-weight:700;margin-bottom:8px;">Tipe Penukaran</label>
+              <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.85rem;font-weight:500;">
+                  <input type="radio" id="modeSwap" name="swapMode" value="tukeran" checked style="cursor:pointer;">
+                  <span>Tukeran (saya & teman sama-sama punya jadwal)</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.85rem;font-weight:500;">
+                  <input type="radio" id="modeSubstitute" name="swapMode" value="menggantikan" style="cursor:pointer;">
+                  <span>Menggantikan (teman sukarela membantu saya)</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Tukeran Mode Form -->
+            <div id="tukeranForm" style="display:block;">
+              <div class="grid-form">
+                <div class="field">
+                  <label for="myTaskSelect">Jadwal Saya</label>
+                  <select id="myTaskSelect" class="combo-source"></select>
+                  <div id="myTaskCombo" class="slot-combo">
+                    <button class="slot-trigger" type="button" aria-expanded="false">-- pilih jadwal saya --</button>
+                    <div class="slot-panel">
+                      <div class="slot-search-box"><input class="slot-search-input" type="search" placeholder="Cari jadwal saya..."></div>
+                      <div class="slot-options"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="swapSlotSelect">Pilih Jadwal Tukar (Tanggal & Jam)</label>
+                  <select id="swapSlotSelect" class="combo-source">
+                    <option value="">-- pilih jadwal tukar --</option>
+                  </select>
+                  <div id="swapSlotCombo" class="slot-combo">
+                    <button class="slot-trigger" type="button" aria-expanded="false">-- pilih jadwal tukar --</button>
+                    <div class="slot-panel">
+                      <div class="slot-search-box"><input class="slot-search-input" type="search" placeholder="Cari tanggal/jam jadwal tukar..."></div>
+                      <div class="slot-options"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="grid-form">
+                <div class="field">
+                  <label for="targetFriendSelect">Teman Tujuan (Role Ditampilkan)</label>
+                  <select id="targetFriendSelect" class="combo-source">
+                    <option value="">-- Pilih slot dulu --</option>
+                  </select>
+                  <div id="friendTargetCombo" class="slot-combo">
+                    <button class="slot-trigger" type="button" aria-expanded="false">-- pilih slot dulu --</button>
+                    <div class="slot-panel">
+                      <div class="slot-search-box"><input class="slot-search-input" type="search" placeholder="Cari teman tujuan..."></div>
+                      <div class="slot-options"></div>
+                    </div>
+                  </div>
+                  <small style="color:var(--muted);font-size:0.73rem;margin-top:4px;">Pilihan teman akan menyesuaikan slot tanggal/jam yang dipilih</small>
+                </div>
+              </div>
+              <div class="field">
+                <label for="swapReason">Alasan Penukaran</label>
+                <textarea id="swapReason" placeholder="Contoh: bentrok jadwal kuliah atau kerja..."></textarea>
+              </div>
+            </div>
+
+            <!-- Menggantikan Mode Form -->
+            <div id="substitutForm" style="display:none;">
+              <div class="grid-form">
+                <div class="field">
+                  <label for="myTaskSelectSub">Jadwal Saya</label>
+                  <select id="myTaskSelectSub" class="combo-source"></select>
+                  <div id="myTaskSubCombo" class="slot-combo">
+                    <button class="slot-trigger" type="button" aria-expanded="false">-- pilih jadwal saya --</button>
+                    <div class="slot-panel">
+                      <div class="slot-search-box"><input class="slot-search-input" type="search" placeholder="Cari jadwal saya..."></div>
+                      <div class="slot-options"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="targetFriendSelectSub">Teman Pengganti</label>
+                  <select id="targetFriendSelectSub" class="combo-source">
+                    <option value="">-- Pilih Teman --</option>
+                    <option value="Rikha">Rikha</option>
+                    <option value="Jeni">Jeni</option>
+                    <option value="Tyas">Tyas</option>
+                    <option value="Lisa">Lisa</option>
+                    <option value="Evan">Evan</option>
+                  </select>
+                  <div id="targetFriendSubCombo" class="slot-combo">
+                    <button class="slot-trigger" type="button" aria-expanded="false">-- pilih teman --</button>
+                    <div class="slot-panel">
+                      <div class="slot-search-box"><input class="slot-search-input" type="search" placeholder="Cari teman pengganti..."></div>
+                      <div class="slot-options"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label for="swapReasonSub">Alasan Meminta Pengganti</label>
+                <textarea id="swapReasonSub" placeholder="Contoh: sakit, ada acara keluarga, dll..."></textarea>
+              </div>
+            </div>
+
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+              <button id="submitSwapBtn" class="btn" type="button">Kirim Request</button>
+              <button id="resetSwapBtn" class="btn ghost" type="button">Reset</button>
+            </div>
+          </div>
+        </section>
+
         <section class="panel">
           <header class="panel-head">
             <h2>Filter Jadwal Terdaftar</h2>
@@ -463,39 +669,6 @@
 
         <section class="panel">
           <header class="panel-head">
-            <h2>Ajukan Penukaran ke Teman</h2>
-          </header>
-          <div class="panel-body">
-            <p class="helper">Anda hanya bisa ajukan penukaran untuk jadwal yang sudah terdaftar atas nama Anda.</p>
-            <div class="grid-form">
-              <div class="field">
-                <label for="myTaskSelect">Jadwal Saya</label>
-                <select id="myTaskSelect"></select>
-              </div>
-              <div class="field">
-                <label for="targetFriendSelect">Teman Tujuan</label>
-                <select id="targetFriendSelect">
-                  <option value="Rikha">Rikha</option>
-                  <option value="Jeni">Jeni</option>
-                  <option value="Tyas">Tyas</option>
-                  <option value="Lisa">Lisa</option>
-                  <option value="Evan">Evan</option>
-                </select>
-              </div>
-            </div>
-            <div class="field">
-              <label for="swapReason">Alasan Penukaran</label>
-              <textarea id="swapReason" placeholder="Contoh: bentrok jadwal kuliah atau kerja..."></textarea>
-            </div>
-            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-              <button id="submitSwapBtn" class="btn" type="button">Kirim Request Penukaran</button>
-              <button id="resetSwapBtn" class="btn ghost" type="button">Reset</button>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <header class="panel-head">
             <h2>Request Masuk dari Teman</h2>
           </header>
           <div class="panel-body table-wrap">
@@ -503,7 +676,9 @@
               <thead>
                 <tr>
                   <th>Teman</th>
-                  <th>Jadwal Diminta</th>
+                  <th>Role</th>
+                  <th>Tipe</th>
+                  <th>Jadwal</th>
                   <th>Alasan</th>
                   <th>Status</th>
                   <th>Aksi</th>
@@ -522,10 +697,12 @@
             <table>
               <thead>
                 <tr>
-                  <th>Jadwal</th>
+                  <th>Jadwal Saya & Role</th>
                   <th>Dikirim Ke</th>
+                  <th>Tipe</th>
                   <th>Alasan</th>
                   <th>Status</th>
+                  <th>Aksi</th>
                 </tr>
               </thead>
               <tbody id="outgoingRows"></tbody>
@@ -541,9 +718,29 @@
     const SWAP_IN_KEY = "crembo-member-swap-incoming";
     const SWAP_OUT_KEY = "crembo-member-swap-outgoing";
 
+    // Mode and Form Elements
+    const modeSwapRadio = document.getElementById("modeSwap");
+    const modeSubstituteRadio = document.getElementById("modeSubstitute");
+    const tukeranForm = document.getElementById("tukeranForm");
+    const substitutForm = document.getElementById("substitutForm");
+
+    // Tukeran form elements
     const myTaskSelect = document.getElementById("myTaskSelect");
     const targetFriendSelect = document.getElementById("targetFriendSelect");
+    const myTaskCombo = document.getElementById("myTaskCombo");
+    const friendTargetCombo = document.getElementById("friendTargetCombo");
+    const swapSlotSelect = document.getElementById("swapSlotSelect");
+    const swapSlotCombo = document.getElementById("swapSlotCombo");
     const swapReason = document.getElementById("swapReason");
+
+    // Menggantikan form elements
+    const myTaskSelectSub = document.getElementById("myTaskSelectSub");
+    const targetFriendSelectSub = document.getElementById("targetFriendSelectSub");
+    const myTaskSubCombo = document.getElementById("myTaskSubCombo");
+    const targetFriendSubCombo = document.getElementById("targetFriendSubCombo");
+    const swapReasonSub = document.getElementById("swapReasonSub");
+
+    // Common elements
     const submitSwapBtn = document.getElementById("submitSwapBtn");
     const resetSwapBtn = document.getElementById("resetSwapBtn");
     const incomingRows = document.getElementById("incomingRows");
@@ -554,6 +751,35 @@
     const memberName = document.getElementById("memberName");
     const sidebar = document.getElementById("sidebar");
     const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+
+    function escapeHtml(value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    const FRIEND_SCHEDULES = {
+      "Rikha": [
+        { id: "rikha-1", title: "Misa Harian", date: "2026-04-15", time: "18:00", role: "Sound Engineer" },
+        { id: "rikha-2", title: "Misa Mingguan", date: "2026-04-20", time: "09:00", role: "Operator Kamera" }
+      ],
+      "Jeni": [
+        { id: "jeni-1", title: "Misa Harian", date: "2026-04-14", time: "17:00", role: "Operator Kamera" },
+        { id: "jeni-2", title: "Misa Mingguan", date: "2026-04-21", time: "08:00", role: "Sound Engineer" }
+      ],
+      "Tyas": [
+        { id: "tyas-1", title: "Misa Harian", date: "2026-04-16", time: "17:00", role: "Producer" }
+      ],
+      "Lisa": [
+        { id: "lisa-1", title: "Misa Mingguan", date: "2026-04-19", time: "08:00", role: "Operator Kamera" }
+      ],
+      "Evan": [
+        { id: "evan-1", title: "Misa Harian", date: "2026-04-17", time: "18:00", role: "Sound Engineer" }
+      ]
+    };
 
     function safeParse(raw, fallback) {
       try {
@@ -571,25 +797,65 @@
     function seedIfEmpty() {
       if (!localStorage.getItem(SWAP_IN_KEY)) {
         const incoming = [
-          { id: "in-1", fromName: "Rikha", taskLabel: "Misa Harian - Senin, 14 Apr 2026 17:00", reason: "Bentrok kerja shift", status: "Menunggu", date: "2026-04-14" },
-          { id: "in-2", fromName: "Jeni", taskLabel: "Misa Mingguan - Minggu, 19 Apr 2026 08:00", reason: "Acara keluarga", status: "Menunggu", date: "2026-04-19" }
+          { 
+            id: "in-1", 
+            fromName: "Rikha", 
+            taskLabel: "Misa Harian - Senin, 14 Apr 2026 17:00", 
+            role: "Operator Kamera",
+            friendRole: "Operator Kamera",
+            reason: "Tukeran dengan jadwal saya", 
+            status: "Menunggu", 
+            date: "2026-04-14",
+            type: "tukeran"
+          },
+          { 
+            id: "in-2", 
+            fromName: "Jeni", 
+            taskLabel: "Misa Mingguan - Minggu, 19 Apr 2026 08:00", 
+            role: "Sound Engineer",
+            reason: "Acara keluarga", 
+            status: "Menunggu", 
+            date: "2026-04-19",
+            type: "menggantikan"
+          }
         ];
         localStorage.setItem(SWAP_IN_KEY, JSON.stringify(incoming));
       }
       if (!localStorage.getItem(SWAP_OUT_KEY)) {
         const outgoing = [
-          { id: "out-1", toName: "Tyas", taskLabel: "Misa Harian - Rabu, 16 Apr 2026 17:00", reason: "Ujian kampus", status: "Menunggu", date: "2026-04-16" }
+          { 
+            id: "out-1", 
+            toName: "Tyas", 
+            taskLabel: "Misa Harian - Rabu, 16 Apr 2026 17:00", 
+            role: "Operator Kamera",
+            reason: "Ujian kampus", 
+            status: "Menunggu", 
+            date: "2026-04-16",
+            type: "tukeran"
+          }
         ];
         localStorage.setItem(SWAP_OUT_KEY, JSON.stringify(outgoing));
       }
     }
 
     function readIncoming() {
-      return safeParse(localStorage.getItem(SWAP_IN_KEY), []);
+      return safeParse(localStorage.getItem(SWAP_IN_KEY), []).map(function (item) {
+        return {
+          type: item.type || "menggantikan",
+          role: item.role || item.friendRole || "-",
+          ...item
+        };
+      });
     }
 
     function readOutgoing() {
-      return safeParse(localStorage.getItem(SWAP_OUT_KEY), []);
+      return safeParse(localStorage.getItem(SWAP_OUT_KEY), []).map(function (item) {
+        return {
+          type: item.type || "menggantikan",
+          role: item.role || "-",
+          ...item
+        };
+      });
     }
 
     function saveIncoming(items) {
@@ -617,16 +883,152 @@
       });
     }
 
-    function renderTaskSelect() {
+    function renderTaskSelects() {
       const tasks = getRegisteredTasksForSwap();
       if (!tasks.length) {
         myTaskSelect.innerHTML = '<option value="">Belum ada jadwal terdaftar</option>';
+        myTaskSelectSub.innerHTML = '<option value="">Belum ada jadwal terdaftar</option>';
+        refreshComboFromSelect(myTaskSelect, myTaskCombo, "-- pilih jadwal saya --");
+        refreshComboFromSelect(myTaskSelectSub, myTaskSubCombo, "-- pilih jadwal saya --");
         return;
       }
-      myTaskSelect.innerHTML = tasks.map(function (item) {
+      const html = tasks.map(function (item) {
         const label = item.title + " - " + item.date + " " + item.time + " (" + item.role + ")";
         return '<option value="' + item.id + '">' + label + '</option>';
       }).join("");
+      myTaskSelect.innerHTML = html;
+      myTaskSelectSub.innerHTML = html;
+      refreshComboFromSelect(myTaskSelect, myTaskCombo, "-- pilih jadwal saya --");
+      refreshComboFromSelect(myTaskSelectSub, myTaskSubCombo, "-- pilih jadwal saya --");
+    }
+
+    function closeAllComboPanels(exceptCombo) {
+      document.querySelectorAll(".slot-combo").forEach(function (comboEl) {
+        if (exceptCombo && comboEl === exceptCombo) {
+          return;
+        }
+        const panel = comboEl.querySelector(".slot-panel");
+        const trigger = comboEl.querySelector(".slot-trigger");
+        if (panel) {
+          panel.classList.remove("show");
+        }
+        if (trigger) {
+          trigger.setAttribute("aria-expanded", "false");
+        }
+      });
+    }
+
+    function setComboTriggerText(selectEl, comboEl, fallbackText) {
+      const trigger = comboEl.querySelector(".slot-trigger");
+      const selected = selectEl.options[selectEl.selectedIndex];
+      trigger.textContent = selected && selected.value ? selected.textContent : fallbackText;
+    }
+
+    function renderComboOptions(selectEl, comboEl, query, fallbackText) {
+      const optionsWrap = comboEl.querySelector(".slot-options");
+      const normalizedQuery = (query || "").trim().toLowerCase();
+      const allOptions = Array.from(selectEl.options || []);
+      const filtered = allOptions.filter(function (opt) {
+        return !normalizedQuery || opt.textContent.toLowerCase().indexOf(normalizedQuery) !== -1;
+      });
+
+      if (!filtered.length) {
+        optionsWrap.innerHTML = '<p class="slot-empty">Data tidak ditemukan.</p>';
+        return;
+      }
+
+      const selectedValue = selectEl.value;
+      optionsWrap.innerHTML = filtered.map(function (opt) {
+        const activeClass = opt.value === selectedValue ? " active" : "";
+        return '<button class="slot-option' + activeClass + '" type="button" data-value="' + escapeHtml(opt.value) + '">' + escapeHtml(opt.textContent) + '</button>';
+      }).join("");
+
+      optionsWrap.querySelectorAll(".slot-option").forEach(function (buttonEl) {
+        buttonEl.addEventListener("click", function () {
+          const previousValue = selectEl.value;
+          selectEl.value = buttonEl.getAttribute("data-value") || "";
+          setComboTriggerText(selectEl, comboEl, fallbackText);
+          if (previousValue !== selectEl.value) {
+            selectEl.dispatchEvent(new Event("change"));
+          }
+          closeAllComboPanels();
+        });
+      });
+    }
+
+    function refreshComboFromSelect(selectEl, comboEl, fallbackText) {
+      if (!comboEl) {
+        return;
+      }
+      const searchInput = comboEl.querySelector(".slot-search-input");
+      setComboTriggerText(selectEl, comboEl, fallbackText);
+      renderComboOptions(selectEl, comboEl, searchInput ? searchInput.value : "", fallbackText);
+    }
+
+    function initCombo(selectEl, comboEl, fallbackText) {
+      const trigger = comboEl.querySelector(".slot-trigger");
+      const panel = comboEl.querySelector(".slot-panel");
+      const searchInput = comboEl.querySelector(".slot-search-input");
+
+      trigger.addEventListener("click", function () {
+        const shouldOpen = !panel.classList.contains("show");
+        closeAllComboPanels(comboEl);
+        if (shouldOpen) {
+          panel.classList.add("show");
+          trigger.setAttribute("aria-expanded", "true");
+          renderComboOptions(selectEl, comboEl, searchInput.value, fallbackText);
+          searchInput.focus();
+        } else {
+          panel.classList.remove("show");
+          trigger.setAttribute("aria-expanded", "false");
+        }
+      });
+
+      searchInput.addEventListener("input", function () {
+        renderComboOptions(selectEl, comboEl, searchInput.value, fallbackText);
+      });
+    }
+
+    function getAllFriendScheduleSlots() {
+      return Object.keys(FRIEND_SCHEDULES).reduce(function (acc, friendName) {
+        const rows = FRIEND_SCHEDULES[friendName].map(function (sched) {
+          return {
+            ...sched,
+            friendName: friendName,
+            slotLabel: sched.date + " " + sched.time + " - " + sched.title
+          };
+        });
+        return acc.concat(rows);
+      }, []);
+    }
+
+    function renderSwapSlotOptions() {
+      const uniqueLabels = Array.from(new Set(getAllFriendScheduleSlots().map(function (item) {
+        return item.slotLabel;
+      })));
+      swapSlotSelect.innerHTML = '<option value="">-- pilih jadwal tukar --</option>' + uniqueLabels.map(function (label) {
+        return '<option value="' + label + '">' + label + '</option>';
+      }).join("");
+      refreshComboFromSelect(swapSlotSelect, swapSlotCombo, "-- pilih jadwal tukar --");
+    }
+
+    function updateFriendsBySelectedSlot() {
+      const selectedSlot = (swapSlotSelect.value || "").trim();
+      const matchingSlots = getAllFriendScheduleSlots().filter(function (item) {
+        return item.slotLabel === selectedSlot;
+      });
+
+      if (!matchingSlots.length) {
+        targetFriendSelect.innerHTML = '<option value="">-- Pilih slot dulu --</option>';
+        refreshComboFromSelect(targetFriendSelect, friendTargetCombo, "-- pilih slot dulu --");
+        return;
+      }
+
+      const optionsHtml = matchingSlots.map(function (item) {
+        return '<option value="' + item.id + '">' + item.friendName + ' (' + item.role + ')</option>';
+      }).join("");
+      targetFriendSelect.innerHTML = '<option value="">-- Pilih Teman --</option>' + optionsHtml;
+      refreshComboFromSelect(targetFriendSelect, friendTargetCombo, "-- pilih slot dulu --");
     }
 
     function passesFilter(dateText, searchableText) {
@@ -650,15 +1052,25 @@
       if (status === "Ditolak") {
         return '<span class="status-danger">Ditolak</span>';
       }
+      if (status === "Dibatalkan") {
+        return '<span class="status-danger">Dibatalkan</span>';
+      }
       return '<span class="status-warn">Menunggu</span>';
+    }
+
+    function typeBadge(type) {
+      if (type === "tukeran") {
+        return '<span class="status-ok" style="background:#e0f2fe;border-color:#0284c7;color:#0c4a6e;">Tukeran</span>';
+      }
+      return '<span class="status-warn" style="background:#fef3c7;border-color:#fbbf24;color:#78350f;">Menggantikan</span>';
     }
 
     function renderSwapTables() {
       const incoming = readIncoming().filter(function (item) {
-        return passesFilter(item.date, [item.fromName, item.taskLabel, item.reason, item.status].join(" "));
+        return passesFilter(item.date, [item.fromName, item.taskLabel, item.reason, item.status, item.role].join(" "));
       });
       const outgoing = readOutgoing().filter(function (item) {
-        return passesFilter(item.date, [item.toName, item.taskLabel, item.reason, item.status].join(" "));
+        return passesFilter(item.date, [item.toName, item.taskLabel, item.reason, item.status, item.role].join(" "));
       });
 
       incomingRows.innerHTML = incoming.length
@@ -668,53 +1080,145 @@
               : '-';
             return '<tr>'
               + '<td>' + item.fromName + '</td>'
+              + '<td>' + (item.role || '-') + '</td>'
+              + '<td>' + typeBadge(item.type) + '</td>'
               + '<td>' + item.taskLabel + '</td>'
               + '<td>' + item.reason + '</td>'
               + '<td>' + statusBadge(item.status) + '</td>'
               + '<td>' + actions + '</td>'
               + '</tr>';
           }).join("")
-        : '<tr><td colspan="5">Tidak ada request masuk sesuai filter.</td></tr>';
+        : '<tr><td colspan="7">Tidak ada request masuk sesuai filter.</td></tr>';
 
       outgoingRows.innerHTML = outgoing.length
         ? outgoing.map(function (item) {
+            const roleText = item.role ? ' (' + item.role + ')' : '';
+            const actions = item.status === "Menunggu"
+              ? '<button class="btn danger" type="button" data-action="cancel" data-id="' + item.id + '">Batalkan</button>'
+              : '-';
             return '<tr>'
-              + '<td>' + item.taskLabel + '</td>'
+              + '<td>' + item.taskLabel + roleText + '</td>'
               + '<td>' + item.toName + '</td>'
+              + '<td>' + typeBadge(item.type) + '</td>'
               + '<td>' + item.reason + '</td>'
               + '<td>' + statusBadge(item.status) + '</td>'
+              + '<td>' + actions + '</td>'
               + '</tr>';
           }).join("")
-        : '<tr><td colspan="4">Tidak ada request keluar sesuai filter.</td></tr>';
+        : '<tr><td colspan="6">Tidak ada request keluar sesuai filter.</td></tr>';
     }
 
     function submitSwapRequest() {
+      const mode = document.querySelector("input[name='swapMode']:checked").value;
+
+      if (mode === "tukeran") {
+        submitTukeran();
+      } else {
+        submitMenggantikan();
+      }
+    }
+
+    function submitTukeran() {
       const taskId = myTaskSelect.value;
+      const selectedFriendSlotId = targetFriendSelect.value;
+      const selectedSlot = (swapSlotSelect.value || "").trim();
       const reason = swapReason.value.trim();
-      const friend = targetFriendSelect.value;
       const task = getRegisteredTasksForSwap().find(function (item) { return item.id === taskId; });
+      const selectedFriendSlot = getAllFriendScheduleSlots().find(function (item) {
+        return item.id === selectedFriendSlotId;
+      });
+      const hasPendingSameDate = readOutgoing().some(function (item) {
+        return item.status === "Menunggu" && item.type === "tukeran" && item.date === (task ? task.date : "");
+      });
+
       if (!task) {
-        window.alert("Pilih jadwal terdaftar yang valid.");
+        window.alert("Pilih jadwal Anda yang valid.");
+        return;
+      }
+      if (!selectedSlot) {
+        window.alert("Pilih slot jadwal tukar (tanggal dan jam).");
+        return;
+      }
+      if (!selectedFriendSlotId || !selectedFriendSlot) {
+        window.alert("Pilih teman tujuan.");
         return;
       }
       if (!reason) {
         window.alert("Alasan penukaran wajib diisi.");
         return;
       }
+      if (hasPendingSameDate) {
+        window.alert("Anda sudah punya request tukeran aktif di tanggal ini. Batalkan request sebelumnya terlebih dahulu.");
+        return;
+      }
 
       const outItems = readOutgoing();
       outItems.unshift({
         id: "out-" + Date.now(),
-        toName: friend,
+        toName: selectedFriendSlot.friendName,
         taskLabel: task.title + " - " + task.date + " " + task.time,
+        role: task.role,
+        friendRole: selectedFriendSlot.role,
+        friendTaskLabel: selectedFriendSlot.title + " - " + selectedFriendSlot.date + " " + selectedFriendSlot.time,
         reason: reason,
         status: "Menunggu",
-        date: task.date
+        date: task.date,
+        type: "tukeran"
       });
       saveOutgoing(outItems);
+      
       swapReason.value = "";
+      myTaskSelect.selectedIndex = 0;
+      refreshComboFromSelect(myTaskSelect, myTaskCombo, "-- pilih jadwal saya --");
+      swapSlotSelect.value = "";
+      refreshComboFromSelect(swapSlotSelect, swapSlotCombo, "-- pilih jadwal tukar --");
+      targetFriendSelect.innerHTML = '<option value="">-- Pilih slot dulu --</option>';
+      refreshComboFromSelect(targetFriendSelect, friendTargetCombo, "-- pilih slot dulu --");
+      renderTaskSelects();
       renderSwapTables();
       window.alert("Request penukaran berhasil dikirim.");
+    }
+
+    function submitMenggantikan() {
+      const taskId = myTaskSelectSub.value;
+      const friendName = targetFriendSelectSub.value;
+      const reason = swapReasonSub.value.trim();
+      const task = getRegisteredTasksForSwap().find(function (item) { return item.id === taskId; });
+
+      if (!task) {
+        window.alert("Pilih jadwal Anda yang valid.");
+        return;
+      }
+      if (!friendName) {
+        window.alert("Pilih teman pengganti.");
+        return;
+      }
+      if (!reason) {
+        window.alert("Alasan wajib diisi.");
+        return;
+      }
+
+      const outItems = readOutgoing();
+      outItems.unshift({
+        id: "out-" + Date.now(),
+        toName: friendName,
+        taskLabel: task.title + " - " + task.date + " " + task.time,
+        role: task.role,
+        reason: reason,
+        status: "Menunggu",
+        date: task.date,
+        type: "menggantikan"
+      });
+      saveOutgoing(outItems);
+      
+      swapReasonSub.value = "";
+      myTaskSelectSub.selectedIndex = 0;
+      refreshComboFromSelect(myTaskSelectSub, myTaskSubCombo, "-- pilih jadwal saya --");
+      targetFriendSelectSub.selectedIndex = 0;
+      refreshComboFromSelect(targetFriendSelectSub, targetFriendSubCombo, "-- pilih teman --");
+      renderTaskSelects();
+      renderSwapTables();
+      window.alert("Request pengganti berhasil dikirim.");
     }
 
     function handleIncomingAction(action, id) {
@@ -726,6 +1230,22 @@
       target.status = action === "accept" ? "Disetujui" : "Ditolak";
       saveIncoming(items);
       renderSwapTables();
+    }
+
+    function handleOutgoingAction(action, id) {
+      if (action !== "cancel") return;
+      
+      const items = readOutgoing();
+      const target = items.find(function (item) { return item.id === id; });
+      if (!target || target.status !== "Menunggu") {
+        return;
+      }
+      
+      if (window.confirm("Batalkan request ini?")) {
+        target.status = "Dibatalkan";
+        saveOutgoing(items);
+        renderSwapTables();
+      }
     }
 
     function updateLiveDateTime() {
@@ -768,13 +1288,39 @@
       sidebar.classList.toggle("show");
     });
 
+    // Mode switching
+    modeSwapRadio.addEventListener("change", function () {
+      if (this.checked) {
+        tukeranForm.style.display = "block";
+        substitutForm.style.display = "none";
+      }
+    });
+
+    modeSubstituteRadio.addEventListener("change", function () {
+      if (this.checked) {
+        tukeranForm.style.display = "none";
+        substitutForm.style.display = "block";
+      }
+    });
+
     submitSwapBtn.addEventListener("click", submitSwapRequest);
     resetSwapBtn.addEventListener("click", function () {
-      swapReason.value = "";
-      if (myTaskSelect.options.length) {
+      const mode = document.querySelector("input[name='swapMode']:checked").value;
+      if (mode === "tukeran") {
+        swapReason.value = "";
         myTaskSelect.selectedIndex = 0;
+        refreshComboFromSelect(myTaskSelect, myTaskCombo, "-- pilih jadwal saya --");
+        swapSlotSelect.value = "";
+        refreshComboFromSelect(swapSlotSelect, swapSlotCombo, "-- pilih jadwal tukar --");
+        targetFriendSelect.innerHTML = '<option value="">-- Pilih slot dulu --</option>';
+        refreshComboFromSelect(targetFriendSelect, friendTargetCombo, "-- pilih slot dulu --");
+      } else {
+        swapReasonSub.value = "";
+        myTaskSelectSub.selectedIndex = 0;
+        refreshComboFromSelect(myTaskSelectSub, myTaskSubCombo, "-- pilih jadwal saya --");
+        targetFriendSelectSub.selectedIndex = 0;
+        refreshComboFromSelect(targetFriendSelectSub, targetFriendSubCombo, "-- pilih teman --");
       }
-      targetFriendSelect.selectedIndex = 0;
     });
 
     incomingRows.addEventListener("click", function (event) {
@@ -790,16 +1336,50 @@
       handleIncomingAction(action, id);
     });
 
+    outgoingRows.addEventListener("click", function (event) {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) {
+        return;
+      }
+      const action = target.getAttribute("data-action");
+      const id = target.getAttribute("data-id");
+      if (!action || !id) {
+        return;
+      }
+      handleOutgoingAction(action, id);
+    });
+
     swapSearch.addEventListener("input", renderSwapTables);
     swapMonthFilter.addEventListener("change", renderSwapTables);
     swapYearFilter.addEventListener("change", renderSwapTables);
+    swapSlotSelect.addEventListener("change", updateFriendsBySelectedSlot);
+
+    initCombo(myTaskSelect, myTaskCombo, "-- pilih jadwal saya --");
+    initCombo(targetFriendSelect, friendTargetCombo, "-- pilih slot dulu --");
+    initCombo(swapSlotSelect, swapSlotCombo, "-- pilih jadwal tukar --");
+    initCombo(myTaskSelectSub, myTaskSubCombo, "-- pilih jadwal saya --");
+    initCombo(targetFriendSelectSub, targetFriendSubCombo, "-- pilih teman --");
+
+    document.addEventListener("click", function (event) {
+      if (!(event.target instanceof Element)) {
+        return;
+      }
+      const insideCombo = event.target.closest(".slot-combo");
+      if (!insideCombo) {
+        closeAllComboPanels();
+      }
+    });
 
     seedIfEmpty();
     setYearFilterOptions();
     const now = new Date();
     swapMonthFilter.value = String(now.getMonth());
     swapYearFilter.value = String(now.getFullYear());
-    renderTaskSelect();
+    renderSwapSlotOptions();
+    renderTaskSelects();
+    refreshComboFromSelect(myTaskSelectSub, myTaskSubCombo, "-- pilih jadwal saya --");
+    refreshComboFromSelect(targetFriendSelectSub, targetFriendSubCombo, "-- pilih teman --");
+    refreshComboFromSelect(targetFriendSelect, friendTargetCombo, "-- pilih slot dulu --");
     renderSwapTables();
     updateLiveDateTime();
     setInterval(updateLiveDateTime, 1000);
