@@ -640,7 +640,9 @@
               <thead>
                 <tr>
                   <th>Judul Tugas</th>
+                  <th>Jumlah</th>
                   <th>Jadwal</th>
+                  <th>Role</th>
                   <th>Status</th>
                   <th>Progres</th>
                 </tr>
@@ -652,20 +654,36 @@
 
         <section class="panel" aria-label="Kekurangan tugas">
           <header class="panel-head">
-            <h2>Kekurangan Tugas (Bulan Lalu)</h2>
+            <h2>Kekurangan Tugas</h2>
           </header>
 
           <div class="filter-bar">
             <div class="filter-group">
-              <label>Cari:</label>
-              <input type="text" id="shortageSearchBox" class="search-box" placeholder="Cari judul tugas...">
+              <label>Bulan:</label>
+              <select id="shortageMonthSelect" class="select-input">
+                <option value="">Semua</option>
+                <option value="01">Januari</option>
+                <option value="02">Februari</option>
+                <option value="03">Maret</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
             </div>
             <div class="filter-group">
-              <label>Urut:</label>
-              <select id="shortageSortSelect" class="select-input">
-                <option value="date-desc">Tanggal Terbaru</option>
-                <option value="date-asc">Tanggal Lama</option>
-                <option value="role">Role (A-Z)</option>
+              <label>Tahun:</label>
+              <select id="shortageYearSelect" class="select-input">
+                <option value="">Semua</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
               </select>
             </div>
           </div>
@@ -674,10 +692,8 @@
             <table>
               <thead>
                 <tr>
-                  <th>Judul Tugas</th>
-                  <th>Bulan</th>
-                  <th>Role</th>
-                  <th>Catatan</th>
+                  <th>Bulan/Tahun</th>
+                  <th>Kekurangan Minimal</th>
                 </tr>
               </thead>
               <tbody id="shortageTableRows"></tbody>
@@ -782,8 +798,8 @@
     const progressSortSelect = document.getElementById("progressSortSelect");
     const progressTableRows = document.getElementById("progressTableRows");
 
-    const shortageSearchBox = document.getElementById("shortageSearchBox");
-    const shortageSortSelect = document.getElementById("shortageSortSelect");
+    const shortageMonthSelect = document.getElementById("shortageMonthSelect");
+    const shortageYearSelect = document.getElementById("shortageYearSelect");
     const shortageTableRows = document.getElementById("shortageTableRows");
 
     const statsMonthSelect = document.getElementById("statsMonthSelect");
@@ -796,8 +812,8 @@
 
     let progressFilterSearch = "";
     let progressFilterSort = "date-desc";
-    let shortageFilterSearch = "";
-    let shortageFilterSort = "date-desc";
+    let shortageFilterMonth = "";
+    let shortageFilterYear = "2026";
     let statsFilterMonth = "04";
     let statsFilterYear = "2026";
 
@@ -834,14 +850,12 @@
         return;
       }
       const demo = [
-        { id: "prog-1", title: "Misa Mingguan", date: "2026-04-13", role: "Operator", status: "Selesai", progress: 100 },
-        { id: "prog-2", title: "Misa Harian", date: "2026-04-10", role: "Kameramen", status: "Selesai", progress: 100 },
-        { id: "prog-3", title: "Misa Besar", date: "2026-04-17", role: "Supervisor", status: "Terjadwal", progress: 0 },
-        { id: "prog-4", title: "Streamer Backup", date: "2026-04-21", role: "Operator", status: "Terjadwal", progress: 0 },
-        { id: "prog-5", title: "Rekaman Liturgi", date: "2026-04-25", role: "Editor", status: "Terjadwal", progress: 0 },
-        { id: "prog-6", title: "Pengecekan Audio", date: "2026-04-06", role: "Teknisi", status: "Selesai", progress: 100 },
-        { id: "prog-7", title: "Setup Kamera", date: "2026-04-09", role: "Kameramen", status: "Selesai", progress: 100 },
-        { id: "prog-8", title: "Live Streaming", date: "2026-04-12", role: "Operator", status: "Selesai", progress: 100 }
+        { id: "prog-1", title: "Misa Mingguan", date: "2026-04-05", role: "Operator", status: "Selesai", progress: 100 },
+        { id: "prog-2", title: "Misa Mingguan", date: "2026-04-13", role: "Kameramen", status: "Selesai", progress: 100 },
+        { id: "prog-3", title: "Misa Harian", date: "2026-04-08", role: "Operator", status: "Selesai", progress: 100 },
+        { id: "prog-4", title: "Misa Harian", date: "2026-04-10", role: "Kameramen", status: "Selesai", progress: 100 },
+        { id: "prog-5", title: "Misa Harian", date: "2026-04-12", role: "Supervisor", status: "Selesai", progress: 100 },
+        { id: "prog-6", title: "Misa Besar", date: "2026-04-17", role: "Supervisor", status: "Terjadwal", progress: 0 }
       ];
       localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(demo));
     }
@@ -851,9 +865,10 @@
         return;
       }
       const demo = [
-        { id: "short-1", title: "Misa Biasa Maret", month: "Maret 2026", role: "Operator", note: "Karun sakit, tidak bisa hadir" },
-        { id: "short-2", title: "Misa Besar Maret", month: "Maret 2026", role: "Kameramen", note: "Jadwal bentrok dengan acara lain" },
-        { id: "short-3", title: "Live Stream Maret", month: "Maret 2026", role: "Streamer", note: "Belum tersedia pengganti" }
+        { id: "short-1", month: "2026-04", monthText: "April 2026", shortage: 3 },
+        { id: "short-2", month: "2026-03", monthText: "Maret 2026", shortage: 3 },
+        { id: "short-3", month: "2026-02", monthText: "Februari 2026", shortage: 0 },
+        { id: "short-4", month: "2026-01", monthText: "Januari 2026", shortage: 1 }
       ];
       localStorage.setItem(SHORTAGE_STORAGE_KEY, JSON.stringify(demo));
     }
@@ -885,7 +900,9 @@
     }
 
     function renderProgressTable() {
-      let items = readProgress();
+      let items = readProgress().filter(function (item) {
+        return item.title === "Misa Mingguan" || item.title === "Misa Harian" || item.title === "Misa Besar";
+      });
 
       if (progressFilterSearch) {
         items = items.filter(function (item) {
@@ -911,21 +928,47 @@
         return;
       }
 
-      progressTableRows.innerHTML = items.map(function (item) {
-        const statusHtml = item.status === "Selesai"
+      // Group items by title to handle multiple instances
+      var grouped = items.reduce(function (acc, item) {
+        var existing = acc.find(function (g) { return g.title === item.title; });
+        if (existing) {
+          existing.dates.push(item.date);
+          existing.statuses.push(item.status);
+          existing.progresses.push(item.progress);
+          existing.roles.push(item.role);
+        } else {
+          acc.push({
+            title: item.title,
+            dates: [item.date],
+            statuses: [item.status],
+            progresses: [item.progress],
+            roles: [item.role]
+          });
+        }
+        return acc;
+      }, []);
+
+      progressTableRows.innerHTML = grouped.map(function (group) {
+        const count = group.dates.length;
+        const displayDate = group.dates.join(", ");
+        const displayRole = group.roles ? group.roles.join(", ") : "-";
+        const statusHtml = group.statuses.every(function (s) { return s === "Selesai"; })
           ? '<span class="status-ok">Selesai</span>'
           : '<span class="status-warn">Terjadwal</span>';
+        const avgProgress = Math.round(group.progresses.reduce(function (a, b) { return a + b; }, 0) / group.progresses.length);
 
         return '<tr>'
-          + '<td>' + item.title + '</td>'
-          + '<td>' + item.date + '</td>'
+          + '<td>' + group.title + '</td>'
+          + '<td>' + count + '</td>'
+          + '<td>' + displayDate + '</td>'
+          + '<td>' + displayRole + '</td>'
           + '<td>' + statusHtml + '</td>'
           + '<td>'
           + '<div style="display: flex; align-items: center; gap: 8px;">'
           + '<div class="progress-bar" style="flex: 1; min-width: 60px;">'
-          + '<div class="progress-fill" style="width: ' + item.progress + '%;"></div>'
+          + '<div class="progress-fill" style="width: ' + avgProgress + '%;"></div>'
           + '</div>'
-          + '<span style="font-size: 0.8rem; font-weight: 700; min-width: 35px;">' + item.progress + '%</span>'
+          + '<span style="font-size: 0.8rem; font-weight: 700; min-width: 35px;">' + avgProgress + '%</span>'
           + '</div>'
           + '</td>'
           + '</tr>';
@@ -935,36 +978,34 @@
     function renderShortageTable() {
       let items = readShortage();
 
-      if (shortageFilterSearch) {
+      if (shortageFilterMonth) {
         items = items.filter(function (item) {
-          return item.title.toLowerCase().includes(shortageFilterSearch.toLowerCase());
+          const itemMonth = item.month ? item.month.substring(5, 7) : "";
+          return itemMonth === shortageFilterMonth;
         });
       }
 
-      items.sort(function (a, b) {
-        if (shortageFilterSort === "date-desc") {
-          return 0;
-        }
-        if (shortageFilterSort === "date-asc") {
-          return 0;
-        }
-        if (shortageFilterSort === "role") {
-          return a.role.localeCompare(b.role);
-        }
-        return 0;
-      });
+      if (shortageFilterYear) {
+        items = items.filter(function (item) {
+          const itemYear = item.month ? item.month.substring(0, 4) : "";
+          return itemYear === shortageFilterYear;
+        });
+      }
 
       if (!items.length) {
-        shortageTableRows.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">Tidak ada kekurangan tugas.</td></tr>';
+        shortageTableRows.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">Tidak ada data.</td></tr>';
         return;
       }
 
       shortageTableRows.innerHTML = items.map(function (item) {
+        const displayMonth = item.monthText || item.month || "";
+        const shortageText = item.shortage > 0
+          ? '<span class="status-danger">' + item.shortage + ' tugas</span>'
+          : '<span class="status-ok">Terpenuhi</span>';
+
         return '<tr>'
-          + '<td>' + item.title + '</td>'
-          + '<td>' + item.month + '</td>'
-          + '<td>' + item.role + '</td>'
-          + '<td>' + item.note + '</td>'
+          + '<td>' + displayMonth + '</td>'
+          + '<td>' + shortageText + '</td>'
           + '</tr>';
       }).join("");
     }
@@ -1046,13 +1087,13 @@
       renderProgressTable();
     });
 
-    shortageSearchBox.addEventListener("input", function (event) {
-      shortageFilterSearch = event.target.value;
+    shortageMonthSelect.addEventListener("change", function (event) {
+      shortageFilterMonth = event.target.value;
       renderShortageTable();
     });
 
-    shortageSortSelect.addEventListener("change", function (event) {
-      shortageFilterSort = event.target.value;
+    shortageYearSelect.addEventListener("change", function (event) {
+      shortageFilterYear = event.target.value;
       renderShortageTable();
     });
 
