@@ -162,6 +162,39 @@
       font-weight: 600;
     }
 
+    .world-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid #6b7280;
+      background: #ffffff;
+      color: #374151;
+      text-decoration: none;
+    }
+
+    .world-link svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .period-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .period-select {
+      border: 1px solid #b7b7b7;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 0.9rem;
+      background: #fff;
+    }
+
     .panel {
       border: 2px solid var(--line);
       border-radius: var(--radius);
@@ -494,7 +527,8 @@
         <h1>Monitoring Tugas Anggota</h1>
         <div class="head-meta">
           <span id="liveDateTime">-</span>
-          <select id="monthSelector" style="border: 1px solid #999; border-radius: 6px; padding: 6px; font-size: 0.9rem;">
+          <div class="period-controls" aria-label="Periode monitoring">
+          <select id="monthSelector" class="period-select" aria-label="Pilih bulan">
             <option value="0">Januari</option>
             <option value="1">Februari</option>
             <option value="2" selected>Maret</option>
@@ -508,6 +542,12 @@
             <option value="10">November</option>
             <option value="11">Desember</option>
           </select>
+          <select id="yearSelector" class="period-select" aria-label="Pilih tahun">
+            <option value="2025">2025</option>
+            <option value="2026" selected>2026</option>
+            <option value="2027">2027</option>
+          </select>
+          </div>
         </div>
       </header>
 
@@ -569,11 +609,9 @@
               <thead>
                 <tr>
                   <th class="sortable-header" data-sort="nama">Nama</th>
-                  <th class="sortable-header" data-sort="role">Role Utama</th>
                   <th class="sortable-header" data-sort="total">Total Tugas</th>
                   <th class="sortable-header" data-sort="kekurangan">Kekurangan</th>
                   <th class="sortable-header" data-sort="status">Status</th>
-                  <th>Catatan</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -650,6 +688,7 @@
     // DOM Elements
     const liveDateTime = document.getElementById("liveDateTime");
     const monthSelector = document.getElementById("monthSelector");
+    const yearSelector = document.getElementById("yearSelector");
     const targetMinInput = document.getElementById("targetMinInput");
     const periodChip = document.getElementById("periodChip");
     const searchFilter = document.getElementById("searchFilter");
@@ -673,7 +712,8 @@
     const modalCloseBtn = document.querySelector(".modal-close");
 
     // State variables
-    let currentMonth = 2;
+    let currentMonth = 3;
+    let currentYear = 2026;
     let targetMinimum = 2;
     let currentSortColumn = null;
     let sortDirection = "asc";
@@ -702,14 +742,24 @@
       liveDateTime.textContent = day + ", " + date + " " + month + " " + year + " " + hour + ":" + minute + ":" + second;
     }
 
-    function getMemberTasks(memberName, monthIndex) {
-      const key = "crembo-member-tasks-" + memberName + "-" + monthIndex;
-      const stored = localStorage.getItem(key);
-      return stored ? JSON.parse(stored) : [];
+    function getPeriodKey(yearValue, monthIndex) {
+      return String(yearValue) + "-" + String(monthIndex + 1).padStart(2, "0");
     }
 
-    function saveMemberTasks(memberName, monthIndex, tasks) {
-      const key = "crembo-member-tasks-" + memberName + "-" + monthIndex;
+    function getMemberTasks(memberName, yearValue, monthIndex) {
+      const key = "crembo-member-tasks-" + memberName + "-" + getPeriodKey(yearValue, monthIndex);
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+
+      const legacyKey = "crembo-member-tasks-" + memberName + "-" + monthIndex;
+      const legacyStored = localStorage.getItem(legacyKey);
+      return legacyStored ? JSON.parse(legacyStored) : [];
+    }
+
+    function saveMemberTasks(memberName, yearValue, monthIndex, tasks) {
+      const key = "crembo-member-tasks-" + memberName + "-" + getPeriodKey(yearValue, monthIndex);
       localStorage.setItem(key, JSON.stringify(tasks));
     }
 
@@ -717,7 +767,8 @@
       // Initialize with default tasks if not present
       DEFAULT_MEMBERS.forEach(function (member) {
         [0, 1, 2, 3, 4].forEach(function (month) {
-          if (!localStorage.getItem("crembo-member-tasks-" + member.nama + "-" + month)) {
+          const periodKey = getPeriodKey(2026, month);
+          if (!localStorage.getItem("crembo-member-tasks-" + member.nama + "-" + periodKey)) {
             const defaultCount = member.nama === "Rikha" && month === 2 ? 3 : 
                                  member.nama === "Jeni" && month === 2 ? 2 :
                                  member.nama === "Claire" && month === 2 ? 1 : 0;
@@ -725,7 +776,7 @@
             for (let i = 0; i < defaultCount; i++) {
               tasks.push({ date: DEFAULT_SCHEDULE[i % DEFAULT_SCHEDULE.length].date, role: "Operator" });
             }
-            saveMemberTasks(member.nama, month, tasks);
+            saveMemberTasks(member.nama, 2026, month, tasks);
           }
         });
       });
@@ -764,11 +815,13 @@
     }
 
     function renderTable() {
-      const monthIdx = parseInt(monthSelector.value || currentMonth);
+      const monthIdx = parseInt(monthSelector.value || currentMonth, 10);
+      const yearValue = parseInt(yearSelector.value || currentYear, 10);
       currentMonth = monthIdx;
+      currentYear = yearValue;
 
       let data = DEFAULT_MEMBERS.map(function (member) {
-        const tasks = getMemberTasks(member.nama, monthIdx);
+        const tasks = getMemberTasks(member.nama, yearValue, monthIdx);
         const total = tasks.length;
         const shortage = Math.max(0, targetMinimum - total);
         const status = calculateStatus(total);
@@ -816,11 +869,9 @@
       monitoringTable.innerHTML = data.map(function (item) {
         return '<tr>' +
           '<td>' + item.nama + '</td>' +
-          '<td>' + item.role + '</td>' +
           '<td>' + item.total + '</td>' +
           '<td>' + item.shortage + '</td>' +
           '<td><span class="pill ' + item.statusClass + '">' + item.status + '</span></td>' +
-          '<td>' + item.catatan + '</td>' +
           '<td>' + (item.shortage > 0 ? '<button class="action-btn schedule-btn" data-member="' + item.nama + '">Jadwalkan</button>' : '-') + '</td>' +
           '</tr>';
       }).join("");
@@ -843,7 +894,7 @@
       shortage1Members.textContent = shortage1;
       shortageMultiMembers.textContent = shortageMulti;
 
-      periodChip.textContent = "Periode: " + getMonthName(monthIdx) + " " + getCurrentYear();
+      periodChip.textContent = "Periode: " + getMonthName(monthIdx) + " " + yearValue;
     }
 
     function render() {
@@ -881,14 +932,15 @@
         return;
       }
 
-      const monthIdx = parseInt(monthSelector.value || currentMonth);
-      const tasks = getMemberTasks(currentSchedulingMember, monthIdx);
+      const monthIdx = parseInt(monthSelector.value || currentMonth, 10);
+      const yearValue = parseInt(yearSelector.value || currentYear, 10);
+      const tasks = getMemberTasks(currentSchedulingMember, yearValue, monthIdx);
       tasks.push({
         date: scheduleDate.value,
         role: scheduleRole.value,
         notes: scheduleNotes.value
       });
-      saveMemberTasks(currentSchedulingMember, monthIdx, tasks);
+      saveMemberTasks(currentSchedulingMember, yearValue, monthIdx, tasks);
       
       alert("Tugas berhasil dijadwalkan untuk " + currentSchedulingMember);
       closeScheduleModal();
@@ -897,6 +949,7 @@
 
     // Event listeners
     monthSelector.addEventListener("change", render);
+    yearSelector.addEventListener("change", render);
     targetMinInput.addEventListener("change", function () {
       targetMinimum = parseInt(this.value) || 2;
       render();

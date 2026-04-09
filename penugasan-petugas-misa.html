@@ -174,6 +174,26 @@
       text-decoration: none;
     }
 
+    .world-link svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .period-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .period-select {
+      border: 1px solid #999;
+      border-radius: 6px;
+      padding: 6px;
+      font-size: 0.9rem;
+      background: #fff;
+    }
+
     .panel {
       border: 2px solid var(--line);
       border-radius: var(--radius);
@@ -453,13 +473,41 @@
         <h1>Penugasan Petugas Misa</h1>
         <div class="head-meta">
           <span id="liveDateTime">-</span>
-          <a class="world-link" href="home.html?session=active" title="Kembali ke Home (tetap login)">●</a>
+          <a class="world-link" href="home.html?session=active" title="Kembali ke Home (tetap login)">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"></circle>
+              <path d="M3 12H21" stroke="currentColor" stroke-width="1.8"></path>
+              <path d="M12 3C14.3 5.5 15.6 8.7 15.6 12C15.6 15.3 14.3 18.5 12 21" stroke="currentColor" stroke-width="1.8"></path>
+              <path d="M12 3C9.7 5.5 8.4 8.7 8.4 12C8.4 15.3 9.7 18.5 12 21" stroke="currentColor" stroke-width="1.8"></path>
+            </svg>
+          </a>
         </div>
       </header>
 
       <section class="panel">
         <div class="panel-head">
           <h2>Tabel Penugasan</h2>
+          <div class="period-controls" aria-label="Pilih periode penugasan">
+            <select id="periodMonth" class="period-select" aria-label="Pilih bulan">
+              <option value="0">Januari</option>
+              <option value="1">Februari</option>
+              <option value="2">Maret</option>
+              <option value="3" selected>April</option>
+              <option value="4">Mei</option>
+              <option value="5">Juni</option>
+              <option value="6">Juli</option>
+              <option value="7">Agustus</option>
+              <option value="8">September</option>
+              <option value="9">Oktober</option>
+              <option value="10">November</option>
+              <option value="11">Desember</option>
+            </select>
+            <select id="periodYear" class="period-select" aria-label="Pilih tahun">
+              <option value="2025">2025</option>
+              <option value="2026" selected>2026</option>
+              <option value="2027">2027</option>
+            </select>
+          </div>
           <div class="chip-toggle" aria-label="Pilih jenis misa">
             <button id="modeBiasa" class="active" type="button">Misa Biasa</button>
             <button id="modeBesar" type="button">Misa Besar</button>
@@ -547,6 +595,8 @@
 
     let currentMode = "biasa";
     const assignmentRows = document.getElementById("assignmentRows");
+    const periodMonth = document.getElementById("periodMonth");
+    const periodYear = document.getElementById("periodYear");
     const swapSchedule = document.getElementById("swapSchedule");
     const swapRoleA = document.getElementById("swapRoleA");
     const swapRoleB = document.getElementById("swapRoleB");
@@ -567,8 +617,33 @@
       return String(value || "").trim();
     }
 
+    function getSelectedPeriod() {
+      return {
+        month: Number(periodMonth.value),
+        year: Number(periodYear.value)
+      };
+    }
+
+    function matchesSelectedPeriod(schedule) {
+      const selected = getSelectedPeriod();
+      const date = new Date(schedule.date + "T00:00:00");
+      if (Number.isNaN(date.getTime())) {
+        return true;
+      }
+
+      return date.getMonth() === selected.month && date.getFullYear() === selected.year;
+    }
+
     function activeSchedules() {
       return currentMode === "biasa" ? schedulesBiasa : schedulesBesar;
+    }
+
+    function visibleSchedules() {
+      return activeSchedules().map(function (schedule, index) {
+        return { schedule: schedule, index: index };
+      }).filter(function (entry) {
+        return matchesSelectedPeriod(entry.schedule);
+      });
     }
 
     function buildMemberSelect(selectedValue, scheduleIndex, roleKey) {
@@ -597,8 +672,10 @@
     }
 
     function renderAssignments() {
-      const schedules = activeSchedules();
-      assignmentRows.innerHTML = schedules.map(function (schedule, index) {
+      const schedules = visibleSchedules();
+      assignmentRows.innerHTML = schedules.map(function (entry) {
+        const schedule = entry.schedule;
+        const index = entry.index;
         return '<tr>' +
           '<td><strong>' + schedule.misa + '</strong></td>' +
           '<td>' + schedule.tanggal + '</td>' +
@@ -659,9 +736,15 @@
     }
 
     function renderSwapSchedules() {
-      const schedules = activeSchedules();
-      swapSchedule.innerHTML = schedules.map(function (schedule, index) {
-        return '<option value="' + index + '">' + schedule.misa + ' - ' + schedule.tanggal + ' ' + schedule.jam + '</option>';
+      const schedules = visibleSchedules();
+      if (!schedules.length) {
+        swapSchedule.innerHTML = '<option value="">-- tidak ada jadwal pada periode ini --</option>';
+        return;
+      }
+
+      swapSchedule.innerHTML = schedules.map(function (entry) {
+        const schedule = entry.schedule;
+        return '<option value="' + entry.index + '">' + schedule.misa + ' - ' + schedule.tanggal + ' ' + schedule.jam + '</option>';
       }).join("");
     }
 
@@ -672,6 +755,16 @@
       renderAssignments();
       renderSwapSchedules();
     }
+
+    periodMonth.addEventListener("change", function () {
+      renderAssignments();
+      renderSwapSchedules();
+    });
+
+    periodYear.addEventListener("change", function () {
+      renderAssignments();
+      renderSwapSchedules();
+    });
 
     modeBiasa.addEventListener("click", function () { setMode("biasa"); });
     modeBesar.addEventListener("click", function () { setMode("besar"); });
@@ -741,7 +834,7 @@
       const index = Number(swapSchedule.value);
       const roleA = swapRoleA.value;
       const roleB = swapRoleB.value;
-      if (roleA === roleB || Number.isNaN(index) || !schedules[index]) {
+      if (swapSchedule.value === "" || roleA === roleB || Number.isNaN(index) || !schedules[index]) {
         return;
       }
 

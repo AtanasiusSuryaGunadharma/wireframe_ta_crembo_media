@@ -653,6 +653,15 @@
 			color: #535353;
 		}
 
+		.schedule-note-banner {
+			border: 1px dashed #7d7d7d;
+			background: #fafafa;
+			padding: 10px 12px;
+			margin: 10px 0 12px;
+			font-size: 0.88rem;
+			color: #474747;
+		}
+
 		.schedule-legend {
 			display: flex;
 			gap: 7px;
@@ -1060,6 +1069,7 @@
 				</div>
 				<p class="schedule-note">Tanggal hari raya diblok dan diarahkan ke mode Hari Raya.</p>
 			</div>
+			<div id="homeMisaBesarNote" class="schedule-note-banner">Keterangan misa besar terbaru akan tampil di sini setelah registrasi disimpan.</div>
 			<div class="schedule-legend">
 				<span class="chip"><span class="swatch normal"></span> Jadwal normal</span>
 				<span class="chip"><span class="swatch blocked"></span> Diblok karena hari raya</span>
@@ -1284,8 +1294,10 @@
 		const aboutMediaDots = document.getElementById("aboutMediaDots");
 		const aboutMediaPrev = document.getElementById("aboutMediaPrev");
 		const aboutMediaNext = document.getElementById("aboutMediaNext");
+		const homeMisaBesarNote = document.getElementById("homeMisaBesarNote");
 		const CAROUSEL_STORAGE_KEY = "crembo-home-carousel-slides";
 		const ABOUT_STORAGE_KEY = "crembo-home-about-content";
+		const BIG_MASS_STORAGE_KEY = "crembo-registrasi-misa-besar-schedules";
 		const DEFAULT_CAROUSEL_SLIDES = [
 			{
 				id: "default-1",
@@ -1363,6 +1375,37 @@
 				.replace(/>/g, "&gt;")
 				.replace(/\"/g, "&quot;")
 				.replace(/'/g, "&#039;");
+		}
+
+		function readBigMassSchedules() {
+			try {
+				const raw = localStorage.getItem(BIG_MASS_STORAGE_KEY);
+				const parsed = raw ? JSON.parse(raw) : [];
+				return Array.isArray(parsed) ? parsed : [];
+			} catch (error) {
+				return [];
+			}
+		}
+
+		function renderHomeMisaNote() {
+			if (!homeMisaBesarNote) {
+				return;
+			}
+
+			const latestItem = readBigMassSchedules().filter(function (item) {
+				return item && (item.misaNote || item.note);
+			}).sort(function (a, b) {
+				const aTime = new Date((a.date || a.misaDate || "") + "T" + (a.time || a.misaTime || "00:00") + ":00").getTime();
+				const bTime = new Date((b.date || b.misaDate || "") + "T" + (b.time || b.misaTime || "00:00") + ":00").getTime();
+				return bTime - aTime;
+			})[0];
+
+			if (!latestItem) {
+				homeMisaBesarNote.textContent = "Keterangan misa besar terbaru akan tampil di sini setelah registrasi disimpan.";
+				return;
+			}
+
+			homeMisaBesarNote.textContent = "Keterangan misa besar terbaru: " + String(latestItem.misaNote || latestItem.note || "-");
 		}
 
 		function readCarouselSlides() {
@@ -1486,6 +1529,7 @@
 			aboutMediaIndex = 0;
 			buildAboutDots();
 			showAboutImage(0);
+			renderHomeMisaNote();
 			startAboutAutoSlide();
 		}
 

@@ -53,6 +53,53 @@
     .brand h1 { margin: 0; font-size: 1rem; text-transform: uppercase; }
     .brand p { margin: 6px 0 0; color: #cdcdcd; font-size: 0.82rem; }
 
+    .dashboard-headline-bar {
+      border: 1px solid #cfcfcf;
+      background: #f3f3f3;
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .dashboard-headline-bar h1 {
+      margin: 0;
+      font-size: clamp(1.25rem, 2.2vw, 2.1rem);
+      font-weight: 700;
+      color: #1c1f27;
+      letter-spacing: 0.01em;
+    }
+
+    .head-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: #374151;
+      font-size: clamp(0.85rem, 1.8vw, 1.02rem);
+      font-weight: 600;
+    }
+
+    .world-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid #6b7280;
+      background: #ffffff;
+      color: #374151;
+      text-decoration: none;
+    }
+
+    .world-link svg {
+      width: 18px;
+      height: 18px;
+    }
+
     .menu-group {
       border: 1px solid #656565;
       border-radius: 12px;
@@ -400,10 +447,25 @@
     </aside>
 
     <main class="main">
-      <header class="meta-header">
-        <h1 class="meta-title">Setting Pertanyaan Evaluasi</h1>
-        <p class="meta-sub">Buat form evaluasi fleksibel: tambah, edit, urutkan, dan hapus pertanyaan seperti pola Google Form.</p>
+      <header class="dashboard-headline-bar" aria-label="Header setting pertanyaan evaluasi">
+        <h1>Setting Pertanyaan Evaluasi</h1>
+        <div class="head-meta">
+          <span id="liveDateTime">-</span>
+          <a class="world-link" href="home.html?session=active" title="Kembali ke Home (tetap login)">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"></circle>
+              <path d="M3 12H21" stroke="currentColor" stroke-width="1.8"></path>
+              <path d="M12 3C14.3 5.5 15.6 8.7 15.6 12C15.6 15.3 14.3 18.5 12 21" stroke="currentColor" stroke-width="1.8"></path>
+              <path d="M12 3C9.7 5.5 8.4 8.7 8.4 12C8.4 15.3 9.7 18.5 12 21" stroke="currentColor" stroke-width="1.8"></path>
+            </svg>
+          </a>
+        </div>
       </header>
+
+      <section class="meta-header">
+        <h2 class="meta-title">Atur pertanyaan form evaluasi</h2>
+        <p class="meta-sub">Buat form evaluasi fleksibel: tambah, edit, urutkan, dan hapus pertanyaan seperti pola Google Form.</p>
+      </section>
 
       <section class="panel" aria-label="Builder pertanyaan evaluasi">
         <header class="panel-head">
@@ -461,6 +523,7 @@
     const saveConfigBtn = document.getElementById("saveConfigBtn");
     const resetDefaultBtn = document.getElementById("resetDefaultBtn");
     const statusMessage = document.getElementById("statusMessage");
+    const liveDateTime = document.getElementById("liveDateTime");
 
     let draftQuestions = [];
 
@@ -685,6 +748,24 @@
         .replace(/'/g, "&#039;");
     }
 
+    function updateLiveDateTime() {
+      if (!liveDateTime) {
+        return;
+      }
+
+      const now = new Date();
+      const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+      const day = dayNames[now.getDay()];
+      const date = String(now.getDate()).padStart(2, "0");
+      const month = monthNames[now.getMonth()];
+      const year = now.getFullYear();
+      const hour = String(now.getHours()).padStart(2, "0");
+      const minute = String(now.getMinutes()).padStart(2, "0");
+      const second = String(now.getSeconds()).padStart(2, "0");
+      liveDateTime.textContent = day + ", " + date + " " + month + " " + year + " " + hour + ":" + minute + ":" + second;
+    }
+
     addQuestionBtn.addEventListener("click", function () {
       draftQuestions.push(createQuestionItem());
       refreshAll();
@@ -798,6 +879,8 @@
     draftQuestions = readQuestions();
     refreshAll();
     renderStatus("Edit pertanyaan sesuai kebutuhan, lalu klik Simpan Konfigurasi.", "neutral");
+    updateLiveDateTime();
+    setInterval(updateLiveDateTime, 1000);
   </script>
 </body>
 </html>
