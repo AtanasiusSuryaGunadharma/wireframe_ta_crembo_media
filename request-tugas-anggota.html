@@ -363,6 +363,35 @@
       color: #1f2937;
     }
 
+    .shortcut-filter-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .shortcut-collapse {
+      border-top: 1px solid #e5e9f2;
+      margin-top: 4px;
+      padding-top: 10px;
+    }
+
+    .blocked-row {
+      background: #f5f7fb;
+    }
+
+    .blocked-note {
+      display: inline-block;
+      margin-top: 5px;
+      font-size: 0.72rem;
+      color: #8a6d00;
+      border: 1px solid #f0d978;
+      background: #fff9df;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-weight: 700;
+    }
+
     .mobile-menu {
       display: none;
       border: 1px solid #cbd5e1;
@@ -386,7 +415,8 @@
       .sidebar.show { display: block; }
       .mobile-menu { display: inline-block; }
       .grid-2,
-      .grid-3 { grid-template-columns: 1fr; }
+      .grid-3,
+      .shortcut-filter-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -593,15 +623,45 @@
         <section class="panel" aria-label="Shortcut lihat jadwal tugas">
           <header class="panel-head">
             <h2>Shortcut Lihat Jadwal Tugas</h2>
-            <a class="badge" href="jadwal-tugas-misa-anggota.html">Buka Halaman Jadwal Lengkap</a>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <button id="shortcutToggleBtn" class="btn ghost" type="button" aria-expanded="false" aria-controls="shortcutBody">Tampilkan</button>
+              <a class="badge" href="jadwal-tugas-misa-anggota.html">Buka Halaman Jadwal Lengkap</a>
+            </div>
           </header>
-          <div class="panel-body">
-            <div class="shortcut-tools">
-              <label for="shortcutJenis" style="margin:0;">Pilih Jenis Jadwal</label>
-              <select id="shortcutJenis" class="shortcut-select" aria-label="Filter tabel shortcut jadwal">
-                <option value="biasa">Misa Biasa</option>
-                <option value="besar">Misa Besar</option>
-              </select>
+          <div id="shortcutBody" class="panel-body shortcut-collapse" hidden>
+            <div class="shortcut-filter-grid">
+              <div class="field">
+                <label for="shortcutJenis">Jenis Jadwal</label>
+                <select id="shortcutJenis" class="shortcut-select" aria-label="Filter tabel shortcut jadwal">
+                  <option value="biasa">Misa Biasa</option>
+                  <option value="besar">Misa Besar</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="shortcutMonth">Bulan</label>
+                <select id="shortcutMonth" class="shortcut-select" aria-label="Pilih bulan jadwal">
+                  <option value="0">Januari</option>
+                  <option value="1">Februari</option>
+                  <option value="2">Maret</option>
+                  <option value="3">April</option>
+                  <option value="4">Mei</option>
+                  <option value="5">Juni</option>
+                  <option value="6">Juli</option>
+                  <option value="7">Agustus</option>
+                  <option value="8">September</option>
+                  <option value="9">Oktober</option>
+                  <option value="10">November</option>
+                  <option value="11">Desember</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="shortcutYear">Tahun</label>
+                <select id="shortcutYear" class="shortcut-select" aria-label="Pilih tahun jadwal"></select>
+              </div>
+              <div class="field">
+                <label for="shortcutSearch">Search Jadwal/Petugas</label>
+                <input id="shortcutSearch" class="shortcut-select" type="search" placeholder="Cari tanggal, nama, role..." aria-label="Cari pada tabel shortcut jadwal">
+              </div>
             </div>
             <div class="table-wrap">
               <table>
@@ -612,6 +672,7 @@
                     <th>Tanggal</th>
                     <th>Jam</th>
                     <th>Kebutuhan Petugas</th>
+                    <th>Petugas Terdaftar</th>
                     <th>Status Slot</th>
                   </tr>
                 </thead>
@@ -646,44 +707,165 @@
     const submitRequestBtn = document.getElementById("submitRequestBtn");
     const resetFormBtn = document.getElementById("resetFormBtn");
     const requestRows = document.getElementById("requestRows");
+    const shortcutToggleBtn = document.getElementById("shortcutToggleBtn");
+    const shortcutBody = document.getElementById("shortcutBody");
     const shortcutJenis = document.getElementById("shortcutJenis");
+    const shortcutMonth = document.getElementById("shortcutMonth");
+    const shortcutYear = document.getElementById("shortcutYear");
+    const shortcutSearch = document.getElementById("shortcutSearch");
     const shortcutRows = document.getElementById("shortcutRows");
     const params = new URLSearchParams(window.location.search);
+    let currentMemberName = "";
 
-    const shortcutSchedules = {
-      biasa: [
-        { title: "Misa Harian Senin", date: "13 Apr 2026", time: "17:00", need: "Operator, Kameramen", status: "Terbuka" },
-        { title: "Misa Harian Selasa", date: "14 Apr 2026", time: "17:00", need: "Supervisor", status: "Terbuka" },
-        { title: "Misa Mingguan", date: "19 Apr 2026", time: "08:00", need: "Tim sudah lengkap", status: "Tertutup" }
-      ],
-      besar: [
-        { title: "Misa Kamis Putih", date: "02 Apr 2026", time: "18:00", need: "Tim sudah lengkap", status: "Tertutup" },
-        { title: "Misa Jumat Agung", date: "03 Apr 2026", time: "17:30", need: "Tim sudah lengkap", status: "Tertutup" },
-        { title: "Misa Vigili Paskah", date: "04 Apr 2026", time: "19:00", need: "Tim sudah lengkap", status: "Tertutup" }
-      ]
-    };
+    function getDaysInMonth(year, monthIndex) {
+      return new Date(year, monthIndex + 1, 0).getDate();
+    }
+
+    function monthNameShort(index) {
+      return ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"][index];
+    }
+
+    function dayName(dateObj) {
+      return ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"][dateObj.getDay()];
+    }
+
+    function formatDateText(dateObj) {
+      const dd = String(dateObj.getDate()).padStart(2, "0");
+      const mm = monthNameShort(dateObj.getMonth());
+      const yy = dateObj.getFullYear();
+      return dd + " " + mm + " " + yy;
+    }
+
+    function buildRegularMonthlyRows(monthIndex, year) {
+      const totalDays = getDaysInMonth(year, monthIndex);
+      const rows = [];
+      const operators = ["Rikha", "Lisa", "Asha", "Nadia", "Tita", "Vio", "Belinda", "Doni"];
+      const cameramen = ["Jeni", "Evan", "Kanes", "Paul", "Reva", "Arya", "Chessa", "Jose"];
+      const supervisors = ["Tyas", "Claire", "Christoforus", "Luciana", "Panji", "Stella", "Bolun", "There"];
+
+      for (let day = 1; day <= totalDays; day += 1) {
+        const dateObj = new Date(year, monthIndex, day);
+        const sunday = dateObj.getDay() === 0;
+        const fullSlot = sunday || day % 5 === 0 || day % 8 === 0;
+        const operatorName = operators[day % operators.length];
+        const cameramanName = cameramen[day % cameramen.length];
+        const supervisorName = supervisors[day % supervisors.length];
+        const registered = fullSlot
+          ? "Operator: " + operatorName + "<br>Kameramen: " + cameramanName + "<br>Supervisor: " + supervisorName
+          : (day % 3 === 0
+            ? "Operator: " + operatorName + "<br>Kameramen: " + cameramanName + "<br>Supervisor: -"
+            : "Operator: " + operatorName + "<br>Kameramen: -<br>Supervisor: -");
+        rows.push({
+          title: sunday ? "Misa Mingguan - " + dayName(dateObj) : "Misa Harian - " + dayName(dateObj),
+          date: formatDateText(dateObj),
+          time: sunday ? "08:00" : "17:00",
+          need: fullSlot ? "Tim sudah lengkap" : (day % 3 === 0 ? "Supervisor" : "Operator, Kameramen"),
+          registered: registered,
+          status: fullSlot ? "Tertutup" : "Terbuka"
+        });
+      }
+
+      return rows;
+    }
+
+    function buildBigMassRows(monthIndex, year) {
+      const events = [
+        { title: "Misa Kamis Putih", day: 2, time: "18:00" },
+        { title: "Misa Jumat Agung", day: 3, time: "17:30" },
+        { title: "Misa Vigili Paskah", day: 4, time: "19:00" }
+      ];
+
+      return events.map(function (event) {
+        const dateObj = new Date(year, monthIndex, event.day);
+        return {
+          title: event.title,
+          date: formatDateText(dateObj),
+          time: event.time,
+          need: "Tim sudah lengkap",
+          registered: event.title === "Misa Kamis Putih"
+            ? "Operator: Bian, Belinda<br>Kameramen: Lisa, Reva, Vio<br>Supervisor: Panji, Arya, Evan"
+            : (event.title === "Misa Jumat Agung"
+              ? "Operator: Tita, Rossa<br>Kameramen: Chessa, Rikha, Jeni<br>Supervisor: Stella, Arya, Bolun"
+              : "Operator: Niko, Vio<br>Kameramen: Dhani, Evan, Bian<br>Supervisor: Panji, There, Arya"),
+          status: "Tertutup"
+        };
+      });
+    }
+
+    function getFilteredShortcutRows() {
+      const jenis = shortcutJenis.value;
+      const monthIndex = Number(shortcutMonth.value);
+      const year = Number(shortcutYear.value);
+
+      if (jenis === "besar") {
+        return buildBigMassRows(monthIndex, year);
+      }
+      return buildRegularMonthlyRows(monthIndex, year);
+    }
 
     function renderShortcutTable() {
       const jenis = shortcutJenis.value;
-      const rows = shortcutSchedules[jenis] || [];
+      const searchKeyword = shortcutSearch.value.trim().toLowerCase();
+      const rows = getFilteredShortcutRows().filter(function (item) {
+        const text = [
+          jenis === "besar" ? "misa besar" : "misa biasa",
+          item.title,
+          item.date,
+          item.time,
+          item.need,
+          item.registered,
+          item.status
+        ].join(" ").toLowerCase();
+        return !searchKeyword || text.includes(searchKeyword);
+      });
 
       if (!rows.length) {
-        shortcutRows.innerHTML = '<tr><td colspan="6">Tidak ada jadwal untuk jenis ini.</td></tr>';
+        shortcutRows.innerHTML = '<tr><td colspan="7">Tidak ada jadwal untuk jenis ini.</td></tr>';
         return;
       }
 
       shortcutRows.innerHTML = rows.map(function (item) {
-        const statusClass = item.status === "Terbuka" ? "status-ok" : "status-wait";
+        const memberKeyword = String(currentMemberName || "").trim().toLowerCase();
+        const assignedToCurrentUser = memberKeyword && item.registered.toLowerCase().includes(memberKeyword);
+        const statusClass = assignedToCurrentUser ? "status-wait" : (item.status === "Terbuka" ? "status-ok" : "status-wait");
+        const effectiveStatus = assignedToCurrentUser ? "Diblok (Anda Sudah Bertugas)" : item.status;
         const jenisLabel = jenis === "besar" ? "Misa Besar" : "Misa Biasa";
-        return '<tr>'
+        const rowClass = assignedToCurrentUser ? ' class="blocked-row"' : "";
+        const blockedNote = assignedToCurrentUser ? '<div class="blocked-note">Nama Anda terdaftar di jadwal ini</div>' : "";
+        return '<tr' + rowClass + '>'
           + '<td>' + jenisLabel + '</td>'
           + '<td>' + item.title + '</td>'
           + '<td>' + item.date + '</td>'
           + '<td>' + item.time + '</td>'
           + '<td>' + item.need + '</td>'
-          + '<td><span class="' + statusClass + '">' + item.status + '</span></td>'
+          + '<td>' + item.registered + blockedNote + '</td>'
+          + '<td><span class="' + statusClass + '">' + effectiveStatus + '</span></td>'
           + '</tr>';
       }).join("");
+    }
+
+    function renderShortcutYears() {
+      const currentYear = new Date().getFullYear();
+      shortcutYear.innerHTML = "";
+      for (let year = currentYear - 2; year <= currentYear + 2; year += 1) {
+        const option = document.createElement("option");
+        option.value = String(year);
+        option.textContent = String(year);
+        shortcutYear.appendChild(option);
+      }
+    }
+
+    function toggleShortcutBody() {
+      const isHidden = shortcutBody.hasAttribute("hidden");
+      if (isHidden) {
+        shortcutBody.removeAttribute("hidden");
+        shortcutToggleBtn.textContent = "Sembunyikan";
+        shortcutToggleBtn.setAttribute("aria-expanded", "true");
+      } else {
+        shortcutBody.setAttribute("hidden", "");
+        shortcutToggleBtn.textContent = "Tampilkan";
+        shortcutToggleBtn.setAttribute("aria-expanded", "false");
+      }
     }
 
     function renderScheduleOptions() {
@@ -722,11 +904,18 @@
     if (sessionRaw) {
       try {
         const session = JSON.parse(sessionRaw);
+        currentMemberName = session.fullName || session.identifier || "";
         if (session.identifier) {
           memberName.textContent = session.identifier;
+        } else if (session.fullName) {
+          memberName.textContent = session.fullName;
         }
       } catch (error) {
       }
+    }
+
+    if (!currentMemberName) {
+      currentMemberName = memberName.textContent || "";
     }
 
     const menuGroups = Array.from(document.querySelectorAll(".menu-group"));
@@ -768,15 +957,22 @@
     }
 
     const now = new Date();
+    shortcutMonth.value = String(now.getMonth());
     tanggalRequest.value = now.toISOString().slice(0, 10);
     jamRequest.value = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
 
+    renderShortcutYears();
+    shortcutYear.value = String(now.getFullYear());
     renderScheduleOptions();
     renderShortcutTable();
     updateLiveDateTime();
     setInterval(updateLiveDateTime, 1000);
 
     shortcutJenis.addEventListener("change", renderShortcutTable);
+    shortcutMonth.addEventListener("change", renderShortcutTable);
+    shortcutYear.addEventListener("change", renderShortcutTable);
+    shortcutSearch.addEventListener("input", renderShortcutTable);
+    shortcutToggleBtn.addEventListener("click", toggleShortcutBody);
   </script>
 </body>
 </html>
