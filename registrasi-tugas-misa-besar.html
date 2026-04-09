@@ -189,6 +189,16 @@
       margin-bottom: 12px;
     }
 
+    .panel.combo-host {
+      overflow: visible;
+      position: relative;
+      z-index: 4;
+    }
+
+    .panel.combo-host .panel-body {
+      overflow: visible;
+    }
+
     .panel-head {
       padding: 12px 14px;
       border-bottom: 1px solid #c8c8c8;
@@ -217,7 +227,7 @@
 
     .name-manager {
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: 1fr auto auto auto;
       gap: 8px;
       align-items: end;
       margin-top: 8px;
@@ -225,6 +235,19 @@
 
     .name-manager .btn {
       white-space: nowrap;
+    }
+
+    .misa-combo {
+      min-width: 220px;
+    }
+
+    .misa-combo.open-up .member-panel {
+      top: auto;
+      bottom: calc(100% + 4px);
+    }
+
+    .misa-combo .member-options {
+      max-height: 110px;
     }
 
     .field { display: grid; gap: 5px; }
@@ -341,7 +364,7 @@
       border-radius: 6px;
       background: #fff;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-      z-index: 40;
+      z-index: 120;
       display: none;
     }
 
@@ -692,7 +715,7 @@
         </div>
       </header>
 
-      <section class="panel">
+      <section class="panel combo-host">
         <div class="panel-head">
           <h2>Data Misa</h2>
         </div>
@@ -701,10 +724,19 @@
           <div class="grid-3">
             <div class="field">
               <label for="misaName">Nama Misa</label>
-              <select id="misaName"></select>
+              <div id="misaNameCombo" class="member-combo misa-combo open-up">
+                <button id="misaNameTrigger" class="member-trigger" type="button" data-value="" aria-expanded="false">-- pilih nama misa --</button>
+                <div id="misaNamePanel" class="member-panel">
+                  <div class="member-search-wrap"><input id="misaNameSearch" class="member-search" type="search" placeholder="Cari nama misa..."></div>
+                  <div id="misaNameOptions" class="member-options"></div>
+                </div>
+                <input id="misaName" type="hidden" value="">
+              </div>
               <div class="name-manager">
                 <input id="customMisaNameInput" type="text" placeholder="Tambah nama misa baru">
                 <button id="addMisaNameBtn" class="btn secondary" type="button">Tambah</button>
+                <button id="editMisaNameBtn" class="btn secondary" type="button">Edit</button>
+                <button id="deleteMisaNameBtn" class="btn danger" type="button">Hapus</button>
               </div>
             </div>
             <div class="field">
@@ -723,7 +755,7 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel combo-host">
         <div class="panel-head">
           <h2>Registrasi Role dan Anggota</h2>
         </div>
@@ -895,9 +927,16 @@
     const scheduleSearchInput = document.getElementById("scheduleSearchInput");
     const scheduleMonthFilter = document.getElementById("scheduleMonthFilter");
     const scheduleYearFilter = document.getElementById("scheduleYearFilter");
+    const misaNameCombo = document.getElementById("misaNameCombo");
+    const misaNameTrigger = document.getElementById("misaNameTrigger");
+    const misaNamePanel = document.getElementById("misaNamePanel");
+    const misaNameSearch = document.getElementById("misaNameSearch");
+    const misaNameOptions = document.getElementById("misaNameOptions");
     const misaNameInput = document.getElementById("misaName");
     const customMisaNameInput = document.getElementById("customMisaNameInput");
     const addMisaNameBtn = document.getElementById("addMisaNameBtn");
+    const editMisaNameBtn = document.getElementById("editMisaNameBtn");
+    const deleteMisaNameBtn = document.getElementById("deleteMisaNameBtn");
     const misaDateInput = document.getElementById("misaDate");
     const misaTimeInput = document.getElementById("misaTime");
     const misaNoteInput = document.getElementById("misaNote");
@@ -987,9 +1026,13 @@
     function readMisaNameOptions() {
       try {
         const raw = localStorage.getItem(MISA_NAME_STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : [];
-        const merged = DEFAULT_MISA_NAMES.concat(Array.isArray(parsed) ? parsed : []);
-        return Array.from(new Set(merged.map(function (item) {
+        if (raw === null) {
+          return DEFAULT_MISA_NAMES.slice();
+        }
+
+        const parsed = JSON.parse(raw);
+        const source = Array.isArray(parsed) ? parsed : DEFAULT_MISA_NAMES;
+        return Array.from(new Set(source.map(function (item) {
           return String(item || "").trim();
         }).filter(function (item) {
           return !!item;
@@ -1000,7 +1043,54 @@
     }
 
     function saveMisaNameOptions(items) {
-      localStorage.setItem(MISA_NAME_STORAGE_KEY, JSON.stringify(items));
+      const clean = Array.from(new Set((Array.isArray(items) ? items : []).map(function (item) {
+        return String(item || "").trim();
+      }).filter(function (item) {
+        return !!item;
+      })));
+      clean.sort(function (a, b) { return a.localeCompare(b, "id"); });
+      localStorage.setItem(MISA_NAME_STORAGE_KEY, JSON.stringify(clean));
+      return clean;
+    }
+
+    function getMisaNameValue() {
+      return (misaNameInput.value || "").trim();
+    }
+
+    function closeMisaNamePanel() {
+      misaNamePanel.classList.remove("show");
+      misaNameTrigger.setAttribute("aria-expanded", "false");
+    }
+
+    function setMisaPanelDirection() {
+      misaNameCombo.classList.add("open-up");
+    }
+
+    function setMisaNameValue(value) {
+      const clean = String(value || "").trim();
+      misaNameInput.value = clean;
+      misaNameTrigger.textContent = clean || "-- pilih nama misa --";
+      misaNameTrigger.setAttribute("data-value", clean);
+      renderMisaNameOptions(clean);
+    }
+
+    function renderMisaNameOptions(selectedName, query) {
+      const names = readMisaNameOptions();
+      const selected = String(selectedName || getMisaNameValue()).trim().toLowerCase();
+      const cleanQuery = String(query || "").trim().toLowerCase();
+      const filtered = names.filter(function (name) {
+        return !cleanQuery || name.toLowerCase().indexOf(cleanQuery) !== -1;
+      });
+
+      if (!filtered.length) {
+        misaNameOptions.innerHTML = '<p class="member-empty">Nama misa tidak ditemukan.</p>';
+        return;
+      }
+
+      misaNameOptions.innerHTML = filtered.map(function (name) {
+        const activeClass = name.toLowerCase() === selected ? " active" : "";
+        return '<button class="member-option' + activeClass + '" type="button" data-value="' + escapeHtml(name) + '">' + escapeHtml(name) + '</button>';
+      }).join("");
     }
 
     function ensureMisaNameOption(name) {
@@ -1012,19 +1102,89 @@
       const names = readMisaNameOptions();
       if (names.map(function (item) { return item.toLowerCase(); }).indexOf(cleanName.toLowerCase()) === -1) {
         names.push(cleanName);
-        names.sort(function (a, b) { return a.localeCompare(b, "id"); });
         saveMisaNameOptions(names);
       }
 
-      renderMisaNameOptions(cleanName);
+      setMisaNameValue(cleanName);
     }
 
-    function renderMisaNameOptions(selectedName) {
+    function updateSelectedMisaName() {
+      const selectedName = getMisaNameValue();
+      const newName = customMisaNameInput.value.trim();
+
+      if (!selectedName) {
+        window.alert("Pilih nama misa yang mau diubah terlebih dahulu.");
+        return;
+      }
+      if (!newName) {
+        window.alert("Masukkan nama misa pengganti di input nama misa baru.");
+        return;
+      }
+
       const names = readMisaNameOptions();
-      misaNameInput.innerHTML = '<option value="">-- pilih nama misa --</option>' + names.map(function (name) {
-        const selected = String(selectedName || "").trim().toLowerCase() === name.toLowerCase();
-        return '<option value="' + escapeHtml(name) + '"' + (selected ? ' selected' : '') + '>' + escapeHtml(name) + '</option>';
-      }).join("");
+      const selectedIndex = names.findIndex(function (item) {
+        return item.toLowerCase() === selectedName.toLowerCase();
+      });
+
+      if (selectedIndex === -1) {
+        window.alert("Nama misa tidak ditemukan di daftar.");
+        return;
+      }
+
+      const duplicate = names.some(function (item, index) {
+        return index !== selectedIndex && item.toLowerCase() === newName.toLowerCase();
+      });
+      if (duplicate) {
+        window.alert("Nama misa tersebut sudah ada di daftar.");
+        return;
+      }
+
+      names[selectedIndex] = newName;
+      const saved = saveMisaNameOptions(names);
+
+      const drafts = readDrafts().map(function (draft) {
+        if ((draft.misaName || "").toLowerCase() === selectedName.toLowerCase()) {
+          draft.misaName = newName;
+        }
+        return draft;
+      });
+      saveDrafts(drafts);
+
+      const schedules = readPublishedMassSchedules().map(function (item) {
+        if ((item.name || "").toLowerCase() === selectedName.toLowerCase()) {
+          item.name = newName;
+        }
+        return item;
+      });
+      savePublishedMassSchedules(schedules);
+
+      customMisaNameInput.value = "";
+      setMisaNameValue(newName);
+      renderMisaNameOptions(newName, misaNameSearch.value);
+      renderDraftList();
+      renderBigMassSchedules();
+      window.alert("Nama misa berhasil diperbarui.");
+    }
+
+    function deleteSelectedMisaName() {
+      const selectedName = getMisaNameValue();
+      if (!selectedName) {
+        window.alert("Pilih nama misa yang mau dihapus terlebih dahulu.");
+        return;
+      }
+
+      if (!window.confirm("Hapus nama misa \"" + selectedName + "\" dari daftar?")) {
+        return;
+      }
+
+      const names = readMisaNameOptions().filter(function (item) {
+        return item.toLowerCase() !== selectedName.toLowerCase();
+      });
+      const saved = saveMisaNameOptions(names);
+
+      const fallback = saved.length ? saved[0] : "";
+      setMisaNameValue(fallback);
+      renderMisaNameOptions(fallback, misaNameSearch.value);
     }
 
     function readDrafts() {
@@ -1218,7 +1378,7 @@
       row.setAttribute("data-role-count", String(desiredCount));
 
       slotWrap.innerHTML = Array.from({ length: desiredCount }).map(function (_, index) {
-        const slotLabel = roleName + " " + (index + 1);
+        const slotLabel = desiredCount === 1 ? roleName : roleName + " " + (index + 1);
         const savedValue = previousMembers[index] || "";
         return createMemberSelect(slotLabel).replace('data-value="" aria-expanded="false">-- pilih anggota --</button>', 'data-value="" aria-expanded="false">-- pilih anggota --</button>');
       }).join("");
@@ -1279,7 +1439,7 @@
     function clearRegistrationForm() {
       currentEditingDraftId = "";
       currentDetailDraftId = "";
-      misaNameInput.value = "";
+      setMisaNameValue("");
       customMisaNameInput.value = "";
       misaDateInput.value = "";
       misaTimeInput.value = "";
@@ -1379,7 +1539,7 @@
       currentEditingDraftId = draft.id;
       setEditMode(true);
       ensureMisaNameOption(draft.misaName || "");
-      misaNameInput.value = draft.misaName || "";
+      setMisaNameValue(draft.misaName || "");
       misaDateInput.value = draft.misaDate || "";
       misaTimeInput.value = draft.misaTime || "";
       misaNoteInput.value = draft.misaNote || "";
@@ -1463,12 +1623,12 @@
     }
 
     function saveCurrentDraft() {
-      const misaName = misaNameInput.value.trim();
+      const misaName = getMisaNameValue();
       const misaDate = misaDateInput.value;
       const misaTime = misaTimeInput.value;
       const misaNote = misaNoteInput.value.trim();
       const roles = getCurrentRoleRows();
-      ensureMisaNameOption(misaNameInput.value || "");
+      ensureMisaNameOption(misaName || "");
 
       if (!misaName || !misaDate || !misaTime) {
         window.alert("Nama misa, tanggal, dan jam harus diisi dulu.");
@@ -1481,7 +1641,12 @@
       }
 
       const selectedMembers = roles
-        .map(function (item) { return item.member ? item.member.toLowerCase() : ""; })
+        .flatMap(function (item) {
+          const members = Array.isArray(item.members) ? item.members : [item.member];
+          return members.map(function (member) {
+            return member ? member.toLowerCase() : "";
+          });
+        })
         .filter(function (item) { return !!item; });
 
       const duplicateMember = selectedMembers.find(function (item, index) {
@@ -1580,9 +1745,13 @@
       }
 
       ensureMisaNameOption(customName);
-      misaNameInput.value = customName;
+      setMisaNameValue(customName);
       customMisaNameInput.value = "";
+      closeMisaNamePanel();
     });
+
+    editMisaNameBtn.addEventListener("click", updateSelectedMisaName);
+    deleteMisaNameBtn.addEventListener("click", deleteSelectedMisaName);
 
     customMisaNameInput.addEventListener("keydown", function (event) {
       if (event.key === "Enter") {
@@ -1591,10 +1760,31 @@
       }
     });
 
-    misaNameInput.addEventListener("change", function () {
-      if (misaNameInput.value) {
-        ensureMisaNameOption(misaNameInput.value);
+    misaNameTrigger.addEventListener("click", function () {
+      const willOpen = !misaNamePanel.classList.contains("show");
+      closeMisaNamePanel();
+
+      if (willOpen) {
+        setMisaPanelDirection();
+        misaNamePanel.classList.add("show");
+        misaNameTrigger.setAttribute("aria-expanded", "true");
+        renderMisaNameOptions(getMisaNameValue(), misaNameSearch.value);
+        misaNameSearch.focus();
       }
+    });
+
+    misaNameOptions.addEventListener("click", function (event) {
+      const option = event.target.closest(".member-option");
+      if (!option) {
+        return;
+      }
+
+      setMisaNameValue(option.getAttribute("data-value") || "");
+      closeMisaNamePanel();
+    });
+
+    misaNameSearch.addEventListener("input", function () {
+      renderMisaNameOptions(getMisaNameValue(), misaNameSearch.value);
     });
 
     rolesBody.addEventListener("click", function (event) {
@@ -1729,12 +1919,14 @@
       currentDetailDraftId = "";
     });
 
+    setMisaNameValue("");
     renderMisaNameOptions();
 
     document.addEventListener("click", function (event) {
       const inCombo = event.target.closest(".member-combo");
       if (!inCombo) {
         closeAllMemberPanels();
+        closeMisaNamePanel();
       }
     });
 
