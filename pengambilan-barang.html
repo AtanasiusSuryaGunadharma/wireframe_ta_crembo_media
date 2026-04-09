@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pengambilan Barang - Crembo Media</title>
+  <title>Konfirmasi Pengembalian Barang - Crembo Media</title>
   <style>
     :root {
       --bg: #ececec;
@@ -133,7 +133,7 @@
         <div class="group-items">
           <a class="menu-link" href="data-inventaris-barang.html">Data Inventaris Barang</a>
           <a class="menu-link" href="persetujuan-peminjaman.html">Persetujuan Peminjaman</a>
-          <a class="menu-link active" href="pengambilan-barang.html">Pengambilan Barang</a>
+          <a class="menu-link active" href="pengambilan-barang.html">Konfirmasi Pengembalian</a>
           <a class="menu-link" href="riwayat-peminjaman-pengembalian.html">Riwayat Peminjaman &amp; Pengembalian</a>
         </div>
       </div>
@@ -146,8 +146,8 @@
 
     <main class="main">
       <section class="headline">
-        <h1>Pengambilan dan Pengembalian Barang</h1>
-        <p>Pencatatan bukti pengambilan dan pengembalian barang sesuai persetujuan admin.</p>
+        <h1>Konfirmasi Pengembalian Barang</h1>
+        <p>Verifikasi admin atas bukti pengambilan/pengembalian yang diinput anggota dengan timestamp otomatis.</p>
       </section>
 
       <section class="toolbar">
@@ -190,7 +190,9 @@
                 <th>Target Kembali</th>
                 <th>Status</th>
                 <th>Pengambilan</th>
+                <th>Bukti Ambil</th>
                 <th>Pengembalian</th>
+                <th>Bukti Kembali</th>
                 <th>Aksi</th>
               </tr>
             </thead>
@@ -213,16 +215,12 @@
         <input id="processTypeInput" type="hidden">
 
         <div class="field">
-          <label for="timeInput">Tanggal &amp; Jam</label>
-          <input id="timeInput" type="datetime-local" required>
+          <label for="locationInput">Lokasi (Diinput Anggota)</label>
+          <input id="locationInput" type="text" required placeholder="Contoh: Gudang Multimedia / Ruang Audio">
         </div>
         <div class="field">
-          <label for="locationInput">Lokasi</label>
-          <input id="locationInput" type="text" required placeholder="Contoh: Gudang Multimedia">
-        </div>
-        <div class="field">
-          <label for="officerInput">Petugas Verifikasi</label>
-          <input id="officerInput" type="text" required placeholder="Nama admin/petugas">
+          <label for="officerInput">Verifikasi Oleh Admin</label>
+          <input id="officerInput" type="text" readonly>
         </div>
         <div class="field" id="conditionWrap" hidden>
           <label for="conditionInput">Kondisi Saat Kembali</label>
@@ -233,7 +231,7 @@
           </select>
         </div>
         <div class="field">
-          <label for="photoInput">Foto Bukti</label>
+          <label for="photoInput">Foto Bukti (Diinput Anggota)</label>
           <input id="photoInput" type="file" accept="image/*" required>
         </div>
 
@@ -263,7 +261,6 @@
     const modalTitle = document.getElementById("modalTitle");
     const requestIdInput = document.getElementById("requestIdInput");
     const processTypeInput = document.getElementById("processTypeInput");
-    const timeInput = document.getElementById("timeInput");
     const locationInput = document.getElementById("locationInput");
     const officerInput = document.getElementById("officerInput");
     const conditionWrap = document.getElementById("conditionWrap");
@@ -273,6 +270,23 @@
     const cancelModalBtn = document.getElementById("cancelModalBtn");
 
     let pendingPhotoData = "";
+
+    function getActiveAdminName() {
+      try {
+        const raw = localStorage.getItem("crembo-login-session");
+        if (!raw) {
+          return "Admin Inventaris";
+        }
+        const session = JSON.parse(raw);
+        const role = String(session && session.role ? session.role : "").toLowerCase();
+        if (role === "admin" || role === "super_admin") {
+          return String(session.identifier || "Admin Inventaris").trim() || "Admin Inventaris";
+        }
+      } catch (error) {
+        return "Admin Inventaris";
+      }
+      return "Admin Inventaris";
+    }
 
     function escapeHtml(text) {
       return String(text || "")
@@ -393,6 +407,12 @@
         const returnText = item.returnInfo
           ? escapeHtml(formatDateTime(item.returnInfo.time)) + '<br><small>' + escapeHtml(item.returnInfo.location || '-') + '</small>'
           : '-';
+        const pickupProof = item.pickup && item.pickup.proofPhoto
+          ? '<img src="' + escapeHtml(item.pickup.proofPhoto) + '" alt="Bukti ambil" width="72" height="54" style="border:1px solid #c8c8c8;border-radius:6px;object-fit:cover;background:#efefef">'
+          : '-';
+        const returnProof = item.returnInfo && item.returnInfo.proofPhoto
+          ? '<img src="' + escapeHtml(item.returnInfo.proofPhoto) + '" alt="Bukti kembali" width="72" height="54" style="border:1px solid #c8c8c8;border-radius:6px;object-fit:cover;background:#efefef">'
+          : '-';
 
         return '<tr>' +
           '<td>' + escapeHtml(item.code || '-') + '</td>' +
@@ -403,7 +423,9 @@
           '<td>' + escapeHtml(item.expectedReturnDate || '-') + '</td>' +
           '<td><span class="status-pill ' + getStatusClass(item.status) + '">' + escapeHtml(item.status) + '</span></td>' +
           '<td>' + pickupText + '</td>' +
+          '<td>' + pickupProof + '</td>' +
           '<td>' + returnText + '</td>' +
+          '<td>' + returnProof + '</td>' +
           '<td>' + actionHtml + '</td>' +
         '</tr>';
       }).join('');
@@ -412,9 +434,8 @@
     function openModal(id, type) {
       requestIdInput.value = id;
       processTypeInput.value = type;
-      timeInput.value = "";
       locationInput.value = "";
-      officerInput.value = "";
+      officerInput.value = getActiveAdminName();
       photoInput.value = "";
       pendingPhotoData = "";
 
@@ -481,12 +502,12 @@
 
       const requestId = requestIdInput.value;
       const type = processTypeInput.value;
-      const time = timeInput.value;
+      const time = new Date().toISOString();
       const location = locationInput.value.trim();
-      const officer = officerInput.value.trim();
+      const officer = getActiveAdminName();
       const file = photoInput.files && photoInput.files[0];
 
-      if (!requestId || !type || !time || !location || !officer || !file) {
+      if (!requestId || !type || !location || !officer || !file) {
         window.alert("Semua field wajib diisi termasuk foto bukti.");
         return;
       }
@@ -510,7 +531,7 @@
           }
 
           req.pickup = {
-            time: new Date(time).toISOString(),
+            time: time,
             location: location,
             officer: officer,
             proofPhoto: photoData
@@ -530,7 +551,7 @@
         }
 
         req.returnInfo = {
-          time: new Date(time).toISOString(),
+          time: time,
           location: location,
           officer: officer,
           condition: conditionInput.value,

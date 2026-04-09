@@ -140,7 +140,7 @@
         <div class="group-items">
           <a class="menu-link" href="data-inventaris-barang.html">Data Inventaris Barang</a>
           <a class="menu-link active" href="persetujuan-peminjaman.html">Persetujuan Peminjaman</a>
-          <a class="menu-link" href="pengambilan-barang.html">Pengambilan Barang</a>
+          <a class="menu-link" href="pengambilan-barang.html">Konfirmasi Pengembalian</a>
           <a class="menu-link" href="riwayat-peminjaman-pengembalian.html">Riwayat Peminjaman &amp; Pengembalian</a>
         </div>
       </div>
@@ -170,7 +170,8 @@
               <option value="Pending">Pending</option>
               <option value="Disetujui">Disetujui</option>
               <option value="Ditolak">Ditolak</option>
-              <option value="Dibatalkan">Dibatalkan</option>
+              <option value="Sedang Dipinjam">Sedang Dipinjam</option>
+              <option value="Selesai">Selesai</option>
             </select>
           </div>
           <div class="field">
@@ -219,7 +220,7 @@
     const INVENTORY_KEY = "crembo-inventaris-barang";
     const REQUEST_KEY = "crembo-peminjaman-requests";
     const REQUEST_SEED_KEY = "crembo-peminjaman-seed-version";
-    const REQUEST_SEED_VERSION = "v1";
+    const REQUEST_SEED_VERSION = "v2";
 
     const searchInput = document.getElementById("searchInput");
     const statusFilter = document.getElementById("statusFilter");
@@ -278,6 +279,10 @@
       };
     }
 
+    function uniqueRequestCode(seedCode, index) {
+      return String(seedCode || ("REQ-" + String(index + 1).padStart(4, "0"))).toUpperCase();
+    }
+
     function seedRequestsIfNeeded() {
       if (localStorage.getItem(REQUEST_SEED_KEY) === REQUEST_SEED_VERSION) {
         return;
@@ -285,6 +290,8 @@
       const inventory = readInventory();
       const first = inventory[0] || {};
       const second = inventory[1] || {};
+      const now = Date.now();
+      const day = 24 * 60 * 60 * 1000;
       const seed = [
         normalizeRequest({
           id: "req-seed-001",
@@ -313,9 +320,140 @@
           borrowDate: new Date().toISOString().slice(0, 10),
           expectedReturnDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
           status: "Pending"
-        }, 2)
+        }, 2),
+        normalizeRequest({
+          id: "req-seed-003",
+          code: "REQ-0003",
+          borrowerName: "Anton Prasetyo",
+          borrowerPhone: "081355667788",
+          itemId: first.id || "",
+          itemCode: first.code || "CAM-001",
+          itemName: first.name || "Kamera",
+          quantity: 1,
+          purpose: "Liputan Misa Harian",
+          borrowDate: new Date(now - day).toISOString().slice(0, 10),
+          expectedReturnDate: new Date(now + day).toISOString().slice(0, 10),
+          status: "Disetujui",
+          approvedBy: "Admin Inventaris",
+          approvedAt: new Date(now - day / 2).toISOString(),
+          adminNote: "Silakan ambil di gudang multimedia."
+        }, 3),
+        normalizeRequest({
+          id: "req-seed-004",
+          code: "REQ-0004",
+          borrowerName: "Clara Wijaya",
+          borrowerPhone: "081266778899",
+          itemId: second.id || "",
+          itemCode: second.code || "AUD-004",
+          itemName: second.name || "Wireless Microphone Set",
+          quantity: 1,
+          purpose: "Pendampingan acara kategorial",
+          borrowDate: new Date(now - 2 * day).toISOString().slice(0, 10),
+          expectedReturnDate: new Date(now + day).toISOString().slice(0, 10),
+          status: "Ditolak",
+          approvedBy: "Admin Inventaris",
+          approvedAt: new Date(now - 2 * day + 2 * 60 * 60 * 1000).toISOString(),
+          adminNote: "Jadwal bentrok dan barang sudah dipesan unit lain."
+        }, 4),
+        normalizeRequest({
+          id: "req-seed-005",
+          code: "REQ-0005",
+          borrowerName: "Dimas Kurnia",
+          borrowerPhone: "081344455566",
+          itemId: first.id || "",
+          itemCode: first.code || "CAM-001",
+          itemName: first.name || "Kamera",
+          quantity: 1,
+          purpose: "Dokumentasi latihan paduan suara",
+          borrowDate: new Date(now - 3 * day).toISOString().slice(0, 10),
+          expectedReturnDate: new Date(now + day).toISOString().slice(0, 10),
+          status: "Sedang Dipinjam",
+          approvedBy: "Admin Inventaris",
+          approvedAt: new Date(now - 3 * day + 3 * 60 * 60 * 1000).toISOString(),
+          adminNote: "Sudah diambil peminjam.",
+          pickup: {
+            time: new Date(now - 3 * day + 6 * 60 * 60 * 1000).toISOString(),
+            location: "Gudang Multimedia",
+            officer: "Admin Inventaris",
+            proofPhoto: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='90'%3E%3Crect width='100%25' height='100%25' fill='%23dbeafe'/%3E%3Ctext x='10' y='48' font-size='12' fill='%231e3a8a'%3EBukti Ambil%3C/text%3E%3C/svg%3E"
+          }
+        }, 5),
+        normalizeRequest({
+          id: "req-seed-006",
+          code: "REQ-0006",
+          borrowerName: "Erika Lestari",
+          borrowerPhone: "081377788899",
+          itemId: second.id || "",
+          itemCode: second.code || "AUD-004",
+          itemName: second.name || "Wireless Microphone Set",
+          quantity: 1,
+          purpose: "Pelatihan operator baru",
+          borrowDate: new Date(now - 7 * day).toISOString().slice(0, 10),
+          expectedReturnDate: new Date(now - 3 * day).toISOString().slice(0, 10),
+          status: "Selesai",
+          approvedBy: "Admin Inventaris",
+          approvedAt: new Date(now - 7 * day + 90 * 60 * 1000).toISOString(),
+          adminNote: "Transaksi selesai.",
+          pickup: {
+            time: new Date(now - 7 * day + 4 * 60 * 60 * 1000).toISOString(),
+            location: "Ruang Audio",
+            officer: "Admin Inventaris",
+            proofPhoto: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='90'%3E%3Crect width='100%25' height='100%25' fill='%23dbeafe'/%3E%3Ctext x='10' y='48' font-size='12' fill='%231e3a8a'%3EBukti Ambil%3C/text%3E%3C/svg%3E"
+          },
+          returnInfo: {
+            time: new Date(now - 3 * day + 5 * 60 * 60 * 1000).toISOString(),
+            location: "Ruang Audio",
+            officer: "Admin Inventaris",
+            condition: "Baik",
+            proofPhoto: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='90'%3E%3Crect width='100%25' height='100%25' fill='%23dcfce7'/%3E%3Ctext x='10' y='48' font-size='12' fill='%2314532d'%3EBukti Kembali%3C/text%3E%3C/svg%3E"
+          }
+        }, 6),
+        normalizeRequest({
+          id: "req-seed-007",
+          code: "REQ-0007",
+          borrowerName: "Fajar Setiawan",
+          borrowerPhone: "081299900011",
+          itemId: second.id || "",
+          itemCode: second.code || "AUD-004",
+          itemName: second.name || "Wireless Microphone Set",
+          quantity: 1,
+          purpose: "Acara karang taruna",
+          borrowDate: new Date(now + day).toISOString().slice(0, 10),
+          expectedReturnDate: new Date(now + 3 * day).toISOString().slice(0, 10),
+          status: "Pending"
+        }, 7),
+        normalizeRequest({
+          id: "req-seed-008",
+          code: "REQ-0008",
+          borrowerName: "Gita Anjani",
+          borrowerPhone: "081233344455",
+          itemId: first.id || "",
+          itemCode: first.code || "CAM-001",
+          itemName: first.name || "Kamera",
+          quantity: 1,
+          purpose: "Kegiatan dokumentasi Paskah",
+          borrowDate: new Date(now + 2 * day).toISOString().slice(0, 10),
+          expectedReturnDate: new Date(now + 4 * day).toISOString().slice(0, 10),
+          status: "Pending"
+        }, 8)
       ];
-      localStorage.setItem(REQUEST_KEY, JSON.stringify(seed));
+      let existing = [];
+      try {
+        const rawExisting = localStorage.getItem(REQUEST_KEY);
+        const parsedExisting = rawExisting ? JSON.parse(rawExisting) : [];
+        existing = Array.isArray(parsedExisting) ? parsedExisting.map(normalizeRequest) : [];
+      } catch (error) {
+        existing = [];
+      }
+
+      const byCode = {};
+      seed.concat(existing).forEach(function (entry, index) {
+        const normalized = normalizeRequest(entry, index);
+        const codeKey = uniqueRequestCode(normalized.code, index);
+        byCode[codeKey] = normalized;
+      });
+
+      localStorage.setItem(REQUEST_KEY, JSON.stringify(Object.keys(byCode).map(function (key) { return byCode[key]; })));
       localStorage.setItem(REQUEST_SEED_KEY, REQUEST_SEED_VERSION);
     }
 
@@ -352,7 +490,7 @@
     }
 
     function getStatusClass(status) {
-      if (status === "Disetujui") {
+      if (status === "Disetujui" || status === "Sedang Dipinjam" || status === "Selesai") {
         return "approved";
       }
       if (status === "Ditolak") {
@@ -384,15 +522,16 @@
 
     function renderSummary(list) {
       const pending = list.filter(function (item) { return item.status === "Pending"; }).length;
-      const approved = list.filter(function (item) { return item.status === "Disetujui"; }).length;
+      const approved = list.filter(function (item) {
+        return ["Disetujui", "Sedang Dipinjam", "Selesai"].indexOf(item.status) !== -1;
+      }).length;
       const rejected = list.filter(function (item) { return item.status === "Ditolak"; }).length;
-      const cancelled = list.filter(function (item) { return item.status === "Dibatalkan"; }).length;
 
       summaryGrid.innerHTML =
         '<article class="summary-item"><p>Total Pengajuan</p><strong>' + list.length + '</strong></article>' +
         '<article class="summary-item"><p>Menunggu Persetujuan</p><strong>' + pending + '</strong></article>' +
-        '<article class="summary-item"><p>Disetujui</p><strong>' + approved + '</strong></article>' +
-        '<article class="summary-item"><p>Ditolak / Dibatalkan</p><strong>' + (rejected + cancelled) + '</strong></article>';
+        '<article class="summary-item"><p>Disetujui (Termasuk Berjalan/Selesai)</p><strong>' + approved + '</strong></article>' +
+        '<article class="summary-item"><p>Ditolak</p><strong>' + rejected + '</strong></article>';
     }
 
     function renderTable() {
@@ -409,7 +548,6 @@
         if (item.status === "Pending") {
           actionHtml += ' <button class="btn" type="button" data-approve-id="' + escapeHtml(item.id) + '">Setujui</button>';
           actionHtml += ' <button class="btn-danger" type="button" data-reject-id="' + escapeHtml(item.id) + '">Tolak</button>';
-          actionHtml += ' <button class="btn-ghost" type="button" data-cancel-id="' + escapeHtml(item.id) + '">Batalkan</button>';
         }
 
         return '<tr>' +
@@ -504,30 +642,6 @@
       req.approvedBy = "Admin Inventaris";
       req.approvedAt = new Date().toISOString();
       req.adminNote = note.trim();
-      list[index] = req;
-      saveRequests(list);
-      renderTable();
-    }
-
-    function cancelRequest(id) {
-      const list = readRequests();
-      const index = list.findIndex(function (item) { return item.id === id; });
-      if (index === -1) {
-        return;
-      }
-      const req = list[index];
-      if (req.status !== "Pending") {
-        window.alert("Pembatalan hanya boleh untuk permintaan yang belum diproses.");
-        return;
-      }
-      const ok = window.confirm("Batalkan pengajuan ini?");
-      if (!ok) {
-        return;
-      }
-      req.status = "Dibatalkan";
-      req.approvedBy = "Admin Inventaris";
-      req.approvedAt = new Date().toISOString();
-      req.adminNote = "Dibatalkan sebelum diproses.";
       list[index] = req;
       saveRequests(list);
       renderTable();
@@ -642,10 +756,6 @@
       if (rejectId) {
         rejectRequest(rejectId);
         return;
-      }
-      const cancelId = target.getAttribute("data-cancel-id") || "";
-      if (cancelId) {
-        cancelRequest(cancelId);
       }
     });
 
