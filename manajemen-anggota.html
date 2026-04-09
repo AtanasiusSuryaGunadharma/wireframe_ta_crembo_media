@@ -370,6 +370,13 @@
       overflow: auto;
     }
 
+    .request-tools {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
     .request-card {
       border: 1px solid #c7ccd8;
       border-radius: 11px;
@@ -416,6 +423,7 @@
       .sidebar.show { display: block; }
       .mobile-toggle { display: inline-block; }
       .filters { grid-template-columns: 1fr; }
+      .request-tools { grid-template-columns: 1fr; }
       .bulk-actions { display: grid; grid-template-columns: 1fr; }
     }
 
@@ -595,6 +603,13 @@
               <h3>Permintaan Status Aktif / Nonaktif</h3>
             </header>
             <div class="panel-body">
+              <div class="request-tools">
+                <input id="requestSearchInput" type="search" placeholder="Cari nama/alasan/status...">
+                <select id="requestSortSelect">
+                  <option value="newest">Urutkan: Terbaru ke Terlama</option>
+                  <option value="oldest">Urutkan: Terlama ke Terbaru</option>
+                </select>
+              </div>
               <div id="requestList" class="request-list"></div>
             </div>
           </article>
@@ -643,6 +658,8 @@
 
     const memberTableBody = document.getElementById("memberTableBody");
     const requestList = document.getElementById("requestList");
+    const requestSearchInput = document.getElementById("requestSearchInput");
+    const requestSortSelect = document.getElementById("requestSortSelect");
 
     const memberForm = document.getElementById("memberForm");
     const formTitle = document.getElementById("formTitle");
@@ -707,7 +724,7 @@
       ];
 
       if (currentRole === "super_admin") {
-        list.push({ label: "Kelola Data Admin", href: "#", active: false });
+        list.push({ label: "Kelola Data Admin", href: "kelola-data-admin.html", active: false });
       }
 
       anggotaMenu.innerHTML = list.map(function (item) {
@@ -729,9 +746,9 @@
 
     function defaultMembers() {
       return [
-        { id: "m-1", name: "Atanasius Surya Guna", email: "surya@example.com", phone: "081234567890", address: "Jl. Melati No. 12, Yogyakarta", birthDate: "2002-07-10", role: "anggota", status: "Aktif", password: "20020710", note: "Aktif reguler", registeredAt: "2025-08-20T08:00:00.000Z" },
-        { id: "m-2", name: "Rikha", email: "rikha@example.com", phone: "081222111000", address: "Jl. Cendana No. 5, Sleman", birthDate: "2001-11-08", role: "admin", status: "Aktif", password: "20011108", note: "Admin operasional", registeredAt: "2025-07-10T08:00:00.000Z" },
-        { id: "m-3", name: "Jeni", email: "jeni@example.com", phone: "081333222111", address: "Jl. Kenanga No. 18, Bantul", birthDate: "2003-03-16", role: "anggota", status: "Nonaktif", password: "20030316", note: "Cuti akademik", registeredAt: "2025-09-02T08:00:00.000Z" }
+        { id: "m-1", name: "Atanasius Surya Guna", email: "surya@example.com", phone: "081234567890", address: "Jl. Melati No. 12, Yogyakarta", birthDate: "2002-07-10", role: "anggota", status: "Aktif", password: "20020710", note: "Aktif reguler", registeredAt: "2025-08-20T08:00:00.000Z", inactiveUntil: "" },
+        { id: "m-2", name: "Rikha", email: "rikha@example.com", phone: "081222111000", address: "Jl. Cendana No. 5, Sleman", birthDate: "2001-11-08", role: "admin", status: "Aktif", password: "20011108", note: "Admin operasional", registeredAt: "2025-07-10T08:00:00.000Z", inactiveUntil: "" },
+        { id: "m-3", name: "Jeni", email: "jeni@example.com", phone: "081333222111", address: "Jl. Kenanga No. 18, Bantul", birthDate: "2003-03-16", role: "anggota", status: "Nonaktif", password: "20030316", note: "Cuti akademik", registeredAt: "2025-09-02T08:00:00.000Z", inactiveUntil: "2026-05-10" }
       ];
     }
 
@@ -779,6 +796,8 @@
           reason: "Siap kembali bertugas rutin.",
           note: "Bisa mulai pelayanan pekan depan.",
           effectiveDate: "2026-04-02",
+          reactivateDate: "",
+          inactiveType: "permanent",
           submittedDate: "2026-03-24",
           status: "Menunggu Review Admin"
         },
@@ -790,6 +809,8 @@
           reason: "Fokus akademik UTS.",
           note: "Mohon nonaktif sementara 1 bulan.",
           effectiveDate: "2026-04-05",
+          reactivateDate: "2026-05-05",
+          inactiveType: "temporary",
           submittedDate: "2026-03-22",
           status: "Disetujui"
         },
@@ -801,6 +822,8 @@
           reason: "Kegiatan keluarga.",
           note: "Tidak bisa bertugas di pekan suci.",
           effectiveDate: "2026-04-01",
+          reactivateDate: "",
+          inactiveType: "permanent",
           submittedDate: "2026-03-25",
           status: "Menunggu Review Admin"
         }
@@ -819,7 +842,9 @@
           role: "anggota",
           status: "Aktif",
           password: "",
-          note: ""
+          note: "",
+          registeredAt: new Date().toISOString(),
+          inactiveUntil: ""
         };
       }
 
@@ -837,8 +862,73 @@
         status: String(item && item.status ? item.status : "Aktif"),
         password: String(item && item.password ? item.password : fallbackPassword),
         note: String(item && item.note ? item.note : ""),
-        registeredAt: normalizeRegisteredAt(item && (item.registeredAt || item.createdAt))
+        registeredAt: normalizeRegisteredAt(item && (item.registeredAt || item.createdAt)),
+        inactiveUntil: normalizeBirthDate(item && item.inactiveUntil)
       };
+    }
+
+    function normalizeRequest(item) {
+      return {
+        id: String(item && item.id ? item.id : makeId("req")),
+        memberId: String(item && item.memberId ? item.memberId : ""),
+        memberName: String(item && item.memberName ? item.memberName : "Anggota"),
+        requestType: String(item && item.requestType ? item.requestType : "Nonaktif"),
+        reason: String(item && item.reason ? item.reason : "-"),
+        note: String(item && item.note ? item.note : ""),
+        effectiveDate: normalizeBirthDate(item && item.effectiveDate),
+        reactivateDate: normalizeBirthDate(item && item.reactivateDate),
+        inactiveType: String(item && item.inactiveType ? item.inactiveType : (item && item.reactivateDate ? "temporary" : "permanent")),
+        submittedDate: normalizeBirthDate(item && item.submittedDate),
+        status: String(item && item.status ? item.status : "Menunggu Review Admin"),
+        updatedAt: String(item && item.updatedAt ? item.updatedAt : ""),
+        evidenceName: String(item && item.evidenceName ? item.evidenceName : ""),
+        evidenceType: String(item && item.evidenceType ? item.evidenceType : ""),
+        evidenceDataUrl: String(item && item.evidenceDataUrl ? item.evidenceDataUrl : "")
+      };
+    }
+
+    function triggerDownload(dataUrl, filename) {
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = filename || "bukti-pendukung";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+
+    function openEvidence(requestId) {
+      const req = requests.find(function (item) { return item.id === requestId; });
+      if (!req || !req.evidenceDataUrl) {
+        showNotify("Bukti tidak ditemukan.");
+        return;
+      }
+
+      const type = String(req.evidenceType || "").toLowerCase();
+      const filename = req.evidenceName || "bukti-pendukung";
+      const isImageOrPdf = type.startsWith("image/") || type === "application/pdf";
+
+      if (isImageOrPdf) {
+        window.open(req.evidenceDataUrl, "_blank", "noopener");
+        return;
+      }
+
+      triggerDownload(req.evidenceDataUrl, filename);
+    }
+
+    function applyAutoReactivateMembers() {
+      const today = normalizeBirthDate(new Date().toISOString());
+      let changed = false;
+      members.forEach(function (member) {
+        const until = normalizeBirthDate(member && member.inactiveUntil ? member.inactiveUntil : "");
+        if (member.status === "Nonaktif" && until && until <= today) {
+          member.status = "Aktif";
+          member.inactiveUntil = "";
+          changed = true;
+        }
+      });
+      if (changed) {
+        saveMembers();
+      }
     }
 
     function loadMembers() {
@@ -874,10 +964,10 @@
     function loadRequests() {
       const raw = localStorage.getItem(STATUS_REQUEST_STORAGE_KEY);
       const parsed = raw ? safeParse(raw) : null;
-      requests = Array.isArray(parsed) ? parsed : [];
+      requests = Array.isArray(parsed) ? parsed.map(normalizeRequest) : [];
 
       if (!requests.length) {
-        requests = defaultRequests();
+        requests = defaultRequests().map(normalizeRequest);
       }
 
       // Migrasi dari key lama single request anggota
@@ -892,6 +982,8 @@
           reason: legacy.reason || "-",
           note: legacy.note || "",
           effectiveDate: legacy.effectiveDate || "",
+          reactivateDate: "",
+          inactiveType: "permanent",
           submittedDate: legacy.submittedDate || "",
           status: legacy.status || "Menunggu Review Admin",
           legacySource: true
@@ -957,6 +1049,9 @@
 
       memberTableBody.innerHTML = rows.map(function (member) {
         const statusClass = member.status === "Nonaktif" ? "status nonaktif" : "status";
+        const statusText = member.status === "Nonaktif" && member.inactiveUntil
+          ? (member.status + " s/d " + formatDate(member.inactiveUntil))
+          : member.status;
         return '<tr>'
           + '<td>' + escapeHtml(member.name) + '</td>'
           + '<td>' + escapeHtml(member.email) + '</td>'
@@ -964,7 +1059,7 @@
           + '<td>' + escapeHtml(member.address) + '</td>'
           + '<td>' + escapeHtml(formatDate(member.birthDate)) + '</td>'
           + '<td>' + escapeHtml(roleLabel(member.role)) + '</td>'
-          + '<td><span class="' + statusClass + '">' + escapeHtml(member.status) + '</span></td>'
+          + '<td><span class="' + statusClass + '">' + escapeHtml(statusText) + '</span></td>'
           + '<td><div class="inline-actions">'
           + '<button class="btn ghost" type="button" data-action="edit" data-id="' + member.id + '">Edit</button>'
           + '<button class="btn ghost" type="button" data-action="reset-password" data-id="' + member.id + '">Reset Password</button>'
@@ -986,16 +1081,37 @@
     }
 
     function renderRequests() {
-      if (!requests.length) {
+      const keyword = requestSearchInput.value.trim().toLowerCase();
+      const sortMode = requestSortSelect.value;
+
+      const filtered = requests.filter(function (req) {
+        if (!keyword) {
+          return true;
+        }
+        const source = [
+          req.memberName,
+          req.requestType,
+          req.reason,
+          req.note,
+          req.evidenceName,
+          req.status,
+          req.inactiveType === "temporary" ? "berjangka" : "selamanya"
+        ].join(" ").toLowerCase();
+        return source.includes(keyword);
+      });
+
+      const sorted = filtered.slice().sort(function (a, b) {
+        const aTime = new Date((a && a.updatedAt) || (a && a.submittedDate) || "1970-01-01").getTime();
+        const bTime = new Date((b && b.updatedAt) || (b && b.submittedDate) || "1970-01-01").getTime();
+        return sortMode === "oldest" ? (aTime - bTime) : (bTime - aTime);
+      });
+
+      if (!sorted.length) {
         requestList.innerHTML = '<div class="request-card">Belum ada permintaan status dari anggota.</div>';
         return;
       }
 
-      requestList.innerHTML = requests
-        .slice()
-        .sort(function (a, b) {
-          return String(b.submittedDate || "").localeCompare(String(a.submittedDate || ""));
-        })
+      requestList.innerHTML = sorted
         .map(function (req) {
           const isPending = String(req.status || "").toLowerCase().includes("menunggu");
           const actions = isPending
@@ -1005,13 +1121,22 @@
               + '</div>'
             : '';
 
+          const evidenceAction = req.evidenceDataUrl
+            ? '<div class="inline-actions"><button class="btn ghost" type="button" data-req-evidence="open" data-req-id="' + req.id + '">Lihat Bukti: ' + escapeHtml(req.evidenceName || "Berkas") + '</button></div>'
+            : '<span>Bukti: -</span>';
+
           return '<article class="request-card">'
             + '<strong>' + escapeHtml(req.memberName || "Anggota") + ' - ' + escapeHtml(req.requestType || "Permintaan") + '</strong>'
             + '<span>Status: <b>' + escapeHtml(req.status || "-") + '</b></span>'
+            + (String(req.requestType || "").toLowerCase().includes("nonaktif")
+                ? '<span>Jenis Nonaktif: ' + escapeHtml(req.inactiveType === "temporary" ? "Berjangka" : "Selamanya") + '</span>'
+                : '')
             + '<span>Tanggal Pengajuan: ' + escapeHtml(formatDate(req.submittedDate)) + '</span>'
             + '<span>Efektif Mulai: ' + escapeHtml(formatDate(req.effectiveDate)) + '</span>'
+            + (req.reactivateDate ? '<span>Aktif Kembali: ' + escapeHtml(formatDate(req.reactivateDate)) + '</span>' : '')
             + '<span>Alasan: ' + escapeHtml(req.reason || "-") + '</span>'
             + (req.note ? '<span>Catatan: ' + escapeHtml(req.note) + '</span>' : '')
+            + evidenceAction
             + actions
             + '</article>';
         }).join("");
@@ -1086,6 +1211,7 @@
         status: memberStatusInput.value,
         password: "",
         note: "",
+        inactiveUntil: existingIndex >= 0 ? normalizeBirthDate(members[existingIndex].inactiveUntil) : "",
         registeredAt: existingIndex >= 0
           ? normalizeRegisteredAt(members[existingIndex].registeredAt || members[existingIndex].createdAt)
           : new Date().toISOString()
@@ -1111,6 +1237,7 @@
         }
         payload.password = members[editIndex].password || defaultPasswordFromBirthDate(payload.birthDate);
         payload.registeredAt = normalizeRegisteredAt(members[editIndex].registeredAt || payload.registeredAt);
+        payload.inactiveUntil = normalizeBirthDate(members[editIndex].inactiveUntil);
         members[editIndex] = payload;
         showNotify("Data anggota berhasil diperbarui.");
       } else {
@@ -1131,16 +1258,24 @@
 
       if (action === "approve") {
         req.status = "Disetujui";
+        req.updatedAt = new Date().toISOString();
         const targetMember = members.find(function (item) {
           return (req.memberId && item.id === req.memberId) || item.name === req.memberName;
         });
         if (targetMember) {
-          targetMember.status = String(req.requestType || "").toLowerCase().includes("nonaktif") ? "Nonaktif" : "Aktif";
+          if (String(req.requestType || "").toLowerCase().includes("nonaktif")) {
+            targetMember.status = "Nonaktif";
+            targetMember.inactiveUntil = req.inactiveType === "temporary" ? normalizeBirthDate(req.reactivateDate) : "";
+          } else {
+            targetMember.status = "Aktif";
+            targetMember.inactiveUntil = "";
+          }
         }
         saveMembers();
         showNotify("Permintaan status disetujui.");
       } else if (action === "reject") {
         req.status = "Ditolak";
+        req.updatedAt = new Date().toISOString();
         showNotify("Permintaan status ditolak.");
       }
 
@@ -1149,6 +1284,7 @@
     }
 
     function renderAll() {
+      applyAutoReactivateMembers();
       renderRoleFilter();
       renderStats();
       renderMemberTable();
@@ -1196,6 +1332,8 @@
     searchMemberInput.addEventListener("input", renderMemberTable);
     filterRoleSelect.addEventListener("change", renderMemberTable);
     filterStatusSelect.addEventListener("change", renderMemberTable);
+    requestSearchInput.addEventListener("input", renderRequests);
+    requestSortSelect.addEventListener("change", renderRequests);
 
     resetFilterBtn.addEventListener("click", function () {
       searchMemberInput.value = "";
@@ -1239,6 +1377,13 @@
     });
 
     requestList.addEventListener("click", function (event) {
+      const evidenceButton = event.target.closest("button[data-req-evidence]");
+      if (evidenceButton) {
+        const requestId = evidenceButton.getAttribute("data-req-id") || "";
+        openEvidence(requestId);
+        return;
+      }
+
       const button = event.target.closest("button[data-req-action]");
       if (!button) {
         return;
