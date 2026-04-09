@@ -650,6 +650,15 @@
       flex-wrap: wrap;
     }
 
+    .dynamic-answer-list {
+      margin: 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 6px;
+      font-size: 0.83rem;
+      color: #374151;
+    }
+
     .btn-ghost {
       border: 1px solid #9ca3af;
       border-radius: 9px;
@@ -724,6 +733,7 @@
           <a class="menu-link" href="registrasi-tugas-misa-besar.html">Registrasi Tugas Misa Besar</a>
           <a class="menu-link" href="penugasan-petugas-misa.html">Penugasan Petugas Misa</a>
           <a class="menu-link" href="monitoring-tugas-anggota.html">Monitoring Tugas Anggota</a>
+          <a class="menu-link" href="setting-pertanyaan-evaluasi-streaming.html">Setting Pertanyaan Evaluasi</a>
           <a class="menu-link active" href="hasil-evaluasi-streaming.html">Hasil Evaluasi Streaming</a>
         </div>
       </div>
@@ -880,15 +890,139 @@
   <script>
     const STORAGE_KEY = "crembo-evaluasi-streaming";
     const STORAGE_SEED_KEY = "crembo-evaluasi-streaming-seed-version";
-    const DUMMY_SEED_VERSION = "v3";
+    const QUESTION_CONFIG_KEY = "crembo-evaluasi-question-config";
+    const DUMMY_SEED_VERSION = "v4";
     const RATING_SCORE_MAP = {
       "Sangat Baik": 4,
       "Baik": 3,
       "Cukup": 2,
       "Perlu Pendampingan": 1
     };
+    const DEFAULT_QUESTION_CONFIG = [
+      {
+        id: "kesan-pelayanan",
+        label: "Apa kesan umum pelayanan streaming pada misa ini?",
+        type: "single_choice",
+        required: true,
+        helpText: "Pilih satu penilaian umum.",
+        options: ["Sangat Baik", "Baik", "Cukup", "Perlu Pendampingan"]
+      },
+      {
+        id: "hal-terbaik",
+        label: "Bagian mana yang sudah paling baik?",
+        type: "long_text",
+        required: false,
+        helpText: "Contoh: alur kamera, audio, koordinasi.",
+        options: []
+      }
+    ];
 
     const DUMMY_EVALUATIONS = {
+      "normal-2026-04-08-1800": {
+        date: "2026-04-08",
+        time: "18:00",
+        misaType: "Biasa",
+        operator: "Nadia",
+        camera: "Riko",
+        supervisor: "Tama",
+        evaluatorName: "Stefani",
+        evaluatorRole: "Admin Streaming",
+        submittedAt: "2026-04-08T20:14:00",
+        technicalIssue: "Audio ambience sedikit terlalu tinggi saat pembuka.",
+        liturgyIssue: "",
+        checklist: { stream: true, coordination: true, archive: true },
+        dynamicAnswers: [
+          {
+            id: "kesan-pelayanan",
+            label: "Apa kesan umum pelayanan streaming pada misa ini?",
+            type: "single_choice",
+            answer: "Baik"
+          },
+          {
+            id: "hal-terbaik",
+            label: "Bagian mana yang sudah paling baik?",
+            type: "long_text",
+            answer: "Koordinasi operator dan camera person rapi dari awal sampai akhir."
+          }
+        ],
+        staffEvaluations: [
+          { name: "Nadia", rating: "Baik", note: "Switching antar scene stabil." },
+          { name: "Riko", rating: "Baik", note: "Komposisi frame altar konsisten." },
+          { name: "Tama", rating: "Sangat Baik", note: "Briefing awal jelas dan efektif." }
+        ],
+        finalNote: "Secara umum siaran berjalan lancar, cukup tingkatkan balancing ambience di awal misa.",
+        questionScores: [4, 4, 4, 4]
+      },
+      "normal-2026-04-09-1800": {
+        date: "2026-04-09",
+        time: "18:00",
+        misaType: "Biasa",
+        operator: "Lisa",
+        camera: "Evan",
+        supervisor: "Jose",
+        evaluatorName: "Krisna",
+        evaluatorRole: "Koordinator Multimedia",
+        submittedAt: "2026-04-09T19:51:00",
+        technicalIssue: "",
+        liturgyIssue: "Perubahan urutan petugas bacaan di menit akhir.",
+        checklist: { stream: true, coordination: false, archive: true },
+        dynamicAnswers: [
+          {
+            id: "kesan-pelayanan",
+            label: "Apa kesan umum pelayanan streaming pada misa ini?",
+            type: "single_choice",
+            answer: "Cukup"
+          },
+          {
+            id: "hal-terbaik",
+            label: "Bagian mana yang sudah paling baik?",
+            type: "long_text",
+            answer: "Respon tim pada perubahan rundown cukup cepat."
+          }
+        ],
+        staffEvaluations: [
+          { name: "Lisa", rating: "Baik", note: "Alur transisi cukup aman." },
+          { name: "Evan", rating: "Cukup", note: "Perlu antisipasi shot saat perubahan mendadak." },
+          { name: "Jose", rating: "Baik", note: "Koordinasi cukup baik, perlu percepatan info liturgi." }
+        ],
+        finalNote: "Kualitas siaran baik, tetapi sinkronisasi dengan perubahan liturgi masih perlu ditingkatkan.",
+        questionScores: [3, 3, 4, 3]
+      },
+      "raya-2026-04-05-0800": {
+        date: "2026-04-05",
+        time: "08:00",
+        misaType: "Hari Raya",
+        operator: "Rossa",
+        camera: "Aurel",
+        supervisor: "Asha",
+        evaluatorName: "Maria",
+        evaluatorRole: "Panitia Misa Besar",
+        submittedAt: "2026-04-05T11:03:00",
+        technicalIssue: "",
+        liturgyIssue: "",
+        checklist: { stream: true, coordination: true, archive: true },
+        dynamicAnswers: [
+          {
+            id: "kesan-pelayanan",
+            label: "Apa kesan umum pelayanan streaming pada misa ini?",
+            type: "single_choice",
+            answer: "Sangat Baik"
+          },
+          {
+            id: "hal-terbaik",
+            label: "Bagian mana yang sudah paling baik?",
+            type: "long_text",
+            answer: "Komunikasi antar tim dan backup audio sangat siap saat misa ramai."
+          }
+        ],
+        staffEvaluations: [
+          { name: "Rossa", rating: "Sangat Baik", note: "Kontrol live stabil sepanjang misa." },
+          { name: "Aurel", rating: "Baik", note: "Framing liturgi utama akurat." },
+          { name: "Asha", rating: "Sangat Baik", note: "Koordinasi lintas petugas sangat rapi." }
+        ],
+        finalNote: "Misa padat tetap tertangani dengan baik, kualitas live stabil sampai penutup.",
+        questionScores: [5, 5, 4, 5]
+      },
       "normal-2026-03-27-1800": {
         date: "2026-03-27",
         time: "18:00",
@@ -902,6 +1036,20 @@
         technicalIssue: "",
         liturgyIssue: "",
         checklist: { stream: true, coordination: true, archive: true },
+        dynamicAnswers: [
+          {
+            id: "kesan-pelayanan",
+            label: "Apa kesan umum pelayanan streaming pada misa ini?",
+            type: "single_choice",
+            answer: "Baik"
+          },
+          {
+            id: "hal-terbaik",
+            label: "Bagian mana yang sudah paling baik?",
+            type: "long_text",
+            answer: "Koordinasi operator dan supervisor sangat stabil."
+          }
+        ],
         staffEvaluations: [
           { name: "Rikha", rating: "Baik", note: "Konsisten menjaga alur live." },
           { name: "Jeni", rating: "Sangat Baik", note: "Framing stabil saat homili." },
@@ -923,6 +1071,20 @@
         technicalIssue: "Audio sempat peak saat lagu pembuka.",
         liturgyIssue: "",
         checklist: { stream: true, coordination: false, archive: true },
+        dynamicAnswers: [
+          {
+            id: "kesan-pelayanan",
+            label: "Apa kesan umum pelayanan streaming pada misa ini?",
+            type: "single_choice",
+            answer: "Cukup"
+          },
+          {
+            id: "hal-terbaik",
+            label: "Bagian mana yang sudah paling baik?",
+            type: "long_text",
+            answer: "Visual kamera utama cukup konsisten."
+          }
+        ],
         staffEvaluations: [
           { name: "Lisa", rating: "Baik", note: "Switching cukup aman." },
           { name: "Evan", rating: "Cukup", note: "Perlu antisipasi zoom mendadak." },
@@ -944,6 +1106,20 @@
         technicalIssue: "Koneksi encoder drop singkat 1 kali.",
         liturgyIssue: "Perubahan urutan petugas bacaan di menit akhir.",
         checklist: { stream: true, coordination: false, archive: true },
+        dynamicAnswers: [
+          {
+            id: "kesan-pelayanan",
+            label: "Apa kesan umum pelayanan streaming pada misa ini?",
+            type: "single_choice",
+            answer: "Cukup"
+          },
+          {
+            id: "hal-terbaik",
+            label: "Bagian mana yang sudah paling baik?",
+            type: "long_text",
+            answer: "Respon tim saat gangguan cukup cepat."
+          }
+        ],
         staffEvaluations: [
           { name: "Reno", rating: "Cukup", note: "Respon gangguan cukup cepat." },
           { name: "Mika", rating: "Cukup", note: "Butuh variasi shot lebih rapi." },
@@ -965,6 +1141,20 @@
         technicalIssue: "Clipping audio ketika lagu penutup.",
         liturgyIssue: "",
         checklist: { stream: true, coordination: true, archive: false },
+        dynamicAnswers: [
+          {
+            id: "kesan-pelayanan",
+            label: "Apa kesan umum pelayanan streaming pada misa ini?",
+            type: "single_choice",
+            answer: "Baik"
+          },
+          {
+            id: "hal-terbaik",
+            label: "Bagian mana yang sudah paling baik?",
+            type: "long_text",
+            answer: "Rundown tetap terjaga sampai penutup."
+          }
+        ],
         staffEvaluations: [
           { name: "Rina", rating: "Baik", note: "Rundown terjaga." },
           { name: "Dimas", rating: "Cukup", note: "Arah kamera perlu lebih tenang." },
@@ -986,6 +1176,20 @@
         technicalIssue: "",
         liturgyIssue: "",
         checklist: { stream: true, coordination: true, archive: true },
+        dynamicAnswers: [
+          {
+            id: "kesan-pelayanan",
+            label: "Apa kesan umum pelayanan streaming pada misa ini?",
+            type: "single_choice",
+            answer: "Sangat Baik"
+          },
+          {
+            id: "hal-terbaik",
+            label: "Bagian mana yang sudah paling baik?",
+            type: "long_text",
+            answer: "Koordinasi lintas petugas sangat rapi saat misa padat."
+          }
+        ],
         staffEvaluations: [
           { name: "Sella", rating: "Sangat Baik", note: "Kontrol live sangat baik." },
           { name: "Niko", rating: "Sangat Baik", note: "Shot variety bagus." },
@@ -1007,6 +1211,20 @@
         technicalIssue: "",
         liturgyIssue: "",
         checklist: { stream: true, coordination: true, archive: true },
+        dynamicAnswers: [
+          {
+            id: "kesan-pelayanan",
+            label: "Apa kesan umum pelayanan streaming pada misa ini?",
+            type: "single_choice",
+            answer: "Sangat Baik"
+          },
+          {
+            id: "hal-terbaik",
+            label: "Bagian mana yang sudah paling baik?",
+            type: "long_text",
+            answer: "Eksekusi kamera dan backup audio sangat siap."
+          }
+        ],
         staffEvaluations: [
           { name: "Rossa", rating: "Sangat Baik", note: "Eksekusi rundown misa raya sangat bagus." },
           { name: "Aurel", rating: "Baik", note: "Pengambilan gambar liturgi utama tepat." },
@@ -1028,6 +1246,20 @@
         technicalIssue: "Noise kecil di awal lagu pembuka.",
         liturgyIssue: "",
         checklist: { stream: true, coordination: true, archive: true },
+        dynamicAnswers: [
+          {
+            id: "kesan-pelayanan",
+            label: "Apa kesan umum pelayanan streaming pada misa ini?",
+            type: "single_choice",
+            answer: "Baik"
+          },
+          {
+            id: "hal-terbaik",
+            label: "Bagian mana yang sudah paling baik?",
+            type: "long_text",
+            answer: "Framing stabil, hanya perlu antisipasi noise pembuka."
+          }
+        ],
         staffEvaluations: [
           { name: "Rikha", rating: "Baik", note: "Transisi rundown aman." },
           { name: "Jeni", rating: "Baik", note: "Framing tetap stabil." },
@@ -1039,6 +1271,30 @@
     };
 
     const schedules = [
+      {
+        id: "normal-2026-04-08-1800",
+        date: "2026-04-08",
+        time: "18:00",
+        type: "Biasa",
+        title: "Misa Rabu Pekan Biasa",
+        team: { operator: "Nadia", camera: "Riko", supervisor: "Tama" }
+      },
+      {
+        id: "normal-2026-04-09-1800",
+        date: "2026-04-09",
+        time: "18:00",
+        type: "Biasa",
+        title: "Misa Kamis Pekan Biasa",
+        team: { operator: "Lisa", camera: "Evan", supervisor: "Jose" }
+      },
+      {
+        id: "raya-2026-04-05-0800",
+        date: "2026-04-05",
+        time: "08:00",
+        type: "Hari Raya",
+        title: "Minggu Palma - Sesi Pagi Lanjutan",
+        team: { operator: "Rossa", camera: "Aurel", supervisor: "Asha" }
+      },
       {
         id: "normal-2026-03-27-1800",
         date: "2026-03-27",
@@ -1131,6 +1387,136 @@
     const evaluationDetailModal = document.getElementById("evaluationDetailModal");
     const evaluationDetailBody = document.getElementById("evaluationDetailBody");
     const closeEvaluationDetailBtn = document.getElementById("closeEvaluationDetailBtn");
+
+    function normalizeQuestionType(type) {
+      const allowed = ["short_text", "long_text", "single_choice", "multi_choice"];
+      return allowed.indexOf(type) !== -1 ? type : "short_text";
+    }
+
+    function normalizeQuestionOptions(options) {
+      if (!Array.isArray(options)) {
+        return [];
+      }
+      const uniq = [];
+      options.forEach(function (item) {
+        const clean = String(item || "").trim();
+        if (!clean) {
+          return;
+        }
+        if (uniq.indexOf(clean) === -1) {
+          uniq.push(clean);
+        }
+      });
+      return uniq;
+    }
+
+    function sanitizeQuestionConfig(items) {
+      if (!Array.isArray(items)) {
+        return [];
+      }
+      return items.map(function (item, index) {
+        const label = String(item && item.label ? item.label : "").trim();
+        const id = String(item && item.id ? item.id : "q-" + (index + 1)).trim();
+        const type = normalizeQuestionType(item && item.type);
+        const options = (type === "single_choice" || type === "multi_choice")
+          ? normalizeQuestionOptions(item && item.options)
+          : [];
+        return {
+          id: id || ("q-" + (index + 1)),
+          label: label || ("Pertanyaan " + (index + 1)),
+          type: type,
+          required: !!(item && item.required),
+          options: options
+        };
+      }).filter(function (item) {
+        return !!item.label;
+      });
+    }
+
+    function readQuestionConfig() {
+      try {
+        const raw = localStorage.getItem(QUESTION_CONFIG_KEY);
+        if (!raw) {
+          return sanitizeQuestionConfig(DEFAULT_QUESTION_CONFIG);
+        }
+        const parsed = JSON.parse(raw);
+        const sanitized = sanitizeQuestionConfig(parsed);
+        return sanitized.length ? sanitized : sanitizeQuestionConfig(DEFAULT_QUESTION_CONFIG);
+      } catch (err) {
+        return sanitizeQuestionConfig(DEFAULT_QUESTION_CONFIG);
+      }
+    }
+
+    function hasMeaningfulAnswer(answer) {
+      if (Array.isArray(answer)) {
+        return answer.length > 0;
+      }
+      return !!String(answer || "").trim();
+    }
+
+    function normalizeDynamicAnswers(rawAnswers, questionConfig) {
+      const config = Array.isArray(questionConfig) ? questionConfig : [];
+      const normalized = [];
+      const rawArray = Array.isArray(rawAnswers)
+        ? rawAnswers
+        : (rawAnswers && typeof rawAnswers === "object"
+          ? Object.keys(rawAnswers).map(function (id) {
+              return { id: id, answer: rawAnswers[id] };
+            })
+          : []);
+
+      const byId = {};
+      const byLabel = {};
+      rawArray.forEach(function (item) {
+        const id = String(item && item.id ? item.id : "").trim();
+        const label = String(item && item.label ? item.label : "").trim();
+        if (id) {
+          byId[id] = item;
+        }
+        if (label) {
+          byLabel[label.toLowerCase()] = item;
+        }
+      });
+
+      config.forEach(function (question) {
+        const fromRaw = byId[question.id] || byLabel[question.label.toLowerCase()] || {};
+        normalized.push({
+          id: question.id,
+          label: question.label,
+          type: question.type,
+          required: !!question.required,
+          options: question.options.slice(),
+          answer: Array.isArray(fromRaw.answer)
+            ? fromRaw.answer.filter(function (item) { return String(item || "").trim(); })
+            : String(fromRaw.answer || "").trim()
+        });
+      });
+
+      rawArray.forEach(function (item) {
+        const id = String(item && item.id ? item.id : "").trim();
+        const label = String(item && item.label ? item.label : "").trim();
+        const exists = normalized.some(function (entry) {
+          if (id && entry.id === id) {
+            return true;
+          }
+          return label && entry.label.toLowerCase() === label.toLowerCase();
+        });
+        if (!exists && (id || label)) {
+          normalized.push({
+            id: id || ("legacy-" + normalized.length),
+            label: label || id,
+            type: normalizeQuestionType(item && item.type),
+            required: !!(item && item.required),
+            options: normalizeQuestionOptions(item && item.options),
+            answer: Array.isArray(item && item.answer)
+              ? item.answer.filter(function (value) { return String(value || "").trim(); })
+              : String(item && item.answer ? item.answer : "").trim()
+          });
+        }
+      });
+
+      return normalized;
+    }
 
     function readStoredEvaluations() {
       try {
@@ -1278,6 +1664,7 @@
 
     function getCompletedEvaluations() {
       const saved = readStoredEvaluations();
+      const questionConfig = readQuestionConfig();
       const entries = Object.keys(saved).map(function (scheduleId) {
         const item = saved[scheduleId] || {};
         const schedule = getScheduleById(scheduleId);
@@ -1320,7 +1707,8 @@
               }).filter(function (staffEval) {
                 return !!staffEval.name;
               })
-            : []
+            : [],
+          dynamicAnswers: normalizeDynamicAnswers(item.dynamicAnswers, questionConfig)
         };
       });
 
@@ -1359,6 +1747,11 @@
       let checklistArchive = 0;
       let technicalIssueCount = 0;
       let liturgyIssueCount = 0;
+      let configuredDynamicCount = 0;
+      let dynamicAnsweredCount = 0;
+
+      const questionConfig = readQuestionConfig();
+      configuredDynamicCount = questionConfig.length;
 
       completed.forEach(function (item) {
         if (item.checklist.stream) {
@@ -1388,6 +1781,14 @@
           totalStaffScore += score;
           ratingCounts[rating] += 1;
         });
+
+        if (configuredDynamicCount > 0 && Array.isArray(item.dynamicAnswers)) {
+          item.dynamicAnswers.forEach(function (answerItem) {
+            if (hasMeaningfulAnswer(answerItem.answer)) {
+              dynamicAnsweredCount += 1;
+            }
+          });
+        }
       });
 
       const formCount = completed.length;
@@ -1398,6 +1799,10 @@
       const technicalIssueRate = formCount ? Math.round((technicalIssueCount / formCount) * 100) : 0;
       const liturgyIssueRate = formCount ? Math.round((liturgyIssueCount / formCount) * 100) : 0;
       const checklistRate = Math.round((streamRate + coordinationRate + archiveRate) / 3);
+      const dynamicExpectedCount = formCount * configuredDynamicCount;
+      const dynamicCompletionRate = dynamicExpectedCount
+        ? Math.round((dynamicAnsweredCount / dynamicExpectedCount) * 100)
+        : 0;
 
       const attributeScores = [
         { label: "Siaran berjalan sampai akhir", value: streamRate },
@@ -1408,10 +1813,19 @@
         { label: "Kendala non-teknis minim", value: 100 - liturgyIssueRate }
       ];
 
+      if (configuredDynamicCount > 0) {
+        attributeScores.push({
+          label: "Kelengkapan jawaban pertanyaan tambahan",
+          value: dynamicCompletionRate
+        });
+      }
+
       aiKpiGrid.innerHTML =
         '<article class="ai-kpi"><p>Rata-rata Penilaian Petugas</p><strong>' + formatScore(averageStaffScore) + '/4</strong></article>' +
         '<article class="ai-kpi"><p>Kepatuhan Checklist Layanan</p><strong>' + checklistRate + '%</strong></article>' +
-        '<article class="ai-kpi"><p>Total Form Evaluasi Masuk</p><strong>' + formCount + '</strong></article>';
+        '<article class="ai-kpi"><p>Jawaban Pertanyaan Tambahan</p><strong>' +
+        (configuredDynamicCount > 0 ? (dynamicAnsweredCount + '/' + dynamicExpectedCount) : '-') +
+        '</strong></article>';
 
       if (!completed.length) {
         aiInsightText.textContent = "Belum ada evaluasi masuk di periode ini. Setelah evaluasi masuk, sistem akan merangkum kekuatan tim dan prioritas perbaikan secara otomatis.";
@@ -1448,7 +1862,10 @@
         "Fokuskan perbaikan pada " + priorities[0].label.toLowerCase() +
         " dan " + priorities[1].label.toLowerCase() +
         ". Targetkan brief 10 menit sebelum misa, validasi checklist layanan per sesi, " +
-        "dan tindak lanjut untuk misa terlewat yang belum dievaluasi (" + lateRate + "% dari total jadwal di filter ini).";
+        "dan tindak lanjut untuk misa terlewat yang belum dievaluasi (" + lateRate + "% dari total jadwal di filter ini)." +
+        (configuredDynamicCount > 0
+          ? (" Pastikan pengisian pertanyaan tambahan konsisten (saat ini " + dynamicCompletionRate + "% terisi).")
+          : "");
 
       aiStrengthList.innerHTML = strongest.map(function (item) {
         return "<li>" + escapeHtml(item.label) + " (" + item.value + "%)</li>";
@@ -1581,6 +1998,15 @@
         ? escapeHtml(data.evaluator + (data.evaluatorRole ? ' (' + data.evaluatorRole + ')' : ''))
         : '-';
 
+      const dynamicAnswersMarkup = data.dynamicAnswers && data.dynamicAnswers.length
+        ? '<ul class="dynamic-answer-list">' + data.dynamicAnswers.map(function (entry) {
+            const answerText = Array.isArray(entry.answer)
+              ? (entry.answer.length ? entry.answer.join(', ') : '-')
+              : (entry.answer || '-');
+            return '<li><strong>' + escapeHtml(entry.label) + ':</strong> ' + escapeHtml(answerText) + '</li>';
+          }).join('') + '</ul>'
+        : '<p>-</p>';
+
       evaluationDetailBody.innerHTML =
         '<div class="detail-grid">' +
           '<article class="detail-card"><h4>Informasi Jadwal</h4><p><strong>Tanggal:</strong> ' + escapeHtml(formatDate(data.date)) + '<br><strong>Jam:</strong> ' + escapeHtml(data.time || '-') + ' WIB<br><strong>Jenis:</strong> ' + escapeHtml(data.misaType || '-') + '<br><strong>Judul:</strong> ' + escapeHtml(data.title || '-') + '</p></article>' +
@@ -1591,6 +2017,7 @@
           '<article class="detail-card"><h4>Kendala Teknis Selama Streaming</h4><p>' + escapeHtml(data.technicalIssue || '-') + '</p></article>' +
           '<article class="detail-card"><h4>Kendala Misa Non-Teknis</h4><p>' + escapeHtml(data.liturgyIssue || '-') + '</p></article>' +
         '</div>' +
+        '<article class="detail-card"><h4>Jawaban Pertanyaan Tambahan</h4>' + dynamicAnswersMarkup + '</article>' +
         '<article class="detail-card"><h4>Evaluasi Per Petugas</h4><table class="staff-table"><thead><tr><th>Nama Petugas</th><th>Penilaian Singkat</th><th>Catatan Per Petugas</th></tr></thead><tbody>' + staffRows + '</tbody></table></article>' +
         '<article class="detail-card"><h4>Catatan Penutup / Rekomendasi</h4><p>' + escapeHtml(data.finalNote || '-') + '</p></article>';
 

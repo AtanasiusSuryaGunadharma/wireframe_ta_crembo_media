@@ -448,6 +448,60 @@
       font-size: 0.9rem;
     }
 
+    .notice a {
+      color: #0f172a;
+      font-weight: 700;
+      text-decoration: underline;
+    }
+
+    .dynamic-question-list {
+      border: 1px solid var(--line-soft);
+      background: #fafafa;
+      padding: 10px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .dynamic-question-item {
+      border: 1px solid #cfcfcf;
+      background: #fff;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .dynamic-question-item h4 {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    .dynamic-help {
+      margin: 0;
+      font-size: 0.82rem;
+      color: #616161;
+    }
+
+    .dynamic-options {
+      display: grid;
+      gap: 6px;
+    }
+
+    .dynamic-options label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+    }
+
+    .dynamic-empty {
+      margin: 0;
+      border: 1px dashed #b1b1b1;
+      background: #fff;
+      padding: 9px;
+      font-size: 0.84rem;
+      color: #5f5f5f;
+    }
+
     .staff-eval-wrap {
       border: 1px solid var(--line-soft);
       background: #fafafa;
@@ -681,7 +735,7 @@
   </div>
 
   <main class="container content">
-    <p class="notice">Halaman ini sengaja tidak ditampilkan di menu utama. Akses melalui URL manual: form-evaluasi-streaming.html</p>
+    <p class="notice">Halaman ini sengaja tidak ditampilkan di menu utama. Akses melalui URL manual: form-evaluasi-streaming.html. Untuk mengatur pertanyaan fleksibel, buka <a href="setting-pertanyaan-evaluasi-streaming.html">Setting Pertanyaan Evaluasi</a>.</p>
 
     <section class="select-card" aria-label="Pilih jadwal untuk evaluasi">
       <h3 class="select-head">1. Pilih Jadwal Yang Belum Diisi</h3>
@@ -842,6 +896,12 @@
           <textarea id="finalNote" placeholder="Catatan untuk perbaikan misa berikutnya"></textarea>
         </div>
 
+        <div class="field">
+          <label>Pertanyaan Tambahan (Dinamis)</label>
+          <div id="dynamicQuestionList" class="dynamic-question-list"></div>
+          <p id="dynamicQuestionEmpty" class="dynamic-empty" hidden>Belum ada pertanyaan tambahan. Silakan atur di halaman setting pertanyaan evaluasi.</p>
+        </div>
+
         <div class="action-row">
           <button class="btn-primary" type="submit">Simpan Evaluasi</button>
           <button id="cancelBtn" class="btn" type="button">Batal</button>
@@ -889,6 +949,25 @@
   <script>
     const STORAGE_KEY = "crembo-evaluasi-streaming";
     const ACTIVE_MEMBER_STORAGE_KEY = "crembo-active-members";
+    const QUESTION_CONFIG_KEY = "crembo-evaluasi-question-config";
+    const DEFAULT_QUESTION_CONFIG = [
+      {
+        id: "kesan-pelayanan",
+        label: "Apa kesan umum pelayanan streaming pada misa ini?",
+        type: "single_choice",
+        required: true,
+        helpText: "Pilih satu penilaian umum.",
+        options: ["Sangat Baik", "Baik", "Cukup", "Perlu Pendampingan"]
+      },
+      {
+        id: "hal-terbaik",
+        label: "Bagian mana yang sudah paling baik?",
+        type: "long_text",
+        required: false,
+        helpText: "Contoh: alur kamera, audio, koordinasi.",
+        options: []
+      }
+    ];
 
     const schedules = [
       {
@@ -973,6 +1052,8 @@
     const technicalIssue = document.getElementById("technicalIssue");
     const liturgyIssue = document.getElementById("liturgyIssue");
     const finalNote = document.getElementById("finalNote");
+    const dynamicQuestionList = document.getElementById("dynamicQuestionList");
+    const dynamicQuestionEmpty = document.getElementById("dynamicQuestionEmpty");
 
     const checkStream = document.getElementById("checkStream");
     const checkCoord = document.getElementById("checkCoord");
@@ -981,6 +1062,7 @@
     let selectedScheduleId = "";
     let activeMembers = [];
     let selectedExtraStaff = [];
+    let dynamicQuestions = [];
 
     const comboConfig = {
       operator: { hiddenInput: operatorName, placeholder: "Pilih operator...", allowEmpty: false },
@@ -1005,6 +1087,201 @@
       } catch (err) {
         return {};
       }
+    }
+
+    function slugifyText(text) {
+      return String(text || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .trim()
+        .replace(/\s+/g, "-")
+        .slice(0, 40);
+    }
+
+    function normalizeQuestionType(type) {
+      const allowed = ["short_text", "long_text", "single_choice", "multi_choice"];
+      return allowed.indexOf(type) !== -1 ? type : "short_text";
+    }
+
+    function normalizeOptions(options) {
+      if (!Array.isArray(options)) {
+        return [];
+      }
+      const uniq = [];
+      options.forEach(function (item) {
+        const clean = String(item || "").trim();
+        if (!clean) {
+          return;
+        }
+        if (uniq.indexOf(clean) === -1) {
+          uniq.push(clean);
+        }
+      });
+      return uniq;
+    }
+
+    function sanitizeQuestionConfig(items) {
+      if (!Array.isArray(items)) {
+        return [];
+      }
+      return items.map(function (item, index) {
+        const label = String(item && item.label ? item.label : "").trim();
+        const id = slugifyText(item && item.id ? item.id : label) || ("q-" + (index + 1));
+        const type = normalizeQuestionType(item && item.type);
+        const options = (type === "single_choice" || type === "multi_choice")
+          ? normalizeOptions(item && item.options)
+          : [];
+        return {
+          id: id,
+          label: label || ("Pertanyaan " + (index + 1)),
+          type: type,
+          required: !!(item && item.required),
+          helpText: String(item && item.helpText ? item.helpText : "").trim(),
+          options: options
+        };
+      }).filter(function (item) {
+        return !!item.label;
+      });
+    }
+
+    function readQuestionConfig() {
+      try {
+        const raw = localStorage.getItem(QUESTION_CONFIG_KEY);
+        if (!raw) {
+          return sanitizeQuestionConfig(DEFAULT_QUESTION_CONFIG);
+        }
+        const parsed = JSON.parse(raw);
+        const sanitized = sanitizeQuestionConfig(parsed);
+        return sanitized.length ? sanitized : sanitizeQuestionConfig(DEFAULT_QUESTION_CONFIG);
+      } catch (err) {
+        return sanitizeQuestionConfig(DEFAULT_QUESTION_CONFIG);
+      }
+    }
+
+    function renderDynamicQuestions() {
+      dynamicQuestionList.innerHTML = "";
+
+      if (!dynamicQuestions.length) {
+        dynamicQuestionEmpty.hidden = false;
+        return;
+      }
+
+      dynamicQuestionEmpty.hidden = true;
+
+      dynamicQuestions.forEach(function (question, index) {
+        const block = document.createElement("article");
+        block.className = "dynamic-question-item";
+
+        const title = document.createElement("h4");
+        title.textContent = (index + 1) + ". " + question.label + (question.required ? " *" : "");
+        block.appendChild(title);
+
+        if (question.helpText) {
+          const help = document.createElement("p");
+          help.className = "dynamic-help";
+          help.textContent = question.helpText;
+          block.appendChild(help);
+        }
+
+        const name = "dynamic-question-" + question.id;
+        if (question.type === "short_text" || question.type === "long_text") {
+          const input = question.type === "long_text" ? document.createElement("textarea") : document.createElement("input");
+          if (question.type === "short_text") {
+            input.type = "text";
+          }
+          input.name = name;
+          input.dataset.questionId = question.id;
+          input.dataset.questionType = question.type;
+          input.placeholder = question.type === "long_text" ? "Tulis jawaban..." : "Isi jawaban...";
+          input.required = !!question.required;
+          block.appendChild(input);
+        }
+
+        if (question.type === "single_choice") {
+          const select = document.createElement("select");
+          select.name = name;
+          select.dataset.questionId = question.id;
+          select.dataset.questionType = question.type;
+          select.required = !!question.required;
+
+          const empty = document.createElement("option");
+          empty.value = "";
+          empty.textContent = "Pilih jawaban";
+          select.appendChild(empty);
+
+          question.options.forEach(function (optionText) {
+            const opt = document.createElement("option");
+            opt.value = optionText;
+            opt.textContent = optionText;
+            select.appendChild(opt);
+          });
+
+          block.appendChild(select);
+        }
+
+        if (question.type === "multi_choice") {
+          const wrap = document.createElement("div");
+          wrap.className = "dynamic-options";
+          question.options.forEach(function (optionText, optionIndex) {
+            const label = document.createElement("label");
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.name = name;
+            checkbox.value = optionText;
+            checkbox.dataset.questionId = question.id;
+            checkbox.dataset.questionType = question.type;
+            checkbox.dataset.required = question.required ? "1" : "0";
+            checkbox.id = name + "-" + optionIndex;
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(optionText));
+            wrap.appendChild(label);
+          });
+          block.appendChild(wrap);
+        }
+
+        dynamicQuestionList.appendChild(block);
+      });
+    }
+
+    function collectDynamicAnswers() {
+      return dynamicQuestions.map(function (question) {
+        const name = "dynamic-question-" + question.id;
+        let answer = "";
+
+        if (question.type === "multi_choice") {
+          answer = Array.from(document.querySelectorAll('input[name="' + name + '"]:checked')).map(function (node) {
+            return node.value;
+          });
+        } else {
+          const input = document.querySelector('[name="' + name + '"]');
+          answer = input ? String(input.value || "").trim() : "";
+        }
+
+        return {
+          id: question.id,
+          label: question.label,
+          type: question.type,
+          required: !!question.required,
+          answer: answer,
+          options: question.options.slice()
+        };
+      });
+    }
+
+    function validateDynamicAnswers(answers) {
+      for (let i = 0; i < answers.length; i += 1) {
+        const item = answers[i];
+        if (!item.required) {
+          continue;
+        }
+        if (Array.isArray(item.answer) && item.answer.length === 0) {
+          return 'Pertanyaan wajib belum dijawab: "' + item.label + '".';
+        }
+        if (!Array.isArray(item.answer) && !String(item.answer || "").trim()) {
+          return 'Pertanyaan wajib belum dijawab: "' + item.label + '".';
+        }
+      }
+      return "";
     }
 
     function writeStoredEvaluations(data) {
@@ -1244,6 +1521,7 @@
       selectedExtraStaff = [];
       staffEvalGrid.innerHTML = "";
       renderExtraStaffChips();
+      renderDynamicQuestions();
     }
 
     function escapeHtml(text) {
@@ -1407,6 +1685,8 @@
       renderComboOptions("extra", "");
       renderExtraStaffChips();
       renderStaffEvaluationFields();
+      dynamicQuestions = readQuestionConfig();
+      renderDynamicQuestions();
 
       evaluationFormCard.classList.add("show");
       setStatus("Silakan isi evaluasi untuk jadwal terpilih.", true);
@@ -1451,9 +1731,16 @@
           archive: checkArchive.checked
         },
         staffEvaluations: collectStaffEvaluations(),
+        dynamicAnswers: collectDynamicAnswers(),
         finalNote: finalNote.value,
         submittedAt: new Date().toISOString()
       };
+
+      const dynamicError = validateDynamicAnswers(payload.dynamicAnswers);
+      if (dynamicError) {
+        setStatus(dynamicError, false);
+        return;
+      }
 
       const saved = readStoredEvaluations();
       saved[selectedScheduleId] = payload;
@@ -1480,12 +1767,14 @@
     window.addEventListener("resize", syncStickyOffset);
 
     initActiveMembers();
+    dynamicQuestions = readQuestionConfig();
     refreshComboSelections();
     Object.keys(comboConfig).forEach(function (key) {
       renderComboOptions(key, "");
     });
 
     drawScheduleOptions();
+    renderDynamicQuestions();
 
     scheduleSelect.addEventListener("change", function () {
       selectedScheduleId = scheduleSelect.value;
