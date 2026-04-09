@@ -566,7 +566,7 @@
 
     .schedule-filters {
       display: grid;
-      grid-template-columns: 1.2fr 1fr 1fr;
+      grid-template-columns: 1.2fr 1fr 1fr 1fr;
       gap: 8px;
       margin-bottom: 10px;
     }
@@ -836,6 +836,12 @@
               <input id="scheduleSearchInput" type="search" placeholder="Cari nama misa, tanggal, atau keterangan...">
             </div>
             <div class="field">
+              <label for="scheduleMisaFilter">Nama Misa</label>
+              <select id="scheduleMisaFilter">
+                <option value="all">Semua Nama Misa</option>
+              </select>
+            </div>
+            <div class="field">
               <label for="scheduleMonthFilter">Bulan</label>
               <select id="scheduleMonthFilter">
                 <option value="all">Semua Bulan</option>
@@ -874,6 +880,7 @@
                   <th>Jenis</th>
                   <th>Lokasi</th>
                   <th>Keterangan</th>
+                  <th>Status</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -925,6 +932,7 @@
     const scheduleRows = document.getElementById("scheduleRows");
     const scheduleEmpty = document.getElementById("scheduleEmpty");
     const scheduleSearchInput = document.getElementById("scheduleSearchInput");
+    const scheduleMisaFilter = document.getElementById("scheduleMisaFilter");
     const scheduleMonthFilter = document.getElementById("scheduleMonthFilter");
     const scheduleYearFilter = document.getElementById("scheduleYearFilter");
     const misaNameCombo = document.getElementById("misaNameCombo");
@@ -945,6 +953,7 @@
     const DRAFT_STORAGE_KEY = "crembo-registrasi-misa-besar-drafts";
     const BIG_MASS_STORAGE_KEY = "crembo-registrasi-misa-besar-schedules";
     const MISA_NAME_STORAGE_KEY = "crembo-registrasi-misa-names";
+    const HIDDEN_DEFAULT_SCHEDULE_KEY = "crembo-registrasi-misa-besar-hidden-default";
     let currentEditingDraftId = "";
     let currentDetailDraftId = "";
 
@@ -961,22 +970,126 @@
       });
     }
 
+    function getDefaultScheduleId(item) {
+      const parts = [item.name || "", item.date || "", item.time || ""];
+      return "default-" + parts.join("-").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    }
+
+    function readHiddenDefaultScheduleIds() {
+      try {
+        const raw = localStorage.getItem(HIDDEN_DEFAULT_SCHEDULE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveHiddenDefaultScheduleIds(items) {
+      const clean = Array.from(new Set((Array.isArray(items) ? items : []).map(function (item) {
+        return String(item || "").trim();
+      }).filter(function (item) {
+        return !!item;
+      })));
+      localStorage.setItem(HIDDEN_DEFAULT_SCHEDULE_KEY, JSON.stringify(clean));
+    }
+
+    function getCombinedScheduleRows() {
+      const rowsById = {};
+      const priority = {
+        default: 1,
+        published: 2,
+        draft: 3
+      };
+      const savedRows = readPublishedMassSchedules().map(function (item) {
+        return Object.assign({
+          source: "registrasi",
+          status: "published"
+        }, item);
+      });
+      const savedIds = savedRows.map(function (item) {
+        return item.id;
+      });
+      const hiddenDefaultIds = readHiddenDefaultScheduleIds();
+      const defaultRows = BIG_MASS_SCHEDULES.map(function (item) {
+        const defaultId = getDefaultScheduleId(item);
+        return Object.assign({}, item, {
+          id: defaultId,
+          source: "default",
+          status: "published"
+        });
+      }).filter(function (item) {
+        return hiddenDefaultIds.indexOf(item.id) === -1 && savedIds.indexOf(item.id) === -1;
+      });
+      const draftRows = readDrafts().map(function (item) {
+        return {
+          id: item.id,
+          name: item.misaName || "",
+          date: item.misaDate || "",
+          time: item.misaTime || "",
+          type: "Misa Besar",
+          location: "Draft Registrasi",
+          note: item.misaNote || "-",
+          misaNote: item.misaNote || "",
+          roles: Array.isArray(item.roles) ? item.roles : [],
+          source: "draft",
+          status: "draft"
+        };
+      });
+
+      defaultRows.concat(savedRows).concat(draftRows).forEach(function (item) {
+        const rank = priority[item.status] || 0;
+        const current = rowsById[item.id];
+        if (!current || rank >= (priority[current.status] || 0)) {
+          rowsById[item.id] = item;
+        }
+      });
+
+      return Object.values(rowsById);
+    }
+
+    function syncMisaScheduleFilterOptions(rows) {
+      const allRows = Array.isArray(rows) ? rows : getCombinedScheduleRows();
+      const selectedValue = scheduleMisaFilter.value || "all";
+      const names = Array.from(new Set(allRows.map(function (item) {
+        return String(item.name || "").trim();
+      }).filter(function (item) {
+        return !!item;
+      })));
+      names.sort(function (a, b) {
+        return a.localeCompare(b, "id");
+      });
+
+      scheduleMisaFilter.innerHTML = '<option value="all">Semua Nama Misa</option>' + names.map(function (name) {
+        return '<option value="' + escapeHtml(name) + '">' + escapeHtml(name) + '</option>';
+      }).join("");
+
+      const stillExists = names.some(function (name) {
+        return name.toLowerCase() === selectedValue.toLowerCase();
+      });
+      scheduleMisaFilter.value = selectedValue === "all" || !stillExists ? "all" : selectedValue;
+    }
+
     function renderBigMassSchedules() {
       const keyword = scheduleSearchInput.value.trim().toLowerCase();
+      const misaFilter = scheduleMisaFilter.value;
       const monthFilter = scheduleMonthFilter.value;
       const yearFilter = scheduleYearFilter.value;
-      const savedRows = readPublishedMassSchedules();
+      const allRows = getCombinedScheduleRows();
 
-      const rows = BIG_MASS_SCHEDULES.concat(savedRows).filter(function (item) {
+      syncMisaScheduleFilterOptions(allRows);
+
+      const rows = allRows.filter(function (item) {
         const date = new Date(item.date + "T00:00:00");
         if (Number.isNaN(date.getTime())) {
           return false;
         }
 
         const matchesKeyword = !keyword || [item.name, item.date, item.time, item.type, item.location, item.note, item.misaNote].join(" ").toLowerCase().indexOf(keyword) !== -1;
+        const matchesMisa = misaFilter === "all" || (item.name || "").toLowerCase() === misaFilter.toLowerCase();
         const matchesMonth = monthFilter === "all" || String(date.getMonth()) === monthFilter;
         const matchesYear = yearFilter === "all" || String(date.getFullYear()) === yearFilter;
-        return matchesKeyword && matchesMonth && matchesYear;
+        return matchesKeyword && matchesMisa && matchesMonth && matchesYear;
       }).sort(function (a, b) {
         return new Date(a.date + "T" + a.time + ":00").getTime() - new Date(b.date + "T" + b.time + ":00").getTime();
       });
@@ -991,13 +1104,21 @@
       scheduleRows.innerHTML = rows.map(function (item) {
         const typeClass = item.type === "Misa Besar" ? "raya" : "biasa";
         const scheduleNote = item.note || item.misaNote || "-";
-        const actions = item.source === "registrasi"
+        const isDraft = item.status === "draft";
+        const statusChip = isDraft
+          ? '<span class="schedule-chip">Draft</span>'
+          : '<span class="schedule-chip raya">Published</span>';
+        const actions = isDraft
           ? '<div class="schedule-action-row">' +
+              '<button class="btn secondary" type="button" data-schedule-action="edit" data-schedule-id="' + escapeHtml(item.id) + '">Edit</button>' +
+              '<button class="btn secondary" type="button" data-schedule-action="publish" data-schedule-id="' + escapeHtml(item.id) + '">Publish</button>' +
+              '<button class="btn danger" type="button" data-schedule-action="delete" data-schedule-id="' + escapeHtml(item.id) + '">Hapus</button>' +
+            '</div>'
+          : '<div class="schedule-action-row">' +
               '<button class="btn secondary" type="button" data-schedule-action="restore" data-schedule-id="' + escapeHtml(item.id) + '">Ke Draft</button>' +
               '<button class="btn secondary" type="button" data-schedule-action="edit" data-schedule-id="' + escapeHtml(item.id) + '">Edit</button>' +
               '<button class="btn danger" type="button" data-schedule-action="delete" data-schedule-id="' + escapeHtml(item.id) + '">Hapus</button>' +
-            '</div>'
-          : '-';
+            '</div>';
         return '<tr>' +
           '<td>' + escapeHtml(formatDisplayDate(item.date)) + '</td>' +
           '<td>' + escapeHtml(item.time) + '</td>' +
@@ -1005,6 +1126,7 @@
           '<td><span class="schedule-chip ' + typeClass + '">' + escapeHtml(item.type) + '</span></td>' +
           '<td>' + escapeHtml(item.location) + '</td>' +
           '<td><span>' + escapeHtml(scheduleNote) + '</span>' + (item.misaNote ? '<span class="schedule-note-inline">Keterangan misa ini ikut tampil di jadwal lain.</span>' : '') + '</td>' +
+          '<td>' + statusChip + '</td>' +
           '<td>' + actions + '</td>' +
         '</tr>';
       }).join("");
@@ -1492,10 +1614,40 @@
           '<div class="draft-actions">' +
             '<button class="btn secondary" type="button" data-draft-action="detail" data-draft-id="' + escapeHtml(draft.id) + '">Detail</button>' +
             '<button class="btn secondary" type="button" data-draft-action="edit" data-draft-id="' + escapeHtml(draft.id) + '">Edit</button>' +
+            '<button class="btn" type="button" data-draft-action="publish" data-draft-id="' + escapeHtml(draft.id) + '">Publish</button>' +
             '<button class="btn danger" type="button" data-draft-action="delete" data-draft-id="' + escapeHtml(draft.id) + '">Hapus</button>' +
           '</div>' +
         '</article>';
       }).join("");
+    }
+
+    function editScheduleItem(scheduleId) {
+      const schedule = getCombinedScheduleRows().find(function (item) {
+        return item.id === scheduleId;
+      });
+
+      if (!schedule) {
+        return;
+      }
+
+      currentEditingDraftId = schedule.id;
+      setEditMode(true);
+      ensureMisaNameOption(schedule.name || schedule.misaName || "");
+      setMisaNameValue(schedule.name || schedule.misaName || "");
+      misaDateInput.value = schedule.date || "";
+      misaTimeInput.value = schedule.time || "";
+      misaNoteInput.value = schedule.misaNote || schedule.note || "";
+      rolesBody.innerHTML = "";
+
+      (Array.isArray(schedule.roles) ? schedule.roles : []).forEach(function (roleItem) {
+        appendRoleRow(roleItem.role, roleItem.member, {
+          multi: !!roleItem.multi,
+          count: roleItem.count,
+          members: Array.isArray(roleItem.members) ? roleItem.members : [roleItem.member].filter(Boolean)
+        });
+      });
+
+      renderAllMemberCombos();
     }
 
     function renderDraftDetail(draftId) {
@@ -1557,7 +1709,7 @@
     }
 
     function restoreScheduleToDraft(scheduleId) {
-      const schedule = readPublishedMassSchedules().find(function (item) {
+      const schedule = getCombinedScheduleRows().find(function (item) {
         return item.id === scheduleId;
       });
 
@@ -1569,7 +1721,7 @@
         return item.id === scheduleId;
       });
 
-      const payload = existingDraft || {
+      const payload = {
         id: schedule.id,
         misaName: schedule.name || schedule.misaName || "",
         misaDate: schedule.date || "",
@@ -1583,6 +1735,16 @@
         const drafts = readDrafts();
         drafts.push(payload);
         saveDrafts(drafts);
+      } else {
+        existingDraft.misaName = payload.misaName;
+        existingDraft.misaDate = payload.misaDate;
+        existingDraft.misaTime = payload.misaTime;
+        existingDraft.misaNote = payload.misaNote;
+        existingDraft.roles = payload.roles;
+        existingDraft.updatedAt = new Date().toISOString();
+        saveDrafts(readDrafts().map(function (item) {
+          return item.id === existingDraft.id ? existingDraft : item;
+        }));
       }
 
       ensureMisaNameOption(payload.misaName || "");
@@ -1608,7 +1770,6 @@
       saveDrafts(drafts.filter(function (item) {
         return item.id !== draftId;
       }));
-      removePublishedMassSchedule(draftId);
 
       if (currentEditingDraftId === draftId) {
         clearRegistrationForm();
@@ -1622,7 +1783,7 @@
       renderBigMassSchedules();
     }
 
-    function saveCurrentDraft() {
+    function validateAndBuildFormPayload(fallbackId) {
       const misaName = getMisaNameValue();
       const misaDate = misaDateInput.value;
       const misaTime = misaTimeInput.value;
@@ -1655,12 +1816,11 @@
 
       if (duplicateMember) {
         window.alert("Satu anggota hanya boleh dipakai di satu role untuk misa yang sama.");
-        return;
+        return null;
       }
 
-      const drafts = readDrafts();
-      const payload = {
-        id: currentEditingDraftId || ("draft-" + Date.now()),
+      return {
+        id: currentEditingDraftId || fallbackId,
         misaName: misaName,
         misaDate: misaDate,
         misaTime: misaTime,
@@ -1668,6 +1828,39 @@
         roles: roles,
         updatedAt: new Date().toISOString()
       };
+    }
+
+    function publishDraftById(draftId) {
+      const draft = readDrafts().find(function (item) {
+        return item.id === draftId;
+      });
+
+      if (!draft) {
+        return;
+      }
+
+      upsertPublishedMassSchedule(draft);
+      saveDrafts(readDrafts().filter(function (item) {
+        return item.id !== draftId;
+      }));
+
+      if (currentEditingDraftId === draftId) {
+        currentEditingDraftId = "";
+        setEditMode(false);
+      }
+
+      renderDraftList();
+      renderBigMassSchedules();
+      window.alert("Draft berhasil dipublish ke jadwal.");
+    }
+
+    function saveCurrentDraft() {
+      const payload = validateAndBuildFormPayload("draft-" + Date.now());
+      if (!payload) {
+        return;
+      }
+
+      const drafts = readDrafts();
 
       const existingIndex = drafts.findIndex(function (item) {
         return item.id === payload.id;
@@ -1680,7 +1873,6 @@
       }
 
       saveDrafts(drafts);
-      upsertPublishedMassSchedule(payload);
       currentEditingDraftId = payload.id;
       setEditMode(true);
       renderDraftList();
@@ -1688,8 +1880,26 @@
       window.alert("Draft berhasil disimpan.");
     }
 
+    function publishCurrentRegistration() {
+      const payload = validateAndBuildFormPayload("pub-" + Date.now());
+      if (!payload) {
+        return;
+      }
+
+      upsertPublishedMassSchedule(payload);
+      saveDrafts(readDrafts().filter(function (item) {
+        return item.id !== payload.id;
+      }));
+
+      currentEditingDraftId = payload.id;
+      setEditMode(false);
+      renderDraftList();
+      renderBigMassSchedules();
+      window.alert("Registrasi berhasil dipublish.");
+    }
+
     function deleteScheduleItem(scheduleId) {
-      const schedule = readPublishedMassSchedules().find(function (item) {
+      const schedule = getCombinedScheduleRows().find(function (item) {
         return item.id === scheduleId;
       });
 
@@ -1702,10 +1912,24 @@
         return;
       }
 
-      saveDrafts(readDrafts().filter(function (item) {
-        return item.id !== scheduleId;
-      }));
-      removePublishedMassSchedule(scheduleId);
+      if (schedule && schedule.status === "draft") {
+        saveDrafts(readDrafts().filter(function (item) {
+          return item.id !== scheduleId;
+        }));
+      } else {
+        saveDrafts(readDrafts().filter(function (item) {
+          return item.id !== scheduleId;
+        }));
+        removePublishedMassSchedule(scheduleId);
+      }
+
+      if (schedule && schedule.source === "default") {
+        const hiddenDefaultIds = readHiddenDefaultScheduleIds();
+        if (hiddenDefaultIds.indexOf(scheduleId) === -1) {
+          hiddenDefaultIds.push(scheduleId);
+          saveHiddenDefaultScheduleIds(hiddenDefaultIds);
+        }
+      }
 
       if (currentEditingDraftId === scheduleId) {
         clearRegistrationForm();
@@ -1856,9 +2080,7 @@
 
     saveDraftBtn.addEventListener("click", saveCurrentDraft);
 
-    publishRegistrationBtn.addEventListener("click", function () {
-      window.alert("Fitur publish registrasi bisa disambungkan nanti setelah alur draft sudah final.");
-    });
+    publishRegistrationBtn.addEventListener("click", publishCurrentRegistration);
 
     draftList.addEventListener("click", function (event) {
       const target = event.target;
@@ -1882,6 +2104,11 @@
         return;
       }
 
+      if (action === "publish") {
+        publishDraftById(draftId);
+        return;
+      }
+
       if (action === "delete") {
         deleteDraft(draftId);
       }
@@ -1899,8 +2126,18 @@
         return;
       }
 
-      if (action === "edit" || action === "restore") {
+      if (action === "edit") {
+        editScheduleItem(scheduleId);
+        return;
+      }
+
+      if (action === "restore") {
         restoreScheduleToDraft(scheduleId);
+        return;
+      }
+
+      if (action === "publish") {
+        publishDraftById(scheduleId);
         return;
       }
 
@@ -1945,6 +2182,7 @@
     }
 
     scheduleSearchInput.addEventListener("input", renderBigMassSchedules);
+    scheduleMisaFilter.addEventListener("change", renderBigMassSchedules);
     scheduleMonthFilter.addEventListener("change", renderBigMassSchedules);
     scheduleYearFilter.addEventListener("change", renderBigMassSchedules);
 
