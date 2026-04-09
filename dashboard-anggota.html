@@ -631,6 +631,7 @@
         <button class="menu-toggle" type="button">Akun & Keanggotaan <span>+</span></button>
         <div class="menu-items">
           <a class="menu-link" href="profil-anggota.html">Profil Anggota (Semua Pengaturan)</a>
+          <a class="menu-link" href="sertifikat-anggota.html">Unduh Sertifikat Anggota</a>
         </div>
       </div>
 
@@ -789,7 +790,9 @@
     if (sessionRaw) {
       try {
         const session = JSON.parse(sessionRaw);
-        if (session.identifier) {
+        if (session.fullName) {
+          memberName.textContent = session.fullName;
+        } else if (session.identifier) {
           memberName.textContent = session.identifier;
         }
       } catch (error) {

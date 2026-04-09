@@ -702,7 +702,8 @@
 
     function renderSidebarMenu(currentRole) {
       const list = [
-        { label: "Data Anggota", href: "manajemen-anggota.html", active: true }
+        { label: "Data Anggota", href: "manajemen-anggota.html", active: true },
+        { label: "Setting Sertifikat Anggota", href: "setting-sertifikat-anggota.html", active: false }
       ];
 
       if (currentRole === "super_admin") {
@@ -728,9 +729,9 @@
 
     function defaultMembers() {
       return [
-        { id: "m-1", name: "Atanasius Surya Guna", email: "surya@example.com", phone: "081234567890", address: "Jl. Melati No. 12, Yogyakarta", birthDate: "2002-07-10", role: "anggota", status: "Aktif", password: "20020710", note: "Aktif reguler" },
-        { id: "m-2", name: "Rikha", email: "rikha@example.com", phone: "081222111000", address: "Jl. Cendana No. 5, Sleman", birthDate: "2001-11-08", role: "admin", status: "Aktif", password: "20011108", note: "Admin operasional" },
-        { id: "m-3", name: "Jeni", email: "jeni@example.com", phone: "081333222111", address: "Jl. Kenanga No. 18, Bantul", birthDate: "2003-03-16", role: "anggota", status: "Nonaktif", password: "20030316", note: "Cuti akademik" }
+        { id: "m-1", name: "Atanasius Surya Guna", email: "surya@example.com", phone: "081234567890", address: "Jl. Melati No. 12, Yogyakarta", birthDate: "2002-07-10", role: "anggota", status: "Aktif", password: "20020710", note: "Aktif reguler", registeredAt: "2025-08-20T08:00:00.000Z" },
+        { id: "m-2", name: "Rikha", email: "rikha@example.com", phone: "081222111000", address: "Jl. Cendana No. 5, Sleman", birthDate: "2001-11-08", role: "admin", status: "Aktif", password: "20011108", note: "Admin operasional", registeredAt: "2025-07-10T08:00:00.000Z" },
+        { id: "m-3", name: "Jeni", email: "jeni@example.com", phone: "081333222111", address: "Jl. Kenanga No. 18, Bantul", birthDate: "2003-03-16", role: "anggota", status: "Nonaktif", password: "20030316", note: "Cuti akademik", registeredAt: "2025-09-02T08:00:00.000Z" }
       ];
     }
 
@@ -754,6 +755,18 @@
 
     function defaultPasswordFromBirthDate(birthDate) {
       return String(birthDate || "").replace(/-/g, "");
+    }
+
+    function normalizeRegisteredAt(value) {
+      const raw = String(value || "").trim();
+      if (!raw) {
+        return new Date().toISOString();
+      }
+      const parsed = new Date(raw);
+      if (Number.isNaN(parsed.getTime())) {
+        return new Date().toISOString();
+      }
+      return parsed.toISOString();
     }
 
     function defaultRequests() {
@@ -823,7 +836,8 @@
         role: normalizeRole(item && item.role),
         status: String(item && item.status ? item.status : "Aktif"),
         password: String(item && item.password ? item.password : fallbackPassword),
-        note: String(item && item.note ? item.note : "")
+        note: String(item && item.note ? item.note : ""),
+        registeredAt: normalizeRegisteredAt(item && (item.registeredAt || item.createdAt))
       };
     }
 
@@ -1060,6 +1074,7 @@
 
     function upsertMember(event) {
       event.preventDefault();
+      const existingIndex = members.findIndex(function (member) { return member.id === editingId; });
       const payload = {
         id: editingId || makeId("m"),
         name: memberNameInput.value.trim(),
@@ -1070,7 +1085,10 @@
         role: normalizeRole(memberRoleInput.value),
         status: memberStatusInput.value,
         password: "",
-        note: ""
+        note: "",
+        registeredAt: existingIndex >= 0
+          ? normalizeRegisteredAt(members[existingIndex].registeredAt || members[existingIndex].createdAt)
+          : new Date().toISOString()
       };
 
       if (!payload.name || !payload.email || !payload.phone || !payload.address || !payload.birthDate) {
@@ -1085,14 +1103,15 @@
         return;
       }
 
-      const existingIndex = members.findIndex(function (member) { return member.id === payload.id; });
-      if (existingIndex >= 0) {
-        if (role !== "super_admin" && members[existingIndex].role === "super_admin") {
+      const editIndex = members.findIndex(function (member) { return member.id === payload.id; });
+      if (editIndex >= 0) {
+        if (role !== "super_admin" && members[editIndex].role === "super_admin") {
           showNotify("Admin tidak dapat mengubah data akun Super Admin.");
           return;
         }
-        payload.password = members[existingIndex].password || defaultPasswordFromBirthDate(payload.birthDate);
-        members[existingIndex] = payload;
+        payload.password = members[editIndex].password || defaultPasswordFromBirthDate(payload.birthDate);
+        payload.registeredAt = normalizeRegisteredAt(members[editIndex].registeredAt || payload.registeredAt);
+        members[editIndex] = payload;
         showNotify("Data anggota berhasil diperbarui.");
       } else {
         members.push(payload);

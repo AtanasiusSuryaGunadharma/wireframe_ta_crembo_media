@@ -661,6 +661,48 @@
       return "username";
     }
 
+    function safeParse(raw) {
+      try {
+        return JSON.parse(raw);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function normalizeDigits(value) {
+      return String(value || "").replace(/\D+/g, "");
+    }
+
+    function readMembers() {
+      const raw = localStorage.getItem("crembo-members");
+      const parsed = raw ? safeParse(raw) : null;
+      return Array.isArray(parsed) ? parsed : [];
+    }
+
+    function findMemberByIdentifier(identifier, type) {
+      const source = readMembers();
+      if (!source.length) {
+        return null;
+      }
+
+      const key = String(identifier || "").trim().toLowerCase();
+      const phone = normalizeDigits(identifier);
+
+      return source.find(function (member) {
+        const memberName = String(member && (member.name || member.fullName) ? (member.name || member.fullName) : "").trim().toLowerCase();
+        const memberEmail = String(member && member.email ? member.email : "").trim().toLowerCase();
+        const memberPhone = normalizeDigits(member && member.phone ? member.phone : "");
+
+        if (type === "email") {
+          return memberEmail && memberEmail === key;
+        }
+        if (type === "no_hp") {
+          return memberPhone && memberPhone === phone;
+        }
+        return (memberName && memberName === key) || (memberEmail && memberEmail === key);
+      }) || null;
+    }
+
     loginForm.addEventListener("submit", function (event) {
       event.preventDefault();
       const identifier = identifierInput.value.trim();
@@ -695,6 +737,17 @@
           loginAt: pendingLoginData.loginAt,
           role: role
         };
+
+        if (role === "anggota") {
+          const matchedMember = findMemberByIdentifier(pendingLoginData.identifier, pendingLoginData.identifierType);
+          if (matchedMember) {
+            sessionPayload.memberId = matchedMember.id || "";
+            sessionPayload.fullName = matchedMember.name || matchedMember.fullName || pendingLoginData.identifier;
+            sessionPayload.registeredAt = matchedMember.registeredAt || matchedMember.createdAt || "";
+          } else {
+            sessionPayload.fullName = pendingLoginData.identifier;
+          }
+        }
 
         localStorage.setItem("crembo-login-session", JSON.stringify(sessionPayload));
         if (role === "anggota") {
