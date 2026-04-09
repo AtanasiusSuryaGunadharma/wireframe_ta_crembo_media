@@ -1179,7 +1179,7 @@
     }
 
     function getMassTitleByWeekday(dayOfWeek) {
-      return dayOfWeek === 0 ? "Misa Minggu" : "Misa Harian";
+      return dayOfWeek === 0 || dayOfWeek === 6 ? "Misa Mingguan" : "Misa Harian";
     }
 
     function getTimesByDate(dateStr) {
@@ -1536,7 +1536,46 @@
       renderRayaCards();
     }
 
+    function setCurrentMonthYearFilters() {
+      const now = new Date();
+      const currentMonth = String(now.getMonth() + 1).padStart(2, "0");
+      const currentYear = String(now.getFullYear());
+
+      monthFilter.value = currentMonth;
+      if (monthFilter.value !== currentMonth) {
+        const monthNames = {
+          "01": "Januari",
+          "02": "Februari",
+          "03": "Maret",
+          "04": "April",
+          "05": "Mei",
+          "06": "Juni",
+          "07": "Juli",
+          "08": "Agustus",
+          "09": "September",
+          "10": "Oktober",
+          "11": "November",
+          "12": "Desember"
+        };
+        const opt = document.createElement("option");
+        opt.value = currentMonth;
+        opt.textContent = monthNames[currentMonth] || currentMonth;
+        monthFilter.appendChild(opt);
+        monthFilter.value = currentMonth;
+      }
+
+      yearFilter.value = currentYear;
+      if (yearFilter.value !== currentYear) {
+        const yearOpt = document.createElement("option");
+        yearOpt.value = currentYear;
+        yearOpt.textContent = currentYear;
+        yearFilter.appendChild(yearOpt);
+        yearFilter.value = currentYear;
+      }
+    }
+
     const currentRole = getCurrentRole();
+    setCurrentMonthYearFilters();
     updateRoleUi(currentRole);
     renderWeeklyTimesInputs();
     updateLiveDateTime();

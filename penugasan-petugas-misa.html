@@ -514,29 +514,17 @@
           </div>
         </div>
         <div class="panel-body">
-          <p class="helper">Admin dapat isi slot kosong, mengganti petugas, dan menghapus petugas yang sudah terdaftar pada jadwal.</p>
+          <p class="helper">Admin dapat isi slot kosong, mengganti petugas, dan menghapus petugas sesuai jadwal. Status penugasan mengikuti data Draft/Published dari registrasi misa besar.</p>
 
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>Nama Misa</th>
-                  <th>Tanggal</th>
-                  <th>Jam</th>
-                  <th>DP</th>
-                  <th>OP</th>
-                  <th>Kamera</th>
-                  <th>Supervisor</th>
-                  <th>Fotografer</th>
-                </tr>
-              </thead>
+              <thead id="assignmentHead"></thead>
               <tbody id="assignmentRows"></tbody>
             </table>
           </div>
 
           <div class="footer-actions">
-            <button class="btn secondary" type="button">Simpan Perubahan</button>
-            <button class="btn" type="button">Publish Penugasan</button>
+            <button id="saveAssignmentBtn" class="btn" type="button">Simpan Penugasan</button>
           </div>
         </div>
       </section>
@@ -553,23 +541,11 @@
             </div>
             <div class="field">
               <label for="swapRoleA">Role A</label>
-              <select id="swapRoleA">
-                <option value="dp">DP</option>
-                <option value="op">OP</option>
-                <option value="kamera">Kamera</option>
-                <option value="supervisor">Supervisor</option>
-                <option value="fotografer">Fotografer</option>
-              </select>
+              <select id="swapRoleA"></select>
             </div>
             <div class="field">
               <label for="swapRoleB">Role B</label>
-              <select id="swapRoleB">
-                <option value="op">OP</option>
-                <option value="dp">DP</option>
-                <option value="kamera">Kamera</option>
-                <option value="supervisor">Supervisor</option>
-                <option value="fotografer">Fotografer</option>
-              </select>
+              <select id="swapRoleB"></select>
             </div>
             <button id="swapBtn" class="btn" type="button">Tukar</button>
           </div>
@@ -580,20 +556,77 @@
 
   <script>
     const memberOptions = ["Rikha", "Jeni", "Tyas", "Lisa", "Evan", "Jose", "Rossa", "Aurel", "Asha", "Bima", "Niko", "Sinta"];
+    const DRAFT_STORAGE_KEY = "crembo-registrasi-misa-besar-drafts";
+    const BIG_MASS_STORAGE_KEY = "crembo-registrasi-misa-besar-schedules";
+    const HIDDEN_DEFAULT_SCHEDULE_KEY = "crembo-registrasi-misa-besar-hidden-default";
+    const BLACKOUT_KEY = "crembo-admin-streaming-blackout";
+    const WEEKLY_TIMES_KEY = "crembo-admin-weekly-mass-times";
 
-    const schedulesBiasa = [
-      { misa: "Misa Harian Senin", tanggal: "2026-03-30", jam: "17:00", dp: "Rikha", op: "Jeni", kamera: "", supervisor: "Tyas", fotografer: "" },
-      { misa: "Misa Harian Selasa", tanggal: "2026-03-31", jam: "17:00", dp: "", op: "Evan", kamera: "Jose", supervisor: "", fotografer: "Asha" },
-      { misa: "Misa Mingguan", tanggal: "2026-04-05", jam: "08:00", dp: "Lisa", op: "", kamera: "Rossa", supervisor: "Aurel", fotografer: "" }
+    const BIG_MASS_DEFAULTS = [
+      { name: "Misa Kamis Putih", date: "2026-04-02", time: "18:00", type: "Misa Besar", location: "Gereja Utama", note: "Registrasi petugas lengkap" },
+      { name: "Misa Jumat Agung", date: "2026-04-03", time: "17:30", type: "Misa Besar", location: "Gereja Utama", note: "Koordinasi liturgi dan dokumentasi" },
+      { name: "Misa Vigili Paskah", date: "2026-04-04", time: "19:00", type: "Misa Besar", location: "Gereja Utama", note: "Pastikan semua role terisi" },
+      { name: "Misa Pentahbisan", date: "2026-05-10", time: "09:00", type: "Misa Besar", location: "Aula Paroki", note: "Jadwal cadangan besar" },
+      { name: "Misa Syukur Ulang Tahun Paroki", date: "2026-07-20", time: "10:00", type: "Misa Besar", location: "Gereja Utama", note: "Agenda paroki tahunan" }
     ];
 
-    const schedulesBesar = [
-      { misa: "Misa Kamis Putih", tanggal: "2026-04-02", jam: "18:00", dp: "Rikha", op: "", kamera: "Jeni", supervisor: "Tyas", fotografer: "" },
-      { misa: "Misa Jumat Agung", tanggal: "2026-04-03", jam: "17:30", dp: "Lisa", op: "Evan", kamera: "", supervisor: "Jose", fotografer: "Asha" },
-      { misa: "Misa Vigili Paskah", tanggal: "2026-04-04", jam: "19:00", dp: "", op: "Niko", kamera: "Rossa", supervisor: "", fotografer: "Sinta" }
+    const DEFAULT_WEEKLY_TIMES = {
+      0: ["07:30", "10:00", "16:30", "18:00"],
+      1: ["18:00"],
+      2: ["18:00"],
+      3: ["18:00"],
+      4: ["18:00"],
+      5: ["18:00"],
+      6: ["18:00"]
+    };
+    const OPERATOR_POOL = ["Rikha", "Lisa", "Asha", "Nadia", "Tita", "Vio", "Belinda", "Doni"];
+    const CAMERA_POOL = ["Jeni", "Evan", "Kanes", "Paul", "Reva", "Arya", "Chessa", "Jose"];
+    const SUPERVISOR_POOL = ["Tyas", "Claire", "Christoforus", "Luciana", "Panji", "Stella", "Bolun", "There"];
+
+    let schedulesBiasa = [];
+
+    const schedulesBesarDummy = [
+      {
+        id: "besar-dummy-1",
+        misa: "Misa Kamis Putih",
+        date: "2026-04-02",
+        time: "18:00",
+        status: "published",
+        source: "default",
+        roles: [
+          { key: "pd-1", label: "PD", member: "Rikha" },
+          { key: "op-1", label: "OP", member: "" },
+          { key: "kamera-1", label: "Kamera 1", member: "Jeni" },
+          { key: "kamera-2", label: "Kamera 2", member: "" }
+        ]
+      },
+      {
+        id: "besar-dummy-2",
+        misa: "Misa Jumat Agung",
+        date: "2026-04-03",
+        time: "17:30",
+        status: "draft",
+        source: "draft",
+        roles: [
+          { key: "pd-1", label: "PD", member: "Lisa" },
+          { key: "switcher-1", label: "Switcher", member: "Evan" },
+          { key: "audio-1", label: "Audio", member: "" }
+        ]
+      }
     ];
 
+    const ROLE_KEYS_BIASA = [
+      { key: "dp", label: "DP" },
+      { key: "op", label: "OP" },
+      { key: "kamera", label: "Kamera" },
+      { key: "supervisor", label: "Supervisor" },
+      { key: "fotografer", label: "Fotografer" }
+    ];
+
+    let schedulesBesar = [];
     let currentMode = "biasa";
+
+    const assignmentHead = document.getElementById("assignmentHead");
     const assignmentRows = document.getElementById("assignmentRows");
     const periodMonth = document.getElementById("periodMonth");
     const periodYear = document.getElementById("periodYear");
@@ -603,6 +636,7 @@
     const swapBtn = document.getElementById("swapBtn");
     const modeBiasa = document.getElementById("modeBiasa");
     const modeBesar = document.getElementById("modeBesar");
+    const saveAssignmentBtn = document.getElementById("saveAssignmentBtn");
 
     function escapeHtml(value) {
       return String(value)
@@ -617,6 +651,305 @@
       return String(value || "").trim();
     }
 
+    function slugify(value) {
+      return normalizeName(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    }
+
+    function getDefaultScheduleId(item) {
+      const parts = [item.name || "", item.date || "", item.time || ""];
+      return "default-" + parts.join("-").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    }
+
+    function normalizeTimesArray(times) {
+      const seen = {};
+      return (Array.isArray(times) ? times : []).filter(function (time) {
+        return /^([01]\d|2[0-3]):[0-5]\d$/.test(time);
+      }).filter(function (time) {
+        if (seen[time]) {
+          return false;
+        }
+        seen[time] = true;
+        return true;
+      }).sort();
+    }
+
+    function getWeeklyTimesConfig() {
+      let stored = null;
+      try {
+        const raw = localStorage.getItem(WEEKLY_TIMES_KEY);
+        stored = raw ? JSON.parse(raw) : null;
+      } catch (error) {
+        stored = null;
+      }
+
+      const result = {};
+      for (let day = 0; day <= 6; day += 1) {
+        const source = stored && Array.isArray(stored[day]) ? stored[day] : DEFAULT_WEEKLY_TIMES[day];
+        result[day] = normalizeTimesArray(source);
+      }
+      return result;
+    }
+
+    function getMassTitleByWeekday(dayOfWeek) {
+      return dayOfWeek === 0 || dayOfWeek === 6 ? "Misa Mingguan" : "Misa Harian";
+    }
+
+    function toIsoDate(year, month, day) {
+      return String(year) + "-" + String(month).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+    }
+
+    function parseBlackoutKey(key) {
+      if (key.indexOf("|") === -1) {
+        return { date: key, time: "*" };
+      }
+      const parts = key.split("|");
+      return { date: parts[0], time: parts[1] || "*" };
+    }
+
+    function getBlackoutEntries() {
+      try {
+        const raw = localStorage.getItem(BLACKOUT_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function isBlackoutSlot(dateStr, timeStr) {
+      return getBlackoutEntries().some(function (key) {
+        const parsed = parseBlackoutKey(String(key || ""));
+        return parsed.date === dateStr && (parsed.time === "*" || parsed.time === timeStr);
+      });
+    }
+
+    function buildRoutineMonthAssignments(year, month) {
+      const totalDays = new Date(year, month, 0).getDate();
+      const weeklyTimes = getWeeklyTimesConfig();
+      const rows = [];
+      let idx = 0;
+
+      for (let day = 1; day <= totalDays; day += 1) {
+        const dateObj = new Date(year, month - 1, day);
+        const dayOfWeek = dateObj.getDay();
+        const dateStr = toIsoDate(year, month, day);
+        const times = weeklyTimes[dayOfWeek] || [];
+
+        times.forEach(function (time, timeIndex) {
+          const seed = idx + timeIndex;
+          const dp = OPERATOR_POOL[seed % OPERATOR_POOL.length];
+          const kamera = CAMERA_POOL[(seed + 2) % CAMERA_POOL.length];
+          const supervisor = SUPERVISOR_POOL[(seed + 4) % SUPERVISOR_POOL.length];
+          const op = memberOptions[(seed + 3) % memberOptions.length];
+          const fotografer = memberOptions[(seed + 5) % memberOptions.length];
+          const pending = day % 7 === 0 && time === "18:00";
+
+          rows.push({
+            id: "reg-" + dateStr + "-" + time.replace(":", ""),
+            misa: getMassTitleByWeekday(dayOfWeek),
+            date: dateStr,
+            time: time,
+            status: pending ? "pending" : "siap",
+            dp: pending ? "" : dp,
+            op: pending ? "" : op,
+            kamera: kamera,
+            supervisor: supervisor,
+            fotografer: pending ? "" : fotografer
+          });
+        });
+
+        idx += 1;
+      }
+
+      return rows;
+    }
+
+    function setCurrentPeriodDefaults() {
+      const now = new Date();
+      const currentMonthValue = String(now.getMonth());
+      const currentYearValue = String(now.getFullYear());
+
+      periodMonth.value = currentMonthValue;
+      periodYear.value = currentYearValue;
+
+      if (periodYear.value !== currentYearValue) {
+        const opt = document.createElement("option");
+        opt.value = currentYearValue;
+        opt.textContent = currentYearValue;
+        periodYear.appendChild(opt);
+        periodYear.value = currentYearValue;
+      }
+    }
+
+    function refreshBiasaSchedulesFromPeriod() {
+      const selected = getSelectedPeriod();
+      schedulesBiasa = buildRoutineMonthAssignments(selected.year, selected.month + 1);
+    }
+
+    function readDrafts() {
+      try {
+        const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function readPublishedSchedules() {
+      try {
+        const raw = localStorage.getItem(BIG_MASS_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function savePublishedSchedules(items) {
+      localStorage.setItem(BIG_MASS_STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function readHiddenDefaultIds() {
+      try {
+        const raw = localStorage.getItem(HIDDEN_DEFAULT_SCHEDULE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function roleSlotsFromRegistrasiRoles(roleItems, scheduleId) {
+      const slots = [];
+      const source = Array.isArray(roleItems) ? roleItems : [];
+
+      source.forEach(function (roleItem, roleIndex) {
+        const baseLabel = normalizeName(roleItem && roleItem.role) || ("Role " + (roleIndex + 1));
+        const listedMembers = Array.isArray(roleItem && roleItem.members)
+          ? roleItem.members.map(normalizeName)
+          : [normalizeName(roleItem && roleItem.member)];
+        const cleanMembers = listedMembers.filter(Boolean);
+        const desiredCount = roleItem && roleItem.multi
+          ? Math.max(2, Number(roleItem.count) || cleanMembers.length || 2)
+          : Math.max(1, Number(roleItem && roleItem.count) || cleanMembers.length || 1);
+
+        for (let i = 0; i < desiredCount; i += 1) {
+          const memberName = listedMembers[i] || "";
+          const label = desiredCount === 1 ? baseLabel : (baseLabel + " " + (i + 1));
+          slots.push({
+            key: slugify(baseLabel) + "-" + (i + 1) + "-" + roleIndex + "-" + slugify(scheduleId),
+            label: label,
+            member: normalizeName(memberName)
+          });
+        }
+      });
+
+      return slots;
+    }
+
+    function getCombinedBesarRows() {
+      const rowsById = {};
+      const priority = { default: 1, published: 2, draft: 3 };
+      const hiddenDefaultIds = readHiddenDefaultIds();
+
+      BIG_MASS_DEFAULTS.forEach(function (item) {
+        const id = getDefaultScheduleId(item);
+        if (hiddenDefaultIds.indexOf(id) !== -1) {
+          return;
+        }
+        rowsById[id] = {
+          id: id,
+          name: item.name,
+          date: item.date,
+          time: item.time,
+          roles: [],
+          status: "published",
+          source: "default",
+          _rank: priority.published
+        };
+      });
+
+      readPublishedSchedules().forEach(function (item, index) {
+        const id = normalizeName(item.id) || ("pub-" + index);
+        const next = {
+          id: id,
+          name: normalizeName(item.name),
+          date: normalizeName(item.date),
+          time: normalizeName(item.time),
+          roles: Array.isArray(item.roles) ? item.roles : [],
+          status: "published",
+          source: "registrasi",
+          _rank: priority.published
+        };
+        if (!rowsById[id] || next._rank >= rowsById[id]._rank) {
+          rowsById[id] = next;
+        }
+      });
+
+      readDrafts().forEach(function (item, index) {
+        const id = normalizeName(item.id) || ("draft-" + index);
+        const next = {
+          id: id,
+          name: normalizeName(item.misaName),
+          date: normalizeName(item.misaDate),
+          time: normalizeName(item.misaTime),
+          roles: Array.isArray(item.roles) ? item.roles : [],
+          status: "draft",
+          source: "draft",
+          _rank: priority.draft
+        };
+        if (!rowsById[id] || next._rank >= rowsById[id]._rank) {
+          rowsById[id] = next;
+        }
+      });
+
+      return Object.keys(rowsById).map(function (id) {
+        const item = rowsById[id];
+        return {
+          id: item.id,
+          misa: item.name || "Misa Besar",
+          date: item.date,
+          time: item.time,
+          status: item.status,
+          source: item.source,
+          roles: roleSlotsFromRegistrasiRoles(item.roles, item.id)
+        };
+      });
+    }
+
+    function buildBesarSchedules() {
+      const synced = getCombinedBesarRows();
+      if (!synced.length) {
+        return schedulesBesarDummy.map(function (item) {
+          return {
+            id: item.id,
+            misa: item.misa,
+            date: item.date,
+            time: item.time,
+            status: item.status,
+            source: item.source,
+            roles: item.roles.map(function (role) {
+              return Object.assign({}, role);
+            })
+          };
+        });
+      }
+
+      return synced.map(function (item) {
+        if (item.roles.length) {
+          return item;
+        }
+
+        return Object.assign({}, item, {
+          roles: [
+            { key: "pd-1-" + slugify(item.id), label: "PD", member: "Rikha" },
+            { key: "kamera-1-" + slugify(item.id), label: "Kamera", member: "" }
+          ]
+        });
+      });
+    }
+
     function getSelectedPeriod() {
       return {
         month: Number(periodMonth.value),
@@ -626,7 +959,7 @@
 
     function matchesSelectedPeriod(schedule) {
       const selected = getSelectedPeriod();
-      const date = new Date(schedule.date + "T00:00:00");
+      const date = new Date((schedule.date || "") + "T00:00:00");
       if (Number.isNaN(date.getTime())) {
         return true;
       }
@@ -642,15 +975,44 @@
       return activeSchedules().map(function (schedule, index) {
         return { schedule: schedule, index: index };
       }).filter(function (entry) {
-        return matchesSelectedPeriod(entry.schedule);
+        if (!matchesSelectedPeriod(entry.schedule)) {
+          return false;
+        }
+        if (currentMode === "biasa") {
+          return !isBlackoutSlot(entry.schedule.date, entry.schedule.time);
+        }
+        return true;
       });
+    }
+
+    function findRoleSlotBesar(scheduleIndex, roleKey) {
+      const schedule = schedulesBesar[scheduleIndex];
+      if (!schedule || !Array.isArray(schedule.roles)) {
+        return null;
+      }
+
+      return schedule.roles.find(function (slot) {
+        return slot.key === roleKey;
+      }) || null;
+    }
+
+    function roleColumnsBesar(entries) {
+      const labels = [];
+      entries.forEach(function (entry) {
+        (entry.schedule.roles || []).forEach(function (slot) {
+          if (labels.indexOf(slot.label) === -1) {
+            labels.push(slot.label);
+          }
+        });
+      });
+      return labels;
     }
 
     function buildMemberSelect(selectedValue, scheduleIndex, roleKey) {
       const clean = normalizeName(selectedValue);
       const label = clean || "-- kosong --";
 
-      return '<div class="slot-combo" data-index="' + scheduleIndex + '" data-role="' + roleKey + '">' +
+      return '<div class="slot-combo" data-index="' + scheduleIndex + '" data-role="' + escapeHtml(roleKey) + '">' +
         '<button class="slot-trigger" type="button" aria-expanded="false">' + escapeHtml(label) + '</button>' +
         '<div class="slot-panel">' +
           '<div class="slot-search-box"><input class="slot-search-input" type="search" placeholder="Cari anggota..."></div>' +
@@ -659,42 +1021,133 @@
       '</div>';
     }
 
-    function buildRoleCell(schedule, scheduleIndex, roleKey) {
-      const value = schedule[roleKey] || "";
+    function buildRoleCell(value, scheduleIndex, roleKey) {
       const tagClass = value ? "tag" : "tag empty";
       const tagText = value ? "Terisi: " + value : "Slot kosong";
 
       return '<div class="slot">' +
-        '<span class="' + tagClass + '">' + tagText + '</span>' +
+        '<span class="' + tagClass + '">' + escapeHtml(tagText) + '</span>' +
         buildMemberSelect(value, scheduleIndex, roleKey) +
-        '<button class="btn danger clear-slot" data-index="' + scheduleIndex + '" data-role="' + roleKey + '" type="button">Hapus</button>' +
-        '</div>';
+        '<button class="btn danger clear-slot" data-index="' + scheduleIndex + '" data-role="' + escapeHtml(roleKey) + '" type="button">Hapus</button>' +
+      '</div>';
+    }
+
+    function buildMissingRoleCell() {
+      return '<div class="slot"><span class="tag empty">Role tidak ada</span></div>';
+    }
+
+    function renderStatusChip(status) {
+      if (status === "siap") {
+        return '<span class="tag">Siap</span>';
+      }
+      if (status === "pending") {
+        return '<span class="tag empty">Belum Lengkap</span>';
+      }
+      if (status === "draft") {
+        return '<span class="tag empty">Draft</span>';
+      }
+      return '<span class="tag">Published</span>';
+    }
+
+    function renderHeadBiasa() {
+      assignmentHead.innerHTML = '<tr>' +
+        '<th>Nama Misa</th>' +
+        '<th>Tanggal</th>' +
+        '<th>Jam</th>' +
+        '<th>DP</th>' +
+        '<th>OP</th>' +
+        '<th>Kamera</th>' +
+        '<th>Supervisor</th>' +
+        '<th>Fotografer</th>' +
+        '<th>Status</th>' +
+      '</tr>';
+    }
+
+    function renderHeadBesar(columns) {
+      const roleHeaders = columns.map(function (label) {
+        return '<th>' + escapeHtml(label) + '</th>';
+      }).join("");
+
+      assignmentHead.innerHTML = '<tr>' +
+        '<th>Nama Misa</th>' +
+        '<th>Tanggal</th>' +
+        '<th>Jam</th>' +
+        roleHeaders +
+        '<th>Status</th>' +
+      '</tr>';
+    }
+
+    function renderAssignmentsBiasa() {
+      const rows = visibleSchedules();
+      renderHeadBiasa();
+      assignmentRows.innerHTML = rows.map(function (entry) {
+        const schedule = entry.schedule;
+        const index = entry.index;
+
+        return '<tr>' +
+          '<td><strong>' + escapeHtml(schedule.misa) + '</strong></td>' +
+          '<td>' + escapeHtml(schedule.date) + '</td>' +
+          '<td>' + escapeHtml(schedule.time) + '</td>' +
+          '<td>' + buildRoleCell(schedule.dp || "", index, "dp") + '</td>' +
+          '<td>' + buildRoleCell(schedule.op || "", index, "op") + '</td>' +
+          '<td>' + buildRoleCell(schedule.kamera || "", index, "kamera") + '</td>' +
+          '<td>' + buildRoleCell(schedule.supervisor || "", index, "supervisor") + '</td>' +
+          '<td>' + buildRoleCell(schedule.fotografer || "", index, "fotografer") + '</td>' +
+          '<td>' + renderStatusChip(schedule.status || "published") + '</td>' +
+        '</tr>';
+      }).join("");
+    }
+
+    function renderAssignmentsBesar() {
+      const rows = visibleSchedules();
+      const columns = roleColumnsBesar(rows);
+      renderHeadBesar(columns);
+
+      assignmentRows.innerHTML = rows.map(function (entry) {
+        const schedule = entry.schedule;
+        const index = entry.index;
+        const roleCells = columns.map(function (columnLabel) {
+          const slot = (schedule.roles || []).find(function (item) {
+            return item.label === columnLabel;
+          });
+          return '<td>' + (slot ? buildRoleCell(slot.member || "", index, slot.key) : buildMissingRoleCell()) + '</td>';
+        }).join("");
+
+        return '<tr>' +
+          '<td><strong>' + escapeHtml(schedule.misa) + '</strong></td>' +
+          '<td>' + escapeHtml(schedule.date || "-") + '</td>' +
+          '<td>' + escapeHtml(schedule.time || "-") + '</td>' +
+          roleCells +
+          '<td>' + renderStatusChip(schedule.status) + '</td>' +
+        '</tr>';
+      }).join("");
     }
 
     function renderAssignments() {
-      const schedules = visibleSchedules();
-      assignmentRows.innerHTML = schedules.map(function (entry) {
-        const schedule = entry.schedule;
-        const index = entry.index;
-        return '<tr>' +
-          '<td><strong>' + schedule.misa + '</strong></td>' +
-          '<td>' + schedule.tanggal + '</td>' +
-          '<td>' + schedule.jam + '</td>' +
-          '<td>' + buildRoleCell(schedule, index, "dp") + '</td>' +
-          '<td>' + buildRoleCell(schedule, index, "op") + '</td>' +
-          '<td>' + buildRoleCell(schedule, index, "kamera") + '</td>' +
-          '<td>' + buildRoleCell(schedule, index, "supervisor") + '</td>' +
-          '<td>' + buildRoleCell(schedule, index, "fotografer") + '</td>' +
-          '</tr>';
-      }).join("");
-
+      if (currentMode === "biasa") {
+        renderAssignmentsBiasa();
+      } else {
+        renderAssignmentsBesar();
+      }
       initSlotCombos();
     }
 
     function renderSlotOptions(comboEl, query) {
       const scheduleIndex = Number(comboEl.getAttribute("data-index"));
       const roleKey = comboEl.getAttribute("data-role");
-      const selectedValue = normalizeName(activeSchedules()[scheduleIndex][roleKey]);
+      const schedule = activeSchedules()[scheduleIndex];
+      if (!schedule) {
+        return;
+      }
+
+      let selectedValue = "";
+      if (currentMode === "biasa") {
+        selectedValue = normalizeName(schedule[roleKey]);
+      } else {
+        const slot = findRoleSlotBesar(scheduleIndex, roleKey);
+        selectedValue = slot ? normalizeName(slot.member) : "";
+      }
+
       const optionsWrap = comboEl.querySelector(".slot-options");
       const cleanQuery = normalizeName(query).toLowerCase();
 
@@ -735,39 +1188,124 @@
       });
     }
 
+    function getScheduleByCurrentSwapSelection() {
+      const index = Number(swapSchedule.value);
+      if (swapSchedule.value === "" || Number.isNaN(index)) {
+        return null;
+      }
+      return activeSchedules()[index] || null;
+    }
+
+    function renderSwapRoleOptions() {
+      const schedule = getScheduleByCurrentSwapSelection();
+      if (!schedule) {
+        swapRoleA.innerHTML = '<option value="">-- tidak ada role --</option>';
+        swapRoleB.innerHTML = '<option value="">-- tidak ada role --</option>';
+        return;
+      }
+
+      let options = "";
+      if (currentMode === "biasa") {
+        options = ROLE_KEYS_BIASA.map(function (role) {
+          return '<option value="' + role.key + '">' + role.label + '</option>';
+        }).join("");
+      } else {
+        options = (schedule.roles || []).map(function (slot) {
+          return '<option value="' + escapeHtml(slot.key) + '">' + escapeHtml(slot.label) + '</option>';
+        }).join("");
+      }
+
+      if (!options) {
+        swapRoleA.innerHTML = '<option value="">-- tidak ada role --</option>';
+        swapRoleB.innerHTML = '<option value="">-- tidak ada role --</option>';
+        return;
+      }
+
+      swapRoleA.innerHTML = options;
+      swapRoleB.innerHTML = options;
+      if (swapRoleB.options.length > 1) {
+        swapRoleB.selectedIndex = 1;
+      }
+    }
+
     function renderSwapSchedules() {
       const schedules = visibleSchedules();
       if (!schedules.length) {
         swapSchedule.innerHTML = '<option value="">-- tidak ada jadwal pada periode ini --</option>';
+        renderSwapRoleOptions();
         return;
       }
 
       swapSchedule.innerHTML = schedules.map(function (entry) {
         const schedule = entry.schedule;
-        return '<option value="' + entry.index + '">' + schedule.misa + ' - ' + schedule.tanggal + ' ' + schedule.jam + '</option>';
+        return '<option value="' + entry.index + '">' + escapeHtml(schedule.misa) + ' - ' + escapeHtml(schedule.date || "-") + ' ' + escapeHtml(schedule.time || "-") + '</option>';
       }).join("");
+      renderSwapRoleOptions();
     }
 
     function setMode(mode) {
       currentMode = mode;
+      if (mode === "besar") {
+        schedulesBesar = buildBesarSchedules();
+      } else {
+        refreshBiasaSchedulesFromPeriod();
+      }
       modeBiasa.classList.toggle("active", mode === "biasa");
       modeBesar.classList.toggle("active", mode === "besar");
       renderAssignments();
       renderSwapSchedules();
     }
 
+    function persistBesarAssignments() {
+      const published = readPublishedSchedules();
+      const publishedById = {};
+      published.forEach(function (item) {
+        publishedById[item.id] = item;
+      });
+
+      const updatedPublished = published.map(function (item) {
+        const local = schedulesBesar.find(function (schedule) {
+          return schedule.id === item.id && schedule.status === "published";
+        });
+        if (!local) {
+          return item;
+        }
+
+        return Object.assign({}, item, {
+          roles: local.roles.map(function (slot) {
+            return {
+              role: slot.label,
+              member: slot.member || "",
+              members: [slot.member || ""].filter(Boolean),
+              multi: false,
+              count: 1
+            };
+          })
+        });
+      });
+
+      savePublishedSchedules(updatedPublished);
+    }
+
     periodMonth.addEventListener("change", function () {
+      if (currentMode === "biasa") {
+        refreshBiasaSchedulesFromPeriod();
+      }
       renderAssignments();
       renderSwapSchedules();
     });
 
     periodYear.addEventListener("change", function () {
+      if (currentMode === "biasa") {
+        refreshBiasaSchedulesFromPeriod();
+      }
       renderAssignments();
       renderSwapSchedules();
     });
 
     modeBiasa.addEventListener("click", function () { setMode("biasa"); });
     modeBesar.addEventListener("click", function () { setMode("besar"); });
+    swapSchedule.addEventListener("change", renderSwapRoleOptions);
 
     assignmentRows.addEventListener("click", function (event) {
       const trigger = event.target.closest(".slot-trigger");
@@ -792,11 +1330,23 @@
         const comboEl = option.closest(".slot-combo");
         const index = Number(comboEl.getAttribute("data-index"));
         const role = comboEl.getAttribute("data-role");
-        const picked = option.getAttribute("data-value") || "";
+        const picked = normalizeName(option.getAttribute("data-value") || "");
 
-        activeSchedules()[index][role] = picked;
+        if (currentMode === "biasa") {
+          if (!schedulesBiasa[index]) {
+            return;
+          }
+          schedulesBiasa[index][role] = picked;
+        } else {
+          const slot = findRoleSlotBesar(index, role);
+          if (!slot) {
+            return;
+          }
+          slot.member = picked;
+        }
+
         renderAssignments();
-        return;
+        renderSwapSchedules();
       }
     });
 
@@ -818,8 +1368,22 @@
 
       const index = Number(button.getAttribute("data-index"));
       const role = button.getAttribute("data-role");
-      activeSchedules()[index][role] = "";
+
+      if (currentMode === "biasa") {
+        if (!schedulesBiasa[index]) {
+          return;
+        }
+        schedulesBiasa[index][role] = "";
+      } else {
+        const slot = findRoleSlotBesar(index, role);
+        if (!slot) {
+          return;
+        }
+        slot.member = "";
+      }
+
       renderAssignments();
+      renderSwapSchedules();
     });
 
     document.addEventListener("click", function (event) {
@@ -830,18 +1394,38 @@
     });
 
     swapBtn.addEventListener("click", function () {
-      const schedules = activeSchedules();
-      const index = Number(swapSchedule.value);
+      const schedule = getScheduleByCurrentSwapSelection();
       const roleA = swapRoleA.value;
       const roleB = swapRoleB.value;
-      if (swapSchedule.value === "" || roleA === roleB || Number.isNaN(index) || !schedules[index]) {
+      if (!schedule || !roleA || !roleB || roleA === roleB) {
         return;
       }
 
-      const temp = schedules[index][roleA];
-      schedules[index][roleA] = schedules[index][roleB];
-      schedules[index][roleB] = temp;
+      if (currentMode === "biasa") {
+        const temp = schedule[roleA] || "";
+        schedule[roleA] = schedule[roleB] || "";
+        schedule[roleB] = temp;
+      } else {
+        const slotA = (schedule.roles || []).find(function (slot) { return slot.key === roleA; });
+        const slotB = (schedule.roles || []).find(function (slot) { return slot.key === roleB; });
+        if (!slotA || !slotB) {
+          return;
+        }
+
+        const temp = slotA.member;
+        slotA.member = slotB.member;
+        slotB.member = temp;
+      }
+
       renderAssignments();
+      renderSwapSchedules();
+    });
+
+    saveAssignmentBtn.addEventListener("click", function () {
+      if (currentMode === "besar") {
+        persistBesarAssignments();
+      }
+      window.alert("Penugasan berhasil disimpan. Status jadwal tetap mengikuti Draft/Published pada data registrasi.");
     });
 
     function updateLiveDateTime() {
@@ -858,6 +1442,8 @@
       document.getElementById("liveDateTime").textContent = day + ", " + date + " " + month + " " + year + " " + hour + ":" + minute + ":" + second;
     }
 
+    setCurrentPeriodDefaults();
+    refreshBiasaSchedulesFromPeriod();
     setMode("biasa");
     updateLiveDateTime();
     setInterval(updateLiveDateTime, 1000);
