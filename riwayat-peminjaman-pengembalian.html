@@ -73,7 +73,7 @@
     .summary-item strong { display: block; margin-top: 4px; font-size: 1.15rem; }
 
     .table-scroll { border: 1px solid #c5c5c5; overflow: auto; background: #fff; }
-    .table-scroll table { min-width: 1450px; width: 100%; border-collapse: collapse; font-size: .84rem; }
+    .table-scroll table { min-width: 2200px; width: 100%; border-collapse: collapse; font-size: .84rem; }
     th, td { border: 1px solid #cbcbcb; padding: 8px; text-align: left; vertical-align: top; }
     th { background: #efefef; font-size: .76rem; text-transform: uppercase; letter-spacing: .02em; }
 
@@ -186,8 +186,14 @@
                 <th>Tanggal Pinjam</th>
                 <th>Target Kembali</th>
                 <th>Pengambilan</th>
+                <th>Lokasi Ambil</th>
+                <th>Kondisi Ambil</th>
+                <th>Catatan Ambil</th>
                 <th>Bukti Ambil</th>
                 <th>Pengembalian</th>
+                <th>Lokasi Kembali</th>
+                <th>Kondisi Kembali</th>
+                <th>Catatan Kembali</th>
                 <th>Bukti Kembali</th>
                 <th>Status</th>
                 <th>Catatan Admin</th>
@@ -245,6 +251,29 @@
         hour: "2-digit",
         minute: "2-digit"
       }) + " WIB";
+    }
+
+    function formatEventDateTime(eventData, fallbackDate, fallbackTime) {
+      if (!eventData) {
+        return "-";
+      }
+
+      const directTime = eventData.time || eventData.datetime || eventData.timestamp;
+      if (directTime && String(directTime).indexOf("T") !== -1) {
+        return formatDateTime(directTime);
+      }
+
+      const datePart = eventData.date || fallbackDate;
+      const timePart = eventData.time || fallbackTime;
+      if (datePart && timePart) {
+        return formatDateTime(datePart + "T" + timePart);
+      }
+
+      if (datePart) {
+        return escapeHtml(datePart);
+      }
+
+      return "-";
     }
 
     function statusClass(status) {
@@ -323,16 +352,38 @@
 
       rows.innerHTML = list.map(function (item) {
         const pickupLabel = item.pickup
-          ? escapeHtml(formatDateTime(item.pickup.time)) + '<br><small>' + escapeHtml(item.pickup.location || '-') + '</small>'
+          ? escapeHtml(formatEventDateTime(item.pickup, item.tanggalDiambil, item.jamDiambil))
           : '-';
         const returnLabel = item.returnInfo
-          ? escapeHtml(formatDateTime(item.returnInfo.time)) + '<br><small>' + escapeHtml(item.returnInfo.location || '-') + '</small>'
+          ? escapeHtml(formatEventDateTime(item.returnInfo, item.tanggalDikembalikan, item.jamDikembalikan))
           : '-';
-        const pickupProof = item.pickup && item.pickup.proofPhoto
-          ? '<img class="thumb" src="' + escapeHtml(item.pickup.proofPhoto) + '" alt="Bukti pengambilan">'
+
+        const pickupLocation = item.pickup && item.pickup.location
+          ? item.pickup.location
           : '-';
-        const returnProof = item.returnInfo && item.returnInfo.proofPhoto
-          ? '<img class="thumb" src="' + escapeHtml(item.returnInfo.proofPhoto) + '" alt="Bukti pengembalian">'
+        const returnLocation = item.returnInfo && item.returnInfo.location
+          ? item.returnInfo.location
+          : '-';
+
+        const pickupCondition = item.pickup && item.pickup.condition
+          ? item.pickup.condition
+          : (item.kondisiSebelum || '-');
+        const returnCondition = item.returnInfo && (item.returnInfo.condition || item.returnInfo.conditions)
+          ? (item.returnInfo.condition || item.returnInfo.conditions)
+          : (item.kondisiSesudah || '-');
+
+        const pickupNote = item.pickup && (item.pickup.note || item.pickup.notes)
+          ? (item.pickup.note || item.pickup.notes)
+          : '-';
+        const returnNote = item.returnInfo && (item.returnInfo.note || item.returnInfo.notes)
+          ? (item.returnInfo.note || item.returnInfo.notes)
+          : '-';
+
+        const pickupProof = item.pickup && (item.pickup.proofPhoto || item.pickup.photo)
+          ? '<img class="thumb" src="' + escapeHtml(item.pickup.proofPhoto || item.pickup.photo) + '" alt="Bukti pengambilan">'
+          : '-';
+        const returnProof = item.returnInfo && (item.returnInfo.proofPhoto || item.returnInfo.photo)
+          ? '<img class="thumb" src="' + escapeHtml(item.returnInfo.proofPhoto || item.returnInfo.photo) + '" alt="Bukti pengembalian">'
           : '-';
 
         return '<tr>' +
@@ -343,8 +394,14 @@
           '<td>' + escapeHtml(item.borrowDate || '-') + '</td>' +
           '<td>' + escapeHtml(item.expectedReturnDate || '-') + '</td>' +
           '<td>' + pickupLabel + '</td>' +
+          '<td>' + escapeHtml(pickupLocation) + '</td>' +
+          '<td>' + escapeHtml(pickupCondition) + '</td>' +
+          '<td>' + escapeHtml(pickupNote) + '</td>' +
           '<td>' + pickupProof + '</td>' +
           '<td>' + returnLabel + '</td>' +
+          '<td>' + escapeHtml(returnLocation) + '</td>' +
+          '<td>' + escapeHtml(returnCondition) + '</td>' +
+          '<td>' + escapeHtml(returnNote) + '</td>' +
           '<td>' + returnProof + '</td>' +
           '<td><span class="status-pill ' + statusClass(item.status) + '">' + escapeHtml(item.status || '-') + '</span></td>' +
           '<td>' + escapeHtml(item.adminNote || '-') + '</td>' +
@@ -357,12 +414,21 @@
       let html = '<html><head><meta charset="UTF-8"></head><body>';
       html += '<h3>Laporan Riwayat Peminjaman dan Pengembalian</h3>';
       html += '<table border="1" cellspacing="0" cellpadding="6">';
-      html += '<tr><th>Kode</th><th>Peminjam</th><th>Barang</th><th>Qty</th><th>Tanggal Pinjam</th><th>Target Kembali</th><th>Status</th><th>Waktu Pengambilan</th><th>Waktu Pengembalian</th><th>Kondisi Kembali</th><th>Catatan Admin</th></tr>';
+      html += '<tr><th>Kode</th><th>Peminjam</th><th>Barang</th><th>Qty</th><th>Tanggal Pinjam</th><th>Target Kembali</th><th>Status</th><th>Waktu Pengambilan</th><th>Lokasi Ambil</th><th>Kondisi Ambil</th><th>Catatan Ambil</th><th>Waktu Pengembalian</th><th>Lokasi Kembali</th><th>Kondisi Kembali</th><th>Catatan Kembali</th><th>Catatan Admin</th></tr>';
 
       if (!list.length) {
-        html += '<tr><td colspan="11">Tidak ada data riwayat sesuai filter.</td></tr>';
+        html += '<tr><td colspan="16">Tidak ada data riwayat sesuai filter.</td></tr>';
       } else {
         list.forEach(function (item) {
+          const pickupWhen = item.pickup ? formatEventDateTime(item.pickup, item.tanggalDiambil, item.jamDiambil) : '-';
+          const returnWhen = item.returnInfo ? formatEventDateTime(item.returnInfo, item.tanggalDikembalikan, item.jamDikembalikan) : '-';
+          const pickupLocation = item.pickup && item.pickup.location ? item.pickup.location : '-';
+          const returnLocation = item.returnInfo && item.returnInfo.location ? item.returnInfo.location : '-';
+          const pickupCondition = item.pickup && item.pickup.condition ? item.pickup.condition : (item.kondisiSebelum || '-');
+          const returnCondition = item.returnInfo && (item.returnInfo.condition || item.returnInfo.conditions) ? (item.returnInfo.condition || item.returnInfo.conditions) : (item.kondisiSesudah || '-');
+          const pickupNote = item.pickup && (item.pickup.note || item.pickup.notes) ? (item.pickup.note || item.pickup.notes) : '-';
+          const returnNote = item.returnInfo && (item.returnInfo.note || item.returnInfo.notes) ? (item.returnInfo.note || item.returnInfo.notes) : '-';
+
           html += '<tr>' +
             '<td>' + escapeHtml(item.code || '-') + '</td>' +
             '<td>' + escapeHtml(item.borrowerName || '-') + '</td>' +
@@ -371,9 +437,14 @@
             '<td>' + escapeHtml(item.borrowDate || '-') + '</td>' +
             '<td>' + escapeHtml(item.expectedReturnDate || '-') + '</td>' +
             '<td>' + escapeHtml(item.status || '-') + '</td>' +
-            '<td>' + escapeHtml(item.pickup ? formatDateTime(item.pickup.time) : '-') + '</td>' +
-            '<td>' + escapeHtml(item.returnInfo ? formatDateTime(item.returnInfo.time) : '-') + '</td>' +
-            '<td>' + escapeHtml(item.returnInfo ? item.returnInfo.condition : '-') + '</td>' +
+            '<td>' + escapeHtml(pickupWhen) + '</td>' +
+            '<td>' + escapeHtml(pickupLocation) + '</td>' +
+            '<td>' + escapeHtml(pickupCondition) + '</td>' +
+            '<td>' + escapeHtml(pickupNote) + '</td>' +
+            '<td>' + escapeHtml(returnWhen) + '</td>' +
+            '<td>' + escapeHtml(returnLocation) + '</td>' +
+            '<td>' + escapeHtml(returnCondition) + '</td>' +
+            '<td>' + escapeHtml(returnNote) + '</td>' +
             '<td>' + escapeHtml(item.adminNote || '-') + '</td>' +
           '</tr>';
         });
