@@ -72,6 +72,29 @@
       color: #5b21b6;
     }
 
+    .flow-switch {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .flow-switch a {
+      text-decoration: none;
+      border: 1px solid #c4b5fd;
+      background: #ffffff;
+      color: #5b21b6;
+      border-radius: 999px;
+      padding: 6px 11px;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .flow-switch a.active {
+      background: #7c3aed;
+      border-color: #7c3aed;
+      color: #ffffff;
+    }
+
     .lane {
       border: 1px solid var(--line);
       border-radius: 14px;
@@ -149,6 +172,11 @@
         <span class="pill">Role: Admin</span>
         <span class="pill">Cakupan Log: Diri Sendiri + Anggota</span>
         <span class="pill">No Akses: Kelola Data Admin</span>
+      </div>
+      <div class="flow-switch" aria-label="Navigasi antar user flow">
+        <a href="user-flow-super-admin.html">Flow Super Admin</a>
+        <a class="active" href="user-flow-admin.html">Flow Admin</a>
+        <a href="user-flow-anggota.html">Flow Anggota</a>
       </div>
     </header>
 

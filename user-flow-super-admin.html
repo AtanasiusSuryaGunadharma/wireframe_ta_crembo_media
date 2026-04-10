@@ -75,6 +75,29 @@
       color: #1e3a8a;
     }
 
+    .flow-switch {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .flow-switch a {
+      text-decoration: none;
+      border: 1px solid #93c5fd;
+      background: #ffffff;
+      color: #1e3a8a;
+      border-radius: 999px;
+      padding: 6px 11px;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .flow-switch a.active {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+      color: #ffffff;
+    }
+
     .lane {
       border: 1px solid var(--line);
       background: rgba(255, 255, 255, 0.92);
@@ -183,6 +206,11 @@
         <span class="pill">Role: Super Admin</span>
         <span class="pill">Cakupan: Semua Modul</span>
         <span class="pill">Tujuan: Skenario Pengujian End-to-End</span>
+      </div>
+      <div class="flow-switch" aria-label="Navigasi antar user flow">
+        <a class="active" href="user-flow-super-admin.html">Flow Super Admin</a>
+        <a href="user-flow-admin.html">Flow Admin</a>
+        <a href="user-flow-anggota.html">Flow Anggota</a>
       </div>
     </header>
 

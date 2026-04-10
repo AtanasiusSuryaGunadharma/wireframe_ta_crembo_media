@@ -69,6 +69,29 @@
       color: #9a3412;
     }
 
+    .flow-switch {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .flow-switch a {
+      text-decoration: none;
+      border: 1px solid #fdba74;
+      background: #ffffff;
+      color: #9a3412;
+      border-radius: 999px;
+      padding: 6px 11px;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .flow-switch a.active {
+      background: #ea580c;
+      border-color: #ea580c;
+      color: #ffffff;
+    }
+
     .lane {
       border: 1px solid var(--line);
       border-radius: 14px;
@@ -146,6 +169,11 @@
         <span class="pill">Role: Anggota</span>
         <span class="pill">Cakupan Log: Diri Sendiri Saja</span>
         <span class="pill">Mode Uji: Fungsionalitas End User</span>
+      </div>
+      <div class="flow-switch" aria-label="Navigasi antar user flow">
+        <a href="user-flow-super-admin.html">Flow Super Admin</a>
+        <a href="user-flow-admin.html">Flow Admin</a>
+        <a class="active" href="user-flow-anggota.html">Flow Anggota</a>
       </div>
     </header>
 
