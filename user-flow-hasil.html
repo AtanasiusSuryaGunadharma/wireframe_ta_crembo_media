@@ -67,6 +67,282 @@
       overflow: hidden;
     }
 
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 40;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal {
+      width: min(720px, 100%);
+      max-height: min(80vh, 760px);
+      overflow: auto;
+      border-radius: 16px;
+      background: #ffffff;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3);
+      border: 1px solid #cbd5e1;
+    }
+
+    .modal-head {
+      position: sticky;
+      top: 0;
+      background: #f8fafc;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .modal-body {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 14px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px 14px;
+    }
+
+    .detail-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #f8fafc;
+    }
+
+    .detail-label {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #64748b;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .detail-value {
+      font-size: 0.9rem;
+      color: var(--ink);
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    .detail-wide {
+      grid-column: 1 / -1;
+    }
+
+    .steps-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .step-card {
+      border: 1px solid #dbe3f0;
+      border-radius: 12px;
+      background: #ffffff;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .step-card-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .step-title {
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .step-meta {
+      font-size: 0.78rem;
+      color: #64748b;
+      font-weight: 700;
+    }
+
+    .qa-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .qa-item {
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      padding: 10px 12px;
+    }
+
+    .qa-label {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #64748b;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .qa-value {
+      font-size: 0.88rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #111827;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .modal-actions button {
+      border: 0;
+      border-radius: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .modal-actions .close {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .modal-actions .danger {
+      background: #b91c1c;
+      color: #fff;
+    }
+
+    .summary-title {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #64748b;
+      font-weight: 800;
+      margin-bottom: -2px;
+    }
+
+    .print-report {
+      display: none;
+    }
+
+    .print-report-header {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .print-report-header h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      color: #0f172a;
+    }
+
+    .print-report-header p {
+      margin: 0;
+      color: #475569;
+      font-size: 0.9rem;
+    }
+
+    .print-submission {
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 14px;
+      margin: 0 0 14px 0;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .print-submission-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .print-submission-title {
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .print-submission-meta {
+      color: #64748b;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .print-step {
+      border-top: 1px solid #e5e7eb;
+      padding-top: 10px;
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .print-step-title {
+      font-weight: 800;
+      color: #1e3a8a;
+      font-size: 0.92rem;
+    }
+
+    .print-qa {
+      display: grid;
+      gap: 8px;
+    }
+
+    .print-qa-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #f8fafc;
+    }
+
+    .print-qa-label {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #64748b;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .print-qa-value {
+      font-size: 0.9rem;
+      color: #111827;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
     .panel-head {
       padding: 10px 12px;
       border-bottom: 1px solid #e5e7eb;
@@ -184,6 +460,10 @@
       background: #b91c1c;
     }
 
+    .act button.detail {
+      background: #2563eb;
+    }
+
     .empty {
       margin: 10px 12px;
       padding: 10px;
@@ -202,11 +482,31 @@
       .hero .nav,
       .tools,
       .act,
-      .panel-head .status {
+      .panel-head .status,
+      .modal-backdrop,
+      .table-wrap,
+      .panel > .table-wrap + .empty {
         display: none !important;
       }
       body { background: #fff; }
       .panel, .hero { box-shadow: none; }
+      .print-report {
+        display: block;
+      }
+      .wrap {
+        max-width: none;
+        padding: 0;
+      }
+      .panel,
+      .hero {
+        border: 0;
+        border-radius: 0;
+      }
+      .print-submission,
+      .print-step {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
     }
   </style>
 </head>
@@ -257,10 +557,7 @@
               <th>Role</th>
               <th>Nama Penguji</th>
               <th>Email</th>
-              <th>Step</th>
-              <th>Pertanyaan</th>
-              <th>Jawaban</th>
-              <th>Catatan</th>
+              <th>Jumlah Item</th>
               <th>Tanggal</th>
               <th>Aksi</th>
             </tr>
@@ -269,6 +566,25 @@
         </table>
       </div>
       <div id="emptyInfo" class="empty" style="display:none;">Belum ada data yang cocok.</div>
+    </section>
+  </div>
+
+  <section id="printReport" class="print-report" aria-hidden="true"></section>
+
+  <div id="detailBackdrop" class="modal-backdrop" aria-hidden="true">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <div class="modal-head">
+        <strong id="detailTitle">Detail Submit</strong>
+        <div class="modal-actions">
+          <button id="btnCloseDetail" class="close" type="button">Tutup</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="detail-grid" id="detailGrid"></div>
+        <div class="modal-actions">
+          <button id="btnDeleteFromDetail" class="danger" type="button">Hapus Submission</button>
+        </div>
+      </div>
     </section>
   </div>
 
@@ -285,8 +601,15 @@
     var resultBody = document.getElementById("resultBody");
     var statusInfo = document.getElementById("statusInfo");
     var emptyInfo = document.getElementById("emptyInfo");
+    var detailBackdrop = document.getElementById("detailBackdrop");
+    var detailGrid = document.getElementById("detailGrid");
+    var btnCloseDetail = document.getElementById("btnCloseDetail");
+    var btnDeleteFromDetail = document.getElementById("btnDeleteFromDetail");
+    var printReport = document.getElementById("printReport");
 
     var allRows = [];
+    var activeDetailId = null;
+    var groupedRows = [];
 
     function headers() {
       return {
@@ -355,8 +678,39 @@
         return sort === "oldest" ? ta - tb : tb - ta;
       });
 
-      renderRows(filtered);
-      return filtered;
+      groupedRows = groupRows(filtered, sort);
+      renderRows(groupedRows);
+      return groupedRows;
+    }
+
+    function groupRows(rows, sort) {
+      var map = {};
+      rows.forEach(function (row) {
+        var key = String(row.submission_id || "");
+        if (!map[key]) {
+          map[key] = {
+            submission_id: row.submission_id,
+            role_name: row.role_name,
+            tester_full_name: row.tester_full_name,
+            tester_email: row.tester_email,
+            submitted_at: row.submitted_at,
+            items: []
+          };
+        }
+        map[key].items.push(row);
+      });
+
+      var groups = Object.keys(map).map(function (key) {
+        return map[key];
+      });
+
+      groups.sort(function (a, b) {
+        var ta = new Date(a.submitted_at).getTime();
+        var tb = new Date(b.submitted_at).getTime();
+        return sort === "oldest" ? ta - tb : tb - ta;
+      });
+
+      return groups;
     }
 
     function renderRows(rows) {
@@ -374,15 +728,105 @@
             "<td>" + esc(row.role_name) + "</td>" +
             "<td>" + esc(row.tester_full_name) + "</td>" +
             "<td>" + esc(row.tester_email) + "</td>" +
-            "<td>" + esc(row.step_title || "-") + "</td>" +
-            "<td>" + esc(row.question_text || "-") + "</td>" +
-            "<td>" + esc(row.answer_value || "-") + "</td>" +
-            "<td>" + esc(row.question_note || row.step_opinion || "-") + "</td>" +
+            "<td>" + esc(row.items.length + " item") + "</td>" +
             "<td>" + esc(new Date(row.submitted_at).toLocaleString("id-ID")) + "</td>" +
-            "<td><div class='act'><button class='delete' type='button' data-delete='" + esc(row.submission_id) + "'>Hapus</button></div></td>" +
+            "<td><div class='act'><button class='detail' type='button' data-detail='" + esc(row.submission_id) + "'>Detail</button><button class='delete' type='button' data-delete='" + esc(row.submission_id) + "'>Hapus</button></div></td>" +
           "</tr>"
         );
       }).join("");
+    }
+
+    function openDetail(submissionId) {
+      var row = groupedRows.find(function (item) {
+        return String(item.submission_id) === String(submissionId);
+      });
+
+      if (!row) {
+        setStatus("Detail tidak ditemukan", true);
+        return;
+      }
+
+      activeDetailId = String(submissionId);
+      var stepGroups = {};
+      row.items.forEach(function (item) {
+        var stepKey = String(item.step_title || "Step") + "||" + String(item.step_order || "");
+        if (!stepGroups[stepKey]) {
+          stepGroups[stepKey] = {
+            step_title: item.step_title || (item.step_order ? "Step " + item.step_order : "Step"),
+            step_order: item.step_order,
+            items: []
+          };
+        }
+        stepGroups[stepKey].items.push(item);
+      });
+
+      var stepList = Object.keys(stepGroups).map(function (key) {
+        return stepGroups[key];
+      }).sort(function (a, b) {
+        return Number(a.step_order || 0) - Number(b.step_order || 0);
+      });
+
+      var summaryHtml = [
+        ["Submission ID", row.submission_id],
+        ["Role", row.role_name],
+        ["Nama Penguji", row.tester_full_name],
+        ["Email", row.tester_email],
+        ["Tanggal Submit", new Date(row.submitted_at).toLocaleString("id-ID")],
+        ["Total Item", row.items.length]
+      ].map(function (item) {
+        return (
+          "<div class='detail-item'>" +
+            "<span class='detail-label'>" + esc(item[0]) + "</span>" +
+            "<div class='detail-value'>" + esc(item[1]) + "</div>" +
+          "</div>"
+        );
+      }).join("");
+
+      var stepsHtml = stepList.map(function (step) {
+        var itemsHtml = step.items.map(function (item) {
+          return (
+            "<div class='qa-grid'>" +
+              "<div class='qa-item'>" +
+                "<span class='qa-label'>Pertanyaan</span>" +
+                "<div class='qa-value'>" + esc(item.question_text || "-") + "</div>" +
+              "</div>" +
+              "<div class='qa-item'>" +
+                "<span class='qa-label'>Jawaban</span>" +
+                "<div class='qa-value'>" + esc(item.answer_value || "-") + "</div>" +
+              "</div>" +
+              "<div class='qa-item'>" +
+                "<span class='qa-label'>Catatan</span>" +
+                "<div class='qa-value'>" + esc(item.question_note || item.step_opinion || "-") + "</div>" +
+              "</div>" +
+            "</div>"
+          );
+        }).join("");
+
+        return (
+          "<section class='step-card'>" +
+            "<div class='step-card-head'>" +
+              "<div class='step-title'>" + esc(step.step_title) + "</div>" +
+              "<div class='step-meta'>" + esc(step.items.length + " item") + "</div>" +
+            "</div>" +
+            itemsHtml +
+          "</section>"
+        );
+      }).join("");
+
+      detailGrid.innerHTML =
+        "<div class='summary-title'>Ringkasan Submit</div>" +
+        "<div class='summary-grid'>" + summaryHtml + "</div>" +
+        "<div class='summary-title'>Detail Step</div>" +
+        "<div class='steps-list'>" + (stepsHtml || "<div class='empty'>Tidak ada detail step.</div>") + "</div>";
+
+      detailBackdrop.classList.add("show");
+      detailBackdrop.setAttribute("aria-hidden", "false");
+    }
+
+    function closeDetail() {
+      activeDetailId = null;
+      detailBackdrop.classList.remove("show");
+      detailBackdrop.setAttribute("aria-hidden", "true");
     }
 
     async function loadData() {
@@ -410,23 +854,7 @@
         return;
       }
 
-      var header = [
-        "Submission ID", "Role", "Nama Penguji", "Email", "Step", "Pertanyaan", "Jawaban", "Catatan", "Tanggal"
-      ];
-      var lines = [header.map(toCsvValue).join(",")];
-      rows.forEach(function (row) {
-        lines.push([
-          row.submission_id,
-          row.role_name,
-          row.tester_full_name,
-          row.tester_email,
-          row.step_title || "",
-          row.question_text || "",
-          row.answer_value || "",
-          row.question_note || row.step_opinion || "",
-          new Date(row.submitted_at).toLocaleString("id-ID")
-        ].map(toCsvValue).join(","));
-      });
+      var lines = buildCsvLines(rows);
 
       var blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
       var url = URL.createObjectURL(blob);
@@ -440,11 +868,144 @@
     }
 
     function downloadPdf() {
-      if (!allRows.length) {
+      if (!groupedRows.length) {
         setStatus("Tidak ada data untuk PDF", true);
         return;
       }
+      renderPrintReport();
       window.print();
+    }
+
+    function buildCsvLines(rows) {
+      var groups = (rows || []).slice().sort(function (a, b) {
+        return new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime();
+      });
+
+      var maxItems = 0;
+      groups.forEach(function (group) {
+        if (group.items.length > maxItems) {
+          maxItems = group.items.length;
+        }
+      });
+
+      var header = [
+        "Submission ID",
+        "Role",
+        "Nama Penguji",
+        "Email",
+        "Tanggal"
+      ];
+
+      for (var i = 1; i <= maxItems; i += 1) {
+        header.push("Step " + i + " - Pertanyaan");
+        header.push("Step " + i + " - Jawaban");
+        header.push("Step " + i + " - Catatan");
+      }
+
+      var lines = [header.map(toCsvValue).join(",")];
+
+      groups.forEach(function (group) {
+        group.items = group.items.slice().sort(function (a, b) {
+          return Number(a.step_order || 0) - Number(b.step_order || 0);
+        });
+
+        var row = [
+          group.submission_id,
+          group.role_name,
+          group.tester_full_name,
+          group.tester_email,
+          new Date(group.submitted_at).toLocaleString("id-ID")
+        ];
+
+        group.items.forEach(function (item, index) {
+          row.push(item.question_text || "");
+          row.push(item.answer_value || "");
+          row.push(item.question_note || item.step_opinion || "");
+        });
+
+        while (row.length < header.length) {
+          row.push("");
+        }
+
+        lines.push(row.map(toCsvValue).join(","));
+      });
+
+      return lines;
+    }
+
+    function renderPrintReport() {
+      var rows = groupedRows.slice();
+      if (!rows.length) {
+        printReport.innerHTML = "";
+        return;
+      }
+
+      var html = [
+        "<div class='print-report-header'>" +
+          "<h1>Hasil Pengujian User Flow</h1>" +
+          "<p>Ringkasan hasil submit per penguji dengan detail step, pertanyaan, jawaban, dan catatan.</p>" +
+        "</div>"
+      ];
+
+      rows.forEach(function (row) {
+        var stepGroups = {};
+        row.items.forEach(function (item) {
+          var stepKey = String(item.step_title || "Step") + "||" + String(item.step_order || "");
+          if (!stepGroups[stepKey]) {
+            stepGroups[stepKey] = {
+              step_title: item.step_title || (item.step_order ? "Step " + item.step_order : "Step"),
+              step_order: item.step_order,
+              items: []
+            };
+          }
+          stepGroups[stepKey].items.push(item);
+        });
+
+        var stepList = Object.keys(stepGroups).map(function (key) {
+          return stepGroups[key];
+        }).sort(function (a, b) {
+          return Number(a.step_order || 0) - Number(b.step_order || 0);
+        });
+
+        var stepsHtml = stepList.map(function (step) {
+          var qaHtml = step.items.map(function (item) {
+            return (
+              "<div class='print-qa-item'>" +
+                "<span class='print-qa-label'>Pertanyaan</span>" +
+                "<div class='print-qa-value'>" + esc(item.question_text || "-") + "</div>" +
+                "<span class='print-qa-label' style='margin-top:8px;'>Jawaban</span>" +
+                "<div class='print-qa-value'>" + esc(item.answer_value || "-") + "</div>" +
+                "<span class='print-qa-label' style='margin-top:8px;'>Catatan</span>" +
+                "<div class='print-qa-value'>" + esc(item.question_note || item.step_opinion || "-") + "</div>" +
+              "</div>"
+            );
+          }).join("");
+
+          return (
+            "<div class='print-step'>" +
+              "<div class='print-step-title'>" + esc(step.step_title) + "</div>" +
+              "<div class='print-qa'>" + qaHtml + "</div>" +
+            "</div>"
+          );
+        }).join("");
+
+        html.push(
+          "<article class='print-submission'>" +
+            "<div class='print-submission-head'>" +
+              "<div class='print-submission-title'>" + esc(row.tester_full_name) + "</div>" +
+              "<div class='print-submission-meta'>" + esc(row.role_name) + " • " + esc(new Date(row.submitted_at).toLocaleString("id-ID")) + "</div>" +
+            "</div>" +
+            "<div class='summary-grid'>" +
+              "<div class='detail-item'><span class='detail-label'>Submission ID</span><div class='detail-value'>" + esc(row.submission_id) + "</div></div>" +
+              "<div class='detail-item'><span class='detail-label'>Email</span><div class='detail-value'>" + esc(row.tester_email) + "</div></div>" +
+              "<div class='detail-item'><span class='detail-label'>Total Item</span><div class='detail-value'>" + esc(row.items.length) + "</div></div>" +
+            "</div>" +
+            stepsHtml +
+          "</article>"
+        );
+      });
+
+      printReport.innerHTML = html.join("");
     }
 
     async function deleteSubmission(submissionId) {
@@ -467,13 +1028,37 @@
     btnRefresh.addEventListener("click", loadData);
     btnCsv.addEventListener("click", downloadCsv);
     btnPdf.addEventListener("click", downloadPdf);
+    btnCloseDetail.addEventListener("click", closeDetail);
+    btnDeleteFromDetail.addEventListener("click", function () {
+      if (activeDetailId) {
+        deleteSubmission(activeDetailId);
+        closeDetail();
+      }
+    });
+
+    detailBackdrop.addEventListener("click", function (event) {
+      if (event.target === detailBackdrop) {
+        closeDetail();
+      }
+    });
+
+    window.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closeDetail();
+      }
+    });
 
     resultBody.addEventListener("click", function (event) {
       var target = event.target;
       if (!(target instanceof HTMLElement)) {
         return;
       }
+      var detailId = target.getAttribute("data-detail");
       var id = target.getAttribute("data-delete");
+      if (detailId) {
+        openDetail(detailId);
+        return;
+      }
       if (id) {
         deleteSubmission(id);
       }
