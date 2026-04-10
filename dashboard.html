@@ -196,6 +196,48 @@
       font-weight: 600;
     }
 
+    .head-notification {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid #6b7280;
+      background: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #374151;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .head-notification:hover {
+      background: #eceff3;
+      border-color: #374151;
+    }
+
+    .head-notification svg {
+      width: 17px;
+      height: 17px;
+    }
+
+    .notif-count-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #b91c1c;
+      color: #ffffff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+      padding: 0 4px;
+      border: 2px solid #f3f3f3;
+    }
+
     .world-link {
       display: inline-flex;
       align-items: center;
@@ -507,6 +549,139 @@
       z-index: 2;
     }
 
+    .notification-panel {
+      margin-top: 12px;
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .notification-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .notification-tab {
+      border: 1px solid #c8d1e2;
+      background: #f8fafc;
+      color: #334155;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .notification-tab.active {
+      background: #1f2937;
+      color: #ffffff;
+      border-color: #1f2937;
+    }
+
+    .notification-tools {
+      padding: 12px;
+      border-bottom: 1px solid #c8c8c8;
+      display: grid;
+      grid-template-columns: 1.1fr 0.7fr 0.7fr;
+      gap: 8px;
+    }
+
+    .notification-tools input,
+    .notification-tools select {
+      width: 100%;
+      border: 1px solid #b8b8b8;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      background: #ffffff;
+    }
+
+    .notification-list {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .notification-item {
+      border: 1px solid #d4d4d4;
+      border-radius: 12px;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      background: #fafafa;
+    }
+
+    .notification-item.unread {
+      border-left: 4px solid #1f2937;
+    }
+
+    .notification-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .notification-top h4 {
+      margin: 0;
+      font-size: 0.96rem;
+      line-height: 1.35;
+    }
+
+    .notification-top small {
+      color: #64748b;
+      font-size: 0.75rem;
+    }
+
+    .notification-meta {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      color: #64748b;
+      font-size: 0.76rem;
+    }
+
+    .notification-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mini-btn {
+      text-decoration: none;
+      border: 0;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #4b5563 0%, #1f2937 100%);
+      color: #ffffff;
+      font-weight: 700;
+      padding: 5px 9px;
+      font-size: 0.74rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mini-btn.ghost {
+      border: 1px solid #aeb9c8;
+      background: #ffffff;
+      color: #1f2937;
+    }
+
+    .notification-empty {
+      border: 1px dashed #b7b7b7;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.82rem;
+      color: #5b5b5b;
+      background: #fafafa;
+    }
+
     @media (max-width: 1080px) {
       .cards {
         grid-template-columns: repeat(2, minmax(150px, 1fr));
@@ -517,6 +692,10 @@
       }
 
       .chart-row {
+        grid-template-columns: 1fr;
+      }
+
+      .notification-tools {
         grid-template-columns: 1fr;
       }
     }
@@ -624,7 +803,6 @@
         <button class="group-toggle" type="button">Sistem <span>+</span></button>
         <div class="group-items">
           <a class="menu-link" href="#">Log Aktivitas</a>
-          <a class="menu-link" href="#">Notifikasi Sistem</a>
         </div>
       </div>
 
@@ -638,6 +816,13 @@
       <header class="dashboard-headline-bar" aria-label="Header dashboard waktu berjalan">
         <h1>Dashboard</h1>
         <div class="head-meta">
+          <button id="notificationBtn" class="head-notification" type="button" aria-label="Buka notifikasi" title="Notifikasi">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 9C6 5.7 8.7 3 12 3C15.3 3 18 5.7 18 9V12.2L19.6 15.4C19.8 15.8 19.7 16.3 19.4 16.6C19.2 16.9 18.8 17 18.4 17H5.6C5.2 17 4.8 16.9 4.6 16.6C4.3 16.3 4.2 15.8 4.4 15.4L6 12.2V9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path>
+              <path d="M9.5 17C9.8 18.2 10.9 19 12 19C13.1 19 14.2 18.2 14.5 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
+            </svg>
+            <span id="notificationCount" class="notif-count-badge">4</span>
+          </button>
           <span id="liveDateTime">-</span>
           <a class="world-link" href="home.html?session=active" title="Kembali ke Home (tetap login)">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -796,6 +981,37 @@
           </div>
         </article>
       </section>
+
+      <section id="notificationPanel" class="notification-panel" aria-label="Notifikasi admin dan super admin">
+        <header class="panel-head">
+          <h2>Notifikasi</h2>
+          <div class="notification-tabs" role="tablist" aria-label="Filter notifikasi cepat">
+            <button class="notification-tab active" type="button" data-admin-notif-tab="all">Semua</button>
+            <button class="notification-tab" type="button" data-admin-notif-tab="tugas">Tugas</button>
+            <button class="notification-tab" type="button" data-admin-notif-tab="tukar">Tukar Jadwal</button>
+            <button class="notification-tab" type="button" data-admin-notif-tab="peminjaman">Peminjaman</button>
+            <button class="notification-tab" type="button" data-admin-notif-tab="agenda">Agenda</button>
+            <button class="notification-tab" type="button" data-admin-notif-tab="keanggotaan">Status Keanggotaan</button>
+          </div>
+        </header>
+        <div class="notification-tools">
+          <input id="notificationSearch" type="search" placeholder="Cari notifikasi...">
+          <select id="notificationTypeFilter" aria-label="Filter jenis notifikasi">
+            <option value="all">Semua Jenis</option>
+            <option value="tugas">Notifikasi Pengingat Tugas</option>
+            <option value="tukar">Notifikasi Tukar Jadwal</option>
+            <option value="peminjaman">Notifikasi Peminjaman</option>
+            <option value="agenda">Notifikasi Agenda/Pengumuman</option>
+            <option value="keanggotaan">Notifikasi Status Keanggotaan</option>
+          </select>
+          <select id="notificationStatusFilter" aria-label="Filter status notifikasi">
+            <option value="all">Semua Status</option>
+            <option value="unread">Belum Dibaca</option>
+            <option value="read">Sudah Dibaca</option>
+          </select>
+        </div>
+        <div id="notificationList" class="notification-list"></div>
+      </section>
     </main>
   </div>
 
@@ -839,6 +1055,24 @@
     const publikasiMenuGroup = document.getElementById("publikasiMenuGroup");
     const kontenMenuGroup = document.getElementById("kontenMenuGroup");
     const keanggotaanMenuGroup = document.getElementById("keanggotaanMenuGroup");
+    const notificationBtn = document.getElementById("notificationBtn");
+    const notificationCount = document.getElementById("notificationCount");
+    const notificationPanel = document.getElementById("notificationPanel");
+    const notificationSearch = document.getElementById("notificationSearch");
+    const notificationTypeFilter = document.getElementById("notificationTypeFilter");
+    const notificationStatusFilter = document.getElementById("notificationStatusFilter");
+    const notificationList = document.getElementById("notificationList");
+    const notificationTabs = Array.from(document.querySelectorAll("[data-admin-notif-tab]"));
+    const NOTIFICATION_STORAGE_KEY = "crembo-admin-notifications";
+    let notificationTab = "all";
+
+    const DEFAULT_NOTIFICATIONS = [
+      { id: "admin-notif-1", type: "tugas", title: "Pengingat penjadwalan petugas", message: "Ada jadwal misa akhir pekan yang masih kurang 1 petugas operator.", date: "2026-04-10 07:30", status: "unread" },
+      { id: "admin-notif-2", type: "tukar", title: "Permintaan tukar jadwal masuk", message: "Anggota mengajukan tukar jadwal untuk misa hari Minggu.", date: "2026-04-09 15:20", status: "read" },
+      { id: "admin-notif-3", type: "peminjaman", title: "Pengajuan peminjaman menunggu persetujuan", message: "Pengajuan peminjaman kamera Sony FX3 menunggu tindakan admin.", date: "2026-04-09 10:10", status: "unread" },
+      { id: "admin-notif-4", type: "agenda", title: "Draft agenda siap dipublikasi", message: "Agenda latihan tim multimedia sudah siap untuk ditinjau.", date: "2026-04-08 18:00", status: "read" },
+      { id: "admin-notif-5", type: "keanggotaan", title: "Permintaan status anggota", message: "Ada 2 pengajuan perubahan status keanggotaan yang perlu diverifikasi.", date: "2026-04-08 08:45", status: "unread" }
+    ];
 
     function formatRole(value) {
       if (value === "super_admin") {
@@ -987,6 +1221,83 @@
       return matched ? normalizePermissions(matched.permissions) : defaultPermissions();
     }
 
+    function seedNotificationsIfEmpty() {
+      if (!localStorage.getItem(NOTIFICATION_STORAGE_KEY)) {
+        localStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(DEFAULT_NOTIFICATIONS));
+      }
+    }
+
+    function readNotifications() {
+      const raw = localStorage.getItem(NOTIFICATION_STORAGE_KEY);
+      const parsed = raw ? safeParse(raw) : null;
+      return Array.isArray(parsed) ? parsed : DEFAULT_NOTIFICATIONS.slice();
+    }
+
+    function saveNotifications(items) {
+      localStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function notificationTypeLabel(type) {
+      if (type === "tugas") return "Notifikasi Pengingat Tugas";
+      if (type === "tukar") return "Notifikasi Tukar Jadwal";
+      if (type === "peminjaman") return "Notifikasi Peminjaman";
+      if (type === "agenda") return "Notifikasi Agenda/Pengumuman";
+      if (type === "keanggotaan") return "Notifikasi Status Keanggotaan";
+      return "Notifikasi";
+    }
+
+    function renderNotifications() {
+      const keyword = String(notificationSearch.value || "").trim().toLowerCase();
+      const typeFilter = notificationTypeFilter.value;
+      const statusFilter = notificationStatusFilter.value;
+      const items = readNotifications();
+
+      const filtered = items.filter(function (item) {
+        const matchesTab = notificationTab === "all" || item.type === notificationTab;
+        const matchesType = typeFilter === "all" || item.type === typeFilter;
+        const matchesStatus = statusFilter === "all" || item.status === statusFilter;
+        const text = [item.title, item.message, notificationTypeLabel(item.type), item.date].join(" ").toLowerCase();
+        const matchesKeyword = !keyword || text.indexOf(keyword) !== -1;
+        return matchesTab && matchesType && matchesStatus && matchesKeyword;
+      });
+
+      notificationCount.textContent = String(items.filter(function (item) { return item.status === "unread"; }).length);
+
+      if (!filtered.length) {
+        notificationList.innerHTML = '<div class="notification-empty">Tidak ada notifikasi sesuai filter.</div>';
+        return;
+      }
+
+      notificationList.innerHTML = filtered.map(function (item) {
+        const badgeClass = item.status === "unread" ? "status" : "status";
+        const badgeLabel = item.status === "unread" ? "Baru" : "Dibaca";
+        const openClass = item.status === "unread" ? " unread" : "";
+        const toggleLabel = item.status === "unread" ? "Tandai Dibaca" : "Tandai Baru";
+        return '<article class="notification-item' + openClass + '">'
+          + '<div class="notification-top">'
+          + '<div>'
+          + '<h4>' + item.title + '</h4>'
+          + '<small>' + notificationTypeLabel(item.type) + '</small>'
+          + '</div>'
+          + '<span class="' + badgeClass + '">' + badgeLabel + '</span>'
+          + '</div>'
+          + '<div>' + item.message + '</div>'
+          + '<div class="notification-meta"><span>' + item.date + '</span><span>ID: ' + item.id + '</span></div>'
+          + '<div class="notification-actions">'
+          + '<button class="mini-btn ghost" type="button" data-notif-action="toggle" data-notif-id="' + item.id + '">' + toggleLabel + '</button>'
+          + '</div>'
+          + '</article>';
+      }).join("");
+    }
+
+    function activateNotificationTab(tabValue) {
+      notificationTab = tabValue || "all";
+      notificationTabs.forEach(function (tabButton) {
+        tabButton.classList.toggle("active", tabButton.getAttribute("data-admin-notif-tab") === notificationTab);
+      });
+      renderNotifications();
+    }
+
     function applyMenuAccessByPermission() {
       const permissions = resolveAdminPermissions();
       if (role === "super_admin") {
@@ -1069,6 +1380,8 @@
     renderRoleNote(role);
     renderLogs(role);
     applyMenuAccessByPermission();
+    seedNotificationsIfEmpty();
+    renderNotifications();
 
     function updateLiveDateTime() {
       const now = new Date();
@@ -1286,6 +1599,46 @@
     metricScheduleRange.addEventListener("change", renderScheduleMetric);
     jadwalChartRange.addEventListener("change", renderScheduleChart);
     peminjamanChartRange.addEventListener("change", renderBorrowingChart);
+
+    notificationBtn.addEventListener("click", function () {
+      notificationPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    notificationSearch.addEventListener("input", renderNotifications);
+    notificationTypeFilter.addEventListener("change", function (event) {
+      activateNotificationTab(event.target.value === "all" ? "all" : event.target.value);
+      notificationTypeFilter.value = event.target.value;
+    });
+    notificationStatusFilter.addEventListener("change", renderNotifications);
+    notificationTabs.forEach(function (tabButton) {
+      tabButton.addEventListener("click", function () {
+        const tabValue = tabButton.getAttribute("data-admin-notif-tab") || "all";
+        notificationTypeFilter.value = tabValue === "all" ? "all" : tabValue;
+        activateNotificationTab(tabValue);
+      });
+    });
+
+    notificationList.addEventListener("click", function (event) {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+      const action = target.getAttribute("data-notif-action");
+      const id = target.getAttribute("data-notif-id");
+      if (action !== "toggle" || !id) {
+        return;
+      }
+
+      const items = readNotifications();
+      const item = items.find(function (row) { return row.id === id; });
+      if (!item) {
+        return;
+      }
+
+      item.status = item.status === "unread" ? "read" : "unread";
+      saveNotifications(items);
+      renderNotifications();
+    });
 
     document.querySelectorAll(".group-toggle").forEach(function (button) {
       button.addEventListener("click", function () {

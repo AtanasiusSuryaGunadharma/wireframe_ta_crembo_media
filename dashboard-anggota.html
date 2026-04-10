@@ -1223,7 +1223,6 @@
           + '<div class="notification-meta"><span>' + item.date + '</span><span>ID: ' + item.id + '</span></div>'
           + '<div class="notification-actions">'
           + '<button class="mini-btn ghost" type="button" data-notif-action="toggle" data-notif-id="' + item.id + '">' + (item.status === "unread" ? 'Tandai Dibaca' : 'Tandai Baru') + '</button>'
-          + '<button class="mini-btn" type="button" data-notif-action="focus" data-notif-id="' + item.id + '">Fokus</button>'
           + '</div>'
           + '</article>';
       }).join('');
@@ -1652,11 +1651,6 @@
         return;
       }
 
-      if (action === "focus") {
-        activateNotificationTab(item.type);
-        notificationTypeFilter.value = item.type;
-        notificationPanel.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
     });
   </script>
 </body>
