@@ -2,141 +2,6 @@
   var SUPABASE_URL = "https://iyqfsgtawhkbvbkvrbsa.supabase.co";
   var SUPABASE_PUBLISHABLE_KEY = "sb_publishable_MJ58ehoCWPwvX1m836BOPA_AhZepXMQ";
 
-  var FLOW_DEFINITIONS = {
-    "super-admin": [
-      {
-        step_no: 1,
-        step_title: "Autentikasi & Masuk Dashboard",
-        action_instruction: "Silakan klik tombol Login pada kanan atas halaman Home, kemudian login dengan akun Super Admin dan pastikan masuk ke dashboard.",
-        question_text: "Apakah alur autentikasi dan tampilan dashboard Super Admin sudah sesuai kebutuhan?"
-      },
-      {
-        step_no: 2,
-        step_title: "Manajemen User & Keanggotaan",
-        action_instruction: "Silakan buka modul manajemen anggota/admin, lalu cek apakah data bisa dilihat dengan struktur yang jelas.",
-        question_text: "Apakah fitur manajemen user dan keanggotaan sudah lengkap dan mudah dipahami?"
-      },
-      {
-        step_no: 3,
-        step_title: "Operasional Streaming",
-        action_instruction: "Silakan uji alur jadwal streaming, registrasi misa besar, penugasan petugas, dan monitoring evaluasi.",
-        question_text: "Apakah alur operasional streaming berjalan runtut dan informasinya jelas?"
-      },
-      {
-        step_no: 4,
-        step_title: "Inventaris & Peminjaman",
-        action_instruction: "Silakan cek data inventaris, persetujuan peminjaman, serta riwayat pinjam-kembali.",
-        question_text: "Apakah fitur inventaris dan peminjaman sudah mendukung kebutuhan operasional?"
-      },
-      {
-        step_no: 5,
-        step_title: "Informasi & Publikasi",
-        action_instruction: "Silakan uji kelola profil, berita/pengumuman, serta agenda publik.",
-        question_text: "Apakah modul informasi dan publikasi sudah sesuai untuk pengelolaan konten?"
-      },
-      {
-        step_no: 6,
-        step_title: "Konten Utama Website",
-        action_instruction: "Silakan cek pengelolaan carousel, embed media, dan tampilan hasil pencarian.",
-        question_text: "Apakah modul konten utama website sudah tampil konsisten dan siap digunakan?"
-      },
-      {
-        step_no: 7,
-        step_title: "Form Pendaftaran Kegiatan",
-        action_instruction: "Silakan uji dari builder form hingga pengecekan daftar pendaftar.",
-        question_text: "Apakah alur form pendaftaran kegiatan sudah lengkap dari hulu ke hilir?"
-      },
-      {
-        step_no: 8,
-        step_title: "Log Aktivitas & Penutupan Sesi",
-        action_instruction: "Silakan uji halaman log aktivitas, lalu lakukan penutupan sesi pengujian.",
-        question_text: "Apakah log aktivitas dan penutupan sesi sudah sesuai ekspektasi pengujian?"
-      }
-    ],
-    "admin": [
-      {
-        step_no: 1,
-        step_title: "Login & Dashboard Admin",
-        action_instruction: "Silakan klik Login di kanan atas Home, masuk sebagai Admin, lalu verifikasi tampilan dashboard.",
-        question_text: "Apakah proses login dan tampilan dashboard Admin sudah sesuai?"
-      },
-      {
-        step_no: 2,
-        step_title: "Modul Streaming",
-        action_instruction: "Silakan uji jadwal streaming, registrasi misa besar, penugasan, dan monitoring evaluasi.",
-        question_text: "Apakah modul streaming untuk Admin berjalan baik dan jelas?"
-      },
-      {
-        step_no: 3,
-        step_title: "Inventaris & Peminjaman",
-        action_instruction: "Silakan lakukan pengecekan alur inventaris, approval, dan riwayat peminjaman.",
-        question_text: "Apakah alur inventaris dan peminjaman untuk Admin sudah memadai?"
-      },
-      {
-        step_no: 4,
-        step_title: "Publikasi & Konten Website",
-        action_instruction: "Silakan cek pengelolaan profil, berita, agenda, dan konten utama website.",
-        question_text: "Apakah fitur publikasi dan konten website sudah mudah digunakan?"
-      },
-      {
-        step_no: 5,
-        step_title: "Keanggotaan & Form Kegiatan",
-        action_instruction: "Silakan uji manajemen anggota, sertifikat, builder form, dan daftar pendaftar.",
-        question_text: "Apakah fitur keanggotaan dan form kegiatan sudah sesuai alur kerja Admin?"
-      },
-      {
-        step_no: 6,
-        step_title: "Log Aktivitas, Laporan, Logout",
-        action_instruction: "Silakan uji log aktivitas Admin, lalu lakukan logout untuk menutup sesi.",
-        question_text: "Apakah log aktivitas dan alur logout Admin sudah berjalan dengan baik?"
-      }
-    ],
-    "anggota": [
-      {
-        step_no: 1,
-        step_title: "Masuk Sistem Anggota",
-        action_instruction: "Silakan klik Login dari Home, masuk dengan akun Anggota, lalu cek dashboard anggota.",
-        question_text: "Apakah proses masuk sistem anggota sudah jelas dan mudah?"
-      },
-      {
-        step_no: 2,
-        step_title: "Profil, Sertifikat, dan Log Pribadi",
-        action_instruction: "Silakan cek profil, unduh sertifikat, dan buka log aktivitas pribadi.",
-        question_text: "Apakah fitur identitas anggota sudah sesuai kebutuhan pengujian?"
-      },
-      {
-        step_no: 3,
-        step_title: "Flow Tugas Streaming Anggota",
-        action_instruction: "Silakan uji alur dari lihat jadwal, request tugas, pembatalan/tukar jadwal, hingga evaluasi.",
-        question_text: "Apakah alur tugas streaming anggota sudah runtut dan mudah diikuti?"
-      },
-      {
-        step_no: 4,
-        step_title: "Monitoring Kewajiban Tugas",
-        action_instruction: "Silakan buka monitoring kewajiban dan cek status kewajiban tugas pribadi.",
-        question_text: "Apakah monitoring kewajiban tugas sudah informatif untuk anggota?"
-      },
-      {
-        step_no: 5,
-        step_title: "Flow Peminjaman Barang",
-        action_instruction: "Silakan uji alur pengajuan pinjam, pengambilan, pengembalian, dan riwayat peminjaman.",
-        question_text: "Apakah alur peminjaman barang anggota sudah jelas dari awal sampai akhir?"
-      },
-      {
-        step_no: 6,
-        step_title: "Form Pendaftaran Kegiatan + Notifikasi",
-        action_instruction: "Silakan cek daftar form kegiatan, isi form detail, lalu uji panel notifikasi di header.",
-        question_text: "Apakah alur form pendaftaran dan notifikasi anggota sudah berjalan baik?"
-      },
-      {
-        step_no: 7,
-        step_title: "Selesai Pengujian Anggota",
-        action_instruction: "Silakan validasi alur kembali ke Home dan lakukan logout.",
-        question_text: "Apakah alur penutupan sesi anggota sudah sesuai harapan?"
-      }
-    ]
-  };
-
   function headers() {
     return {
       apikey: SUPABASE_PUBLISHABLE_KEY,
@@ -157,6 +22,8 @@
   function byId(id) {
     return document.getElementById(id);
   }
+
+  var runtimeDefs = [];
 
   function asNumber(value) {
     var parsed = Number(value);
@@ -210,18 +77,39 @@
       var laneTitleEl = lane.querySelector(".lane-head h2");
       var laneTitle = laneTitleEl ? String(laneTitleEl.textContent || "").trim() : "";
       var nodes = lane.querySelectorAll(".flow .node");
+      var prevNodeTitle = "";
 
       nodes.forEach(function (node) {
         var nodeTitleEl = node.querySelector("strong");
         var nodeDescEl = node.querySelector("p");
         var nodeTitle = nodeTitleEl ? String(nodeTitleEl.textContent || "").trim() : "Langkah " + stepNo;
         var nodeDesc = nodeDescEl ? String(nodeDescEl.textContent || "").trim() : "Silakan uji langkah ini sesuai skenario flow.";
+        var links = Array.prototype.slice.call(node.querySelectorAll("a")).map(function (a) {
+          return String(a.textContent || "").trim();
+        }).filter(Boolean);
+
+        var openText = links.length
+          ? "Klik dan buka halaman berikut secara berurutan: " + links.join(" lalu ") + "."
+          : "Buka halaman pada node ini dari tautan yang tersedia.";
+
+        var prevText = prevNodeTitle
+          ? "Setelah menyelesaikan langkah \"" + prevNodeTitle + "\", lanjutkan ke langkah ini."
+          : "Mulai dari langkah ini sebagai awal alur pengujian.";
+
+        var actionInstruction = [
+          prevText,
+          openText,
+          "Fokuskan pengujian pada: " + nodeDesc,
+          "Setelah selesai, simpan perubahan jika ada dan lanjutkan ke langkah berikutnya."
+        ].join(" ");
+
+        prevNodeTitle = nodeTitle;
 
         defs.push({
           step_no: stepNo,
           step_title: nodeTitle,
           flow_title: laneTitle,
-          action_instruction: nodeDesc || ("Silakan uji " + nodeTitle + " pada flow " + laneTitle + "."),
+          action_instruction: actionInstruction,
           question_text: "Apakah " + nodeTitle + " pada " + laneTitle + " sudah sesuai dan mudah digunakan?"
         });
 
@@ -354,7 +242,7 @@
 
     var root = byId("ufQuestionnaire");
     var flowSlug = root ? root.getAttribute("data-flow-slug") : "";
-    var defs = FLOW_DEFINITIONS[flowSlug] || [];
+    var defs = runtimeDefs.length ? runtimeDefs : collectNodeDefinitions(flowSlug);
 
     var fullName = String(byId("testerFullName").value || "").trim();
     if (!fullName) {
@@ -471,8 +359,8 @@
     injectStyles();
 
     var flowSlug = section.getAttribute("data-flow-slug");
-    var defs = collectNodeDefinitions(flowSlug);
-    buildQuestionnaire(defs);
+    runtimeDefs = collectNodeDefinitions(flowSlug);
+    buildQuestionnaire(runtimeDefs);
     byId("ufForm").addEventListener("submit", handleSubmit);
   }
 
