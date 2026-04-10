@@ -181,6 +181,21 @@
       </div>
     </header>
 
+    <section class="lane uf-identity-lane">
+      <div class="lane-head">
+        <h2>Identitas Penguji</h2>
+        <small>Wajib diisi sebelum menilai flow</small>
+      </div>
+      <div class="flow" style="display:block; padding-bottom:12px;">
+        <div class="uf-grid">
+          <input id="testerFullName" type="text" placeholder="Nama lengkap penguji" required>
+          <input id="testerOrg" type="text" placeholder="Instansi / Kelas / Unit">
+          <input id="testerEmail" type="email" placeholder="Email penguji (opsional)">
+          <input id="testerPhone" type="text" placeholder="No HP penguji (opsional)">
+        </div>
+      </div>
+    </section>
+
     <section class="lane">
       <div class="lane-head"><h2>1) Login & Dashboard Admin</h2><small>Start</small></div>
       <div class="flow">
@@ -252,16 +267,9 @@
     <section id="ufQuestionnaire" class="lane" data-flow-slug="admin">
       <div class="lane-head">
         <h2>7) Form Kuesioner Pengujian</h2>
-        <small>Isi identitas, jawab pertanyaan, lalu submit</small>
+        <small>Kartu pertanyaan muncul di setiap kotak flow, submit ada di bawah</small>
       </div>
       <form id="ufForm" class="uf-form" autocomplete="off">
-        <div class="uf-grid">
-          <input id="testerFullName" type="text" placeholder="Nama lengkap penguji" required>
-          <input id="testerOrg" type="text" placeholder="Instansi / Kelas / Unit">
-          <input id="testerEmail" type="email" placeholder="Email penguji (opsional)">
-          <input id="testerPhone" type="text" placeholder="No HP penguji (opsional)">
-        </div>
-        <div id="ufQuestionList" class="uf-question-list"></div>
         <div class="uf-submit-row">
           <button id="ufSubmitBtn" class="uf-btn" type="submit">Submit Hasil Pengujian</button>
           <a class="uf-btn link" href="user-flow-hasil.html">Lihat Halaman Hasil</a>

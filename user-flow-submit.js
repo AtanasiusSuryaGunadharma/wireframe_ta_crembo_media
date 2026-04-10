@@ -158,6 +158,11 @@
     return document.getElementById(id);
   }
 
+  function asNumber(value) {
+    var parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : NaN;
+  }
+
   async function requestJson(method, path, body) {
     var options = {
       method: method,
@@ -187,6 +192,46 @@
     return rows[0];
   }
 
+  function collectNodeDefinitions(flowSlug) {
+    var questionnaire = byId("ufQuestionnaire");
+    if (!questionnaire) {
+      return [];
+    }
+
+    var lanes = Array.prototype.slice.call(document.querySelectorAll(".lane"));
+    var defs = [];
+    var stepNo = 1;
+
+    lanes.forEach(function (lane) {
+      if (lane === questionnaire || lane.classList.contains("checklist-lane")) {
+        return;
+      }
+
+      var laneTitleEl = lane.querySelector(".lane-head h2");
+      var laneTitle = laneTitleEl ? String(laneTitleEl.textContent || "").trim() : "";
+      var nodes = lane.querySelectorAll(".flow .node");
+
+      nodes.forEach(function (node) {
+        var nodeTitleEl = node.querySelector("strong");
+        var nodeDescEl = node.querySelector("p");
+        var nodeTitle = nodeTitleEl ? String(nodeTitleEl.textContent || "").trim() : "Langkah " + stepNo;
+        var nodeDesc = nodeDescEl ? String(nodeDescEl.textContent || "").trim() : "Silakan uji langkah ini sesuai skenario flow.";
+
+        defs.push({
+          step_no: stepNo,
+          step_title: nodeTitle,
+          flow_title: laneTitle,
+          action_instruction: nodeDesc || ("Silakan uji " + nodeTitle + " pada flow " + laneTitle + "."),
+          question_text: "Apakah " + nodeTitle + " pada " + laneTitle + " sudah sesuai dan mudah digunakan?"
+        });
+
+        stepNo += 1;
+      });
+    });
+
+    return defs;
+  }
+
   async function ensureStepsAndQuestions(flowId, defs) {
     var existingSteps = await requestJson(
       "GET",
@@ -195,12 +240,12 @@
 
     var byStepNo = {};
     (existingSteps || []).forEach(function (row) {
-      byStepNo[row.step_no] = row;
+      byStepNo[asNumber(row.step_no)] = row;
     });
 
     for (var i = 0; i < defs.length; i += 1) {
       var item = defs[i];
-      if (!byStepNo[item.step_no]) {
+      if (!byStepNo[asNumber(item.step_no)]) {
         var inserted = await requestJson("POST", "/rest/v1/uf_steps", {
           flow_id: flowId,
           step_no: item.step_no,
@@ -220,39 +265,36 @@
       "/rest/v1/uf_steps?select=id,flow_id,step_no,step_title&flow_id=eq." + flowId + "&order=step_no.asc"
     );
 
-    var stepIds = existingSteps.map(function (row) {
-      return row.id;
-    });
-
     var qMap = {};
-    if (stepIds.length) {
-      var inFilter = stepIds.join(",");
-      var questions = await requestJson(
-        "GET",
-        "/rest/v1/uf_questions?select=id,step_id,question_no,question_text&step_id=in.(" + inFilter + ")"
-      );
-
-      (questions || []).forEach(function (q) {
-        qMap[q.step_id] = q;
+    for (var j = 0; j < defs.length; j += 1) {
+      var currentDef = defs[j];
+      var step = existingSteps.find(function (row) {
+        return asNumber(row.step_no) === asNumber(currentDef.step_no);
       });
 
-      for (var j = 0; j < defs.length; j += 1) {
-        var step = existingSteps.find(function (row) {
-          return row.step_no === defs[j].step_no;
-        });
+      if (!step) {
+        continue;
+      }
 
-        if (step && !qMap[step.id]) {
-          var insertedQuestion = await requestJson("POST", "/rest/v1/uf_questions", {
-            step_id: step.id,
-            question_no: 1,
-            question_text: defs[j].question_text,
-            answer_type: "yes_no_note"
-          });
+      var questions = await requestJson(
+        "GET",
+        "/rest/v1/uf_questions?select=id,step_id,question_no,question_text&step_id=eq." + encodeURIComponent(step.id) + "&question_no=eq.1"
+      );
 
-          if (insertedQuestion && insertedQuestion.length) {
-            qMap[step.id] = insertedQuestion[0];
-          }
-        }
+      if (questions && questions.length) {
+        qMap[step.id] = questions[0];
+        continue;
+      }
+
+      var insertedQuestion = await requestJson("POST", "/rest/v1/uf_questions", {
+        step_id: step.id,
+        question_no: 1,
+        question_text: currentDef.question_text,
+        answer_type: "yes_no_note"
+      });
+
+      if (insertedQuestion && insertedQuestion.length) {
+        qMap[step.id] = insertedQuestion[0];
       }
     }
 
@@ -263,28 +305,33 @@
   }
 
   function buildQuestionnaire(defs) {
-    var container = byId("ufQuestionList");
-    if (!container) {
-      return;
-    }
+    defs.forEach(function (item) {
+      var candidates = document.querySelectorAll(".lane .flow .node");
+      var node = candidates[item.step_no - 1];
+      if (!node || node.querySelector(".uf-node-question")) {
+        return;
+      }
 
-    container.innerHTML = defs.map(function (item) {
-      return (
-        '<article class="uf-q-item" data-step-no="' + item.step_no + '">' +
-          '<header><strong>Step ' + item.step_no + " - " + escapeHtml(item.step_title) + '</strong></header>' +
-          '<p class="uf-action">' + escapeHtml(item.action_instruction) + '</p>' +
-          '<p class="uf-question">Pertanyaan: ' + escapeHtml(item.question_text) + '</p>' +
-          '<div class="uf-answer-row">' +
-            '<label><input type="radio" name="answer-' + item.step_no + '" value="YA"> YA</label>' +
-            '<label><input type="radio" name="answer-' + item.step_no + '" value="TIDAK"> TIDAK</label>' +
-          '</div>' +
-          '<label class="uf-label">Catatan pertanyaan</label>' +
-          '<textarea id="note-' + item.step_no + '" rows="2" placeholder="Catatan terkait jawaban pertanyaan..."></textarea>' +
-          '<label class="uf-label">Catatan pendapat user per step</label>' +
-          '<textarea id="opinion-' + item.step_no + '" rows="2" placeholder="Pendapat user setelah menguji step ini..."></textarea>' +
-        '</article>'
-      );
-    }).join("");
+      var card = document.createElement("div");
+      card.className = "uf-node-question";
+      card.setAttribute("data-step-no", String(item.step_no));
+      card.innerHTML = [
+        '<div class="uf-node-question-head">',
+          '<span class="uf-node-question-step">Step ' + item.step_no + '</span>',
+          '<span class="uf-node-question-flow">' + escapeHtml(item.flow_title) + '</span>',
+        '</div>',
+        '<p class="uf-node-question-action">' + escapeHtml(item.action_instruction) + '</p>',
+        '<p class="uf-node-question-text">Pertanyaan: ' + escapeHtml(item.question_text) + '</p>',
+        '<div class="uf-answer-row">',
+          '<label><input type="radio" name="answer-' + item.step_no + '" value="YA"> YA</label>',
+          '<label><input type="radio" name="answer-' + item.step_no + '" value="TIDAK"> TIDAK</label>',
+        '</div>',
+        '<label class="uf-label">Catatan</label>',
+        '<textarea id="note-' + item.step_no + '" rows="2" placeholder="Catatan untuk kotak ini..."></textarea>'
+      ].join("");
+
+      node.appendChild(card);
+    });
   }
 
   function selectedValue(stepNo) {
@@ -325,10 +372,11 @@
 
       var answers = [];
       var stepNotes = [];
+      var missingAnswers = [];
 
       defs.forEach(function (def) {
         var step = (mapping.steps || []).find(function (s) {
-          return s.step_no === def.step_no;
+          return asNumber(s.step_no) === asNumber(def.step_no);
         });
         if (!step) {
           return;
@@ -337,7 +385,10 @@
         var question = mapping.questionByStepId[step.id];
         var answerValue = selectedValue(def.step_no);
         var noteText = String((byId("note-" + def.step_no) || {}).value || "").trim();
-        var opinionText = String((byId("opinion-" + def.step_no) || {}).value || "").trim();
+
+        if (!answerValue) {
+          missingAnswers.push("Step " + def.step_no + " - " + def.step_title);
+        }
 
         if (question) {
           answers.push({
@@ -347,14 +398,13 @@
             note_text: noteText
           });
         }
-
-        if (opinionText) {
-          stepNotes.push({
-            step_id: step.id,
-            user_opinion: opinionText
-          });
-        }
       });
+
+      if (missingAnswers.length) {
+        renderMessage("error", "Masih ada jawaban kosong: " + missingAnswers.join("; "));
+        submitButton.disabled = false;
+        return;
+      }
 
       var payload = {
         payload: {
@@ -391,12 +441,15 @@
       ".uf-form { display:grid; gap:10px; padding:12px; }",
       ".uf-grid { display:grid; grid-template-columns:repeat(2,minmax(220px,1fr)); gap:8px; }",
       ".uf-grid input { width:100%; border:1px solid #b9c2d1; border-radius:8px; padding:8px; font:inherit; font-size:0.82rem; }",
-      ".uf-question-list { display:grid; gap:10px; }",
-      ".uf-q-item { border:1px solid #cbd5e1; border-radius:10px; background:#ffffff; padding:10px; display:grid; gap:6px; }",
-      ".uf-action,.uf-question { margin:0; font-size:0.78rem; color:#334155; line-height:1.45; }",
+      ".uf-node-question { margin-top:10px; border:1px solid #cbd5e1; border-radius:12px; background:linear-gradient(180deg,#f8fbff 0%,#ffffff 100%); padding:10px; display:grid; gap:8px; }",
+      ".uf-node-question-head { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; align-items:center; }",
+      ".uf-node-question-step { display:inline-flex; align-items:center; border-radius:999px; padding:4px 8px; background:#dbeafe; color:#1e3a8a; font-size:0.72rem; font-weight:800; }",
+      ".uf-node-question-flow { font-size:0.7rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.04em; }",
+      ".uf-node-question-action,.uf-node-question-text { margin:0; font-size:0.78rem; color:#334155; line-height:1.45; }",
+      ".uf-node-question-text { font-weight:700; color:#0f172a; }",
       ".uf-answer-row { display:flex; gap:14px; flex-wrap:wrap; font-size:0.78rem; color:#1f2937; }",
       ".uf-label { font-size:0.75rem; font-weight:700; color:#374151; }",
-      ".uf-q-item textarea { width:100%; border:1px solid #b9c2d1; border-radius:8px; padding:8px; font:inherit; font-size:0.8rem; resize:vertical; }",
+      ".uf-node-question textarea { width:100%; border:1px solid #b9c2d1; border-radius:8px; padding:8px; font:inherit; font-size:0.8rem; resize:vertical; }",
       ".uf-submit-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }",
       ".uf-btn { border:0; border-radius:8px; background:#1d4ed8; color:#fff; font-weight:700; padding:8px 12px; cursor:pointer; }",
       ".uf-btn.link { text-decoration:none; border:1px solid #94a3b8; background:#fff; color:#1f2937; }",
@@ -418,7 +471,7 @@
     injectStyles();
 
     var flowSlug = section.getAttribute("data-flow-slug");
-    var defs = FLOW_DEFINITIONS[flowSlug] || [];
+    var defs = collectNodeDefinitions(flowSlug);
     buildQuestionnaire(defs);
     byId("ufForm").addEventListener("submit", handleSubmit);
   }
