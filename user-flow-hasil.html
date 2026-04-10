@@ -636,6 +636,41 @@
       statusInfo.className = "status " + (isError ? "err" : "ok");
     }
 
+    function normalizeRole(value) {
+      var raw = String(value || "").trim().toLowerCase();
+      if (!raw) {
+        return "";
+      }
+      if (raw === "super admin" || raw === "super_admin" || raw === "super-admin") {
+        return "Super Admin";
+      }
+      if (raw === "admin") {
+        return "Admin";
+      }
+      if (raw === "anggota" || raw === "member") {
+        return "Anggota";
+      }
+      return String(value || "").trim();
+    }
+
+    function inferRoleFromFlow(flowSlug) {
+      var slug = String(flowSlug || "").trim().toLowerCase();
+      if (slug === "super-admin" || slug === "super_admin") {
+        return "Super Admin";
+      }
+      if (slug === "admin") {
+        return "Admin";
+      }
+      if (slug === "anggota") {
+        return "Anggota";
+      }
+      return "";
+    }
+
+    function resolveRoleName(row) {
+      return normalizeRole(row.role_name) || inferRoleFromFlow(row.flow_slug) || "-";
+    }
+
     async function request(method, path, body) {
       var options = {
         method: method,
@@ -659,10 +694,10 @@
       var sort = qSort.value;
 
       var filtered = allRows.filter(function (row) {
-        var roleOk = role === "all" || String(row.role_name || "") === role;
+        var roleOk = role === "all" || resolveRoleName(row) === role;
         var text = [
           row.submission_id,
-          row.role_name,
+          resolveRoleName(row),
           row.flow_slug,
           row.tester_full_name,
           row.tester_org,
@@ -699,7 +734,7 @@
         if (!map[key]) {
           map[key] = {
             submission_id: row.submission_id,
-            role_name: row.role_name,
+            role_name: resolveRoleName(row),
             flow_slug: row.flow_slug,
             tester_full_name: row.tester_full_name,
             tester_org: row.tester_org,

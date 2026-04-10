@@ -128,7 +128,7 @@
   async function ensureStepsAndQuestions(flowId, defs) {
     var existingSteps = await requestJson(
       "GET",
-      "/rest/v1/uf_steps?select=id,flow_id,step_no,step_title&flow_id=eq." + flowId + "&order=step_no.asc"
+      "/rest/v1/uf_steps?select=id,flow_id,step_no,step_title,action_instruction&flow_id=eq." + flowId + "&order=step_no.asc"
     );
 
     var byStepNo = {};
@@ -138,7 +138,9 @@
 
     for (var i = 0; i < defs.length; i += 1) {
       var item = defs[i];
-      if (!byStepNo[asNumber(item.step_no)]) {
+      var existingStep = byStepNo[asNumber(item.step_no)];
+
+      if (!existingStep) {
         var inserted = await requestJson("POST", "/rest/v1/uf_steps", {
           flow_id: flowId,
           step_no: item.step_no,
@@ -150,12 +152,29 @@
         if (inserted && inserted.length) {
           byStepNo[item.step_no] = inserted[0];
         }
+      } else {
+        var existingTitle = String(existingStep.step_title || "").trim();
+        var existingInstruction = String(existingStep.action_instruction || "").trim();
+        var nextTitle = String(item.step_title || "").trim();
+        var nextInstruction = String(item.action_instruction || "").trim();
+
+        if (existingTitle !== nextTitle || existingInstruction !== nextInstruction) {
+          await requestJson(
+            "PATCH",
+            "/rest/v1/uf_steps?id=eq." + encodeURIComponent(existingStep.id),
+            {
+              step_title: item.step_title,
+              action_instruction: item.action_instruction,
+              page_url: window.location.pathname.split("/").pop()
+            }
+          );
+        }
       }
     }
 
     existingSteps = await requestJson(
       "GET",
-      "/rest/v1/uf_steps?select=id,flow_id,step_no,step_title&flow_id=eq." + flowId + "&order=step_no.asc"
+      "/rest/v1/uf_steps?select=id,flow_id,step_no,step_title,action_instruction&flow_id=eq." + flowId + "&order=step_no.asc"
     );
 
     var qMap = {};
@@ -175,6 +194,22 @@
       );
 
       if (questions && questions.length) {
+        var currentQuestion = questions[0];
+        var oldText = String(currentQuestion.question_text || "").trim();
+        var newText = String(currentDef.question_text || "").trim();
+
+        if (oldText !== newText) {
+          await requestJson(
+            "PATCH",
+            "/rest/v1/uf_questions?id=eq." + encodeURIComponent(currentQuestion.id),
+            {
+              question_text: currentDef.question_text,
+              answer_type: "yes_no_note"
+            }
+          );
+          currentQuestion.question_text = currentDef.question_text;
+        }
+
         qMap[step.id] = questions[0];
         continue;
       }
@@ -359,13 +394,20 @@
       var payload = {
         payload: {
           flow_slug: flowSlug,
+          tester_org: getElementValue("testerOrg"),
+          tester_phone: getElementValue("testerPhone"),
+          tester_device: testerDevice,
+          tester_browser: testerBrowser,
           tester: {
             full_name: fullName,
             org: getElementValue("testerOrg"),
+            instansi_unit: getElementValue("testerOrg"),
             email: getElementValue("testerEmail"),
             phone: getElementValue("testerPhone"),
+            no_hp: getElementValue("testerPhone"),
             device: testerDevice,
-            browser: testerBrowser
+            browser: testerBrowser,
+            user_agent: String(navigator.userAgent || "")
           },
           answers: answers,
           step_notes: stepNotes
@@ -375,6 +417,7 @@
       var submissionId = await requestJson("POST", "/rest/v1/rpc/uf_submit_full", payload);
       renderMessage("success", "Submit berhasil. ID submission: " + submissionId);
       byId("ufForm").reset();
+      applyIdentityDefaults();
     } catch (error) {
       renderMessage("error", "Submit gagal: " + error.message);
     } finally {
