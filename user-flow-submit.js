@@ -23,6 +23,11 @@
     return document.getElementById(id);
   }
 
+  function getElementValue(id) {
+    var element = byId(id);
+    return String((element && element.value) || "").trim();
+  }
+
   var runtimeDefs = [];
 
   function asNumber(value) {
@@ -237,6 +242,50 @@
     el.textContent = text;
   }
 
+  function detectDevice() {
+    var ua = String(navigator.userAgent || "").toLowerCase();
+    if (/android|iphone|ipad|ipod|mobile/.test(ua)) {
+      return "Handphone";
+    }
+    return "PC/Laptop";
+  }
+
+  function detectBrowser() {
+    var ua = String(navigator.userAgent || "");
+    if (/Edg\//.test(ua)) {
+      return "Microsoft Edge";
+    }
+    if (/OPR\//.test(ua)) {
+      return "Opera";
+    }
+    if (/Brave\//.test(ua)) {
+      return "Brave";
+    }
+    if (/Chrome\//.test(ua) && !/Edg\//.test(ua) && !/OPR\//.test(ua)) {
+      return "Google Chrome";
+    }
+    if (/Firefox\//.test(ua)) {
+      return "Mozilla Firefox";
+    }
+    if (/Safari\//.test(ua) && !/Chrome\//.test(ua) && !/Edg\//.test(ua)) {
+      return "Safari";
+    }
+    return "Lainnya";
+  }
+
+  function applyIdentityDefaults() {
+    var deviceEl = byId("testerDevice");
+    var browserEl = byId("testerBrowser");
+
+    if (deviceEl && !deviceEl.value) {
+      deviceEl.value = detectDevice();
+    }
+
+    if (browserEl && !browserEl.value) {
+      browserEl.value = detectBrowser();
+    }
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -244,9 +293,22 @@
     var flowSlug = root ? root.getAttribute("data-flow-slug") : "";
     var defs = runtimeDefs.length ? runtimeDefs : collectNodeDefinitions(flowSlug);
 
-    var fullName = String(byId("testerFullName").value || "").trim();
+    var fullName = getElementValue("testerFullName");
+    var testerDevice = getElementValue("testerDevice");
+    var testerBrowser = getElementValue("testerBrowser");
+
     if (!fullName) {
       renderMessage("error", "Nama lengkap penguji wajib diisi.");
+      return;
+    }
+
+    if (!testerDevice) {
+      renderMessage("error", "Pilih device yang digunakan penguji.");
+      return;
+    }
+
+    if (!testerBrowser) {
+      renderMessage("error", "Pilih browser yang digunakan penguji.");
       return;
     }
 
@@ -299,9 +361,11 @@
           flow_slug: flowSlug,
           tester: {
             full_name: fullName,
-            org: String(byId("testerOrg").value || "").trim(),
-            email: String(byId("testerEmail").value || "").trim(),
-            phone: String(byId("testerPhone").value || "").trim()
+            org: getElementValue("testerOrg"),
+            email: getElementValue("testerEmail"),
+            phone: getElementValue("testerPhone"),
+            device: testerDevice,
+            browser: testerBrowser
           },
           answers: answers,
           step_notes: stepNotes
@@ -328,7 +392,7 @@
     style.textContent = [
       ".uf-form { display:grid; gap:10px; padding:12px; }",
       ".uf-grid { display:grid; grid-template-columns:repeat(2,minmax(220px,1fr)); gap:8px; }",
-      ".uf-grid input { width:100%; border:1px solid #b9c2d1; border-radius:8px; padding:8px; font:inherit; font-size:0.82rem; }",
+      ".uf-grid input,.uf-grid select { width:100%; border:1px solid #b9c2d1; border-radius:8px; padding:8px; font:inherit; font-size:0.82rem; background:#fff; color:#0f172a; }",
       ".uf-node-question { margin-top:10px; border:1px solid #cbd5e1; border-radius:12px; background:linear-gradient(180deg,#f8fbff 0%,#ffffff 100%); padding:10px; display:grid; gap:8px; }",
       ".uf-node-question-head { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; align-items:center; }",
       ".uf-node-question-step { display:inline-flex; align-items:center; border-radius:999px; padding:4px 8px; background:#dbeafe; color:#1e3a8a; font-size:0.72rem; font-weight:800; }",
@@ -359,6 +423,7 @@
     injectStyles();
 
     var flowSlug = section.getAttribute("data-flow-slug");
+    applyIdentityDefaults();
     runtimeDefs = collectNodeDefinitions(flowSlug);
     buildQuestionnaire(runtimeDefs);
     byId("ufForm").addEventListener("submit", handleSubmit);
