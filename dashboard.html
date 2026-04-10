@@ -802,7 +802,7 @@
       <div class="menu-group">
         <button class="group-toggle" type="button">Sistem <span>+</span></button>
         <div class="group-items">
-          <a class="menu-link" href="#">Log Aktivitas</a>
+          <a id="logActivityLink" class="menu-link" href="log-aktivitas.html">Log Aktivitas</a>
         </div>
       </div>
 
@@ -1055,6 +1055,7 @@
     const publikasiMenuGroup = document.getElementById("publikasiMenuGroup");
     const kontenMenuGroup = document.getElementById("kontenMenuGroup");
     const keanggotaanMenuGroup = document.getElementById("keanggotaanMenuGroup");
+    const logActivityLink = document.getElementById("logActivityLink");
     const notificationBtn = document.getElementById("notificationBtn");
     const notificationCount = document.getElementById("notificationCount");
     const notificationPanel = document.getElementById("notificationPanel");
@@ -1375,6 +1376,11 @@
     }
 
     roleBadge.textContent = "Role: " + formatRole(role);
+    if (logActivityLink) {
+      const query = new URLSearchParams();
+      query.set("role", role);
+      logActivityLink.href = "log-aktivitas.html?" + query.toString();
+    }
     renderMemberMenu(role);
     renderContentMenu(role);
     renderRoleNote(role);
