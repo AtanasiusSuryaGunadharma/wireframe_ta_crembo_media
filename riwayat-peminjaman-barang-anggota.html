@@ -406,6 +406,40 @@
       margin-bottom: 2px;
     }
 
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .evidence-box {
+      border: 1px solid #dbe2ef;
+      border-radius: 10px;
+      padding: 12px;
+      background: #fff;
+      font-size: 0.82rem;
+      color: #374151;
+    }
+
+    .evidence-box strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
+      color: #1f2937;
+    }
+
+    .evidence-box img {
+      width: 100%;
+      max-width: 220px;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #dbe2ef;
+      margin-top: 8px;
+      background: #f8fafc;
+    }
+
     .mobile-menu {
       display: none;
       border: 1px solid #cbd5e1;
@@ -658,6 +692,154 @@
       return safeParse(localStorage.getItem(RIWAYAT_STORAGE_KEY), []);
     }
 
+    function seedPengajuanIfEmpty() {
+      if (localStorage.getItem(PENGAJUAN_STORAGE_KEY)) {
+        return;
+      }
+
+      const demo = [
+        {
+          id: "pjn-demo-1",
+          barangId: "inv-001",
+          barangNama: "Kamera Sony A6400",
+          barangCode: "CAM-001",
+          jumlahDiminta: 1,
+          tanggalPengajuan: "2026-04-08",
+          tanggalMulai: "2026-04-10",
+          tanggalSelesai: "2026-04-12",
+          tujuan: "Dokumentasi Misa Harian",
+          status: "approved"
+        },
+        {
+          id: "pjn-demo-2",
+          barangId: "inv-002",
+          barangNama: "Wireless Microphone Set",
+          barangCode: "AUD-004",
+          jumlahDiminta: 2,
+          tanggalPengajuan: "2026-04-07",
+          tanggalMulai: "2026-04-10",
+          tanggalSelesai: "2026-04-11",
+          tujuan: "Siaran live dan rekaman audio",
+          status: "taken"
+        },
+        {
+          id: "pjn-demo-3",
+          barangId: "inv-003",
+          barangNama: "Tripod Heavy Duty",
+          barangCode: "TRI-002",
+          jumlahDiminta: 1,
+          tanggalPengajuan: "2026-04-09",
+          tanggalMulai: "2026-04-11",
+          tanggalSelesai: "2026-04-13",
+          tujuan: "Pendukung kamera misa",
+          status: "pending"
+        },
+        {
+          id: "pjn-demo-4",
+          barangId: "inv-005",
+          barangNama: "Kabel HDMI 10m",
+          barangCode: "CAB-015",
+          jumlahDiminta: 1,
+          tanggalPengajuan: "2026-04-01",
+          tanggalMulai: "2026-04-02",
+          tanggalSelesai: "2026-04-03",
+          tujuan: "Kebutuhan input video",
+          status: "rejected"
+        }
+      ];
+
+      localStorage.setItem(PENGAJUAN_STORAGE_KEY, JSON.stringify(demo));
+    }
+
+    function seedRiwayatIfEmpty() {
+      if (localStorage.getItem(RIWAYAT_STORAGE_KEY)) {
+        return;
+      }
+
+      const demo = [
+        {
+          id: "rwyt-demo-1",
+          pengajuanId: "pjn-demo-1",
+          barangId: "inv-001",
+          barangNama: "Kamera Sony A6400",
+          jumlah: 1,
+          tanggalDiambil: "2026-04-10",
+          jamDiambil: "08:15",
+          tanggalDikembalikan: null,
+          jamDikembalikan: null,
+          kondisiSebelum: "Baik",
+          kondisiSesudah: null,
+          keterangan: "Dipakai untuk dokumentasi Misa Harian",
+          status: "Sedang Dipinjam",
+          borrowerName: "Atanasius Surya Guna",
+          borrowerPhone: "08xxxxxxxxxx",
+          itemName: "Kamera Sony A6400",
+          itemCode: "CAM-001",
+          quantity: 1,
+          borrowDate: "2026-04-10",
+          expectedReturnDate: "2026-04-12",
+          pickup: { time: "2026-04-10T08:15:00", location: "Gudang Studio", proofPhoto: "" },
+          returnInfo: null,
+          code: "RW-001",
+          adminNote: "Menunggu pengembalian"
+        },
+        {
+          id: "rwyt-demo-2",
+          pengajuanId: "pjn-demo-2",
+          barangId: "inv-002",
+          barangNama: "Wireless Microphone Set",
+          jumlah: 2,
+          tanggalDiambil: "2026-04-09",
+          jamDiambil: "17:30",
+          tanggalDikembalikan: null,
+          jamDikembalikan: null,
+          kondisiSebelum: "Baik, Baik",
+          kondisiSesudah: null,
+          keterangan: "Satu set untuk live dan satu set cadangan",
+          status: "Disetujui",
+          borrowerName: "Atanasius Surya Guna",
+          borrowerPhone: "08xxxxxxxxxx",
+          itemName: "Wireless Microphone Set",
+          itemCode: "AUD-004",
+          quantity: 2,
+          borrowDate: "2026-04-09",
+          expectedReturnDate: "2026-04-11",
+          pickup: { time: "2026-04-09T17:30:00", location: "Rak Audio 2", proofPhoto: "" },
+          returnInfo: null,
+          code: "RW-002",
+          adminNote: "Siap dikembalikan setelah agenda selesai"
+        },
+        {
+          id: "rwyt-demo-3",
+          pengajuanId: "pjn-demo-3",
+          barangId: "inv-003",
+          barangNama: "Tripod Heavy Duty",
+          jumlah: 1,
+          tanggalDiambil: "2026-04-05",
+          jamDiambil: "09:00",
+          tanggalDikembalikan: "2026-04-08",
+          jamDikembalikan: "16:45",
+          kondisiSebelum: "Baik",
+          kondisiSesudah: "Baik",
+          keterangan: "Sudah dikembalikan setelah kegiatan",
+          status: "Selesai",
+          borrowerName: "Atanasius Surya Guna",
+          borrowerPhone: "08xxxxxxxxxx",
+          itemName: "Tripod Heavy Duty",
+          itemCode: "TRI-002",
+          quantity: 1,
+          borrowDate: "2026-04-05",
+          expectedReturnDate: "2026-04-08",
+          pickup: { time: "2026-04-05T09:00:00", location: "Gudang Perlengkapan", proofPhoto: "" },
+          returnInfo: { time: "2026-04-08T16:45:00", location: "Gudang Perlengkapan", proofPhoto: "", condition: "Baik" },
+          code: "RW-003",
+          adminNote: "Selesai sesuai jadwal"
+        }
+      ];
+
+      localStorage.setItem(RIWAYAT_STORAGE_KEY, JSON.stringify(demo));
+    }
+
     function renderStatusTable() {
       let items = readPengajuan().slice().reverse();
 
@@ -701,41 +883,67 @@
       riwayatContainer.innerHTML = items.map(function (item) {
         const statusPengembalian = item.tanggalDikembalikan ? "Sudah Dikembalikan" : "Sedang Dipinjam";
         const statusColor = item.tanggalDikembalikan ? "status-ok" : "status-warn";
+        const pickupPhoto = item.pickup && item.pickup.photo ? item.pickup.photo : "";
+        const returnPhoto = item.returnInfo && item.returnInfo.photo ? item.returnInfo.photo : "";
+        const pickupStamp = item.pickup && item.pickup.date ? item.pickup.date + " " + (item.pickup.time || "") : item.tanggalDiambil + " " + item.jamDiambil;
+        const returnStamp = item.returnInfo && item.returnInfo.date ? item.returnInfo.date + " " + (item.returnInfo.time || "") : (item.tanggalDikembalikan ? item.tanggalDikembalikan + " " + (item.jamDikembalikan || "") : "-");
+        const pickupLocation = item.pickup && item.pickup.location ? item.pickup.location : (item.pickup && item.pickup.locationText ? item.pickup.locationText : "-");
+        const returnLocation = item.returnInfo && item.returnInfo.location ? item.returnInfo.location : "-";
 
         return '<div class="detail-card">'
           + '<h3>' + item.barangNama + ' <span class="' + statusColor + '">' + statusPengembalian + '</span></h3>'
           + '<div class="detail-row">'
           + '<div class="detail-item">'
           + '<strong>Tanggal Pengambilan:</strong>'
-          + item.tanggalDiambil + ' ' + item.jamDiambil
+          + pickupStamp
           + '</div>'
+          + '<div class="detail-item">'
+          + '<strong>Lokasi Pengambilan:</strong>'
+          + pickupLocation
+          + '</div>'
+          + '</div>'
+          + '<div class="detail-row">'
           + '<div class="detail-item">'
           + '<strong>Kondisi Saat Diambil:</strong>'
           + item.kondisiSebelum
+          + '</div>'
+          + '<div class="detail-item">'
+          + '<strong>Jumlah Unit:</strong>'
+          + item.jumlah
           + '</div>'
           + '</div>'
           + (item.tanggalDikembalikan ? 
             '<div class="detail-row">'
             + '<div class="detail-item">'
             + '<strong>Tanggal Pengembalian:</strong>'
-            + item.tanggalDikembalikan + ' ' + item.jamDikembalikan
+            + returnStamp
             + '</div>'
             + '<div class="detail-item">'
-            + '<strong>Kondisi Saat Dikembalikan:</strong>'
-            + item.kondisiSesudah
+            + '<strong>Lokasi Pengembalian:</strong>'
+            + returnLocation
             + '</div>'
             + '</div>'
             : '')
           + '<div class="detail-row">'
           + '<div class="detail-item">'
-          + '<strong>Jumlah Unit:</strong>'
-          + item.jumlah
+          + '<strong>Kondisi Saat Dikembalikan:</strong>'
+          + (item.kondisiSesudah ? item.kondisiSesudah : "-")
           + '</div>'
           + '<div class="detail-item">'
           + '<strong>Catatan:</strong>'
           + (item.keterangan ? item.keterangan : "-")
           + '</div>'
           + '</div>'
+          + ((pickupPhoto || returnPhoto) ? '<div class="evidence-grid">'
+            + '<div class="evidence-box">'
+            + '<strong>Bukti Foto Pengambilan</strong>'
+            + (pickupPhoto ? '<img src="' + pickupPhoto + '" alt="Bukti foto pengambilan">' : '<div>-</div>')
+            + '</div>'
+            + '<div class="evidence-box">'
+            + '<strong>Bukti Foto Pengembalian</strong>'
+            + (returnPhoto ? '<img src="' + returnPhoto + '" alt="Bukti foto pengembalian">' : '<div>-</div>')
+            + '</div>'
+            + '</div>' : '')
           + '</div>';
       }).join("");
     }
@@ -750,6 +958,8 @@
       });
     });
 
+    seedPengajuanIfEmpty();
+    seedRiwayatIfEmpty();
     renderStatusTable();
     renderRiwayatCards();
   </script>

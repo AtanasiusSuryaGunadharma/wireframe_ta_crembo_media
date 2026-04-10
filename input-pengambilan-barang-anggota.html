@@ -374,6 +374,31 @@
       min-height: 60px;
     }
 
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .photo-preview {
+      margin-top: 8px;
+      display: none;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.78rem;
+      color: #5b6473;
+    }
+
+    .photo-preview img {
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #dbe2ef;
+      background: #fff;
+    }
+
     .form-row {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -576,6 +601,29 @@
 
             <div style="padding: 16px;">
               <form id="pengambilanForm">
+                <div class="item-form">
+                  <h3>Data Pengambilan</h3>
+                  <div class="meta-grid">
+                    <div class="form-group">
+                      <label>Tanggal Pengambilan *</label>
+                      <input id="pengambilanDate" type="date" required>
+                    </div>
+                    <div class="form-group">
+                      <label>Waktu Pengambilan *</label>
+                      <input id="pengambilanTime" type="time" required>
+                    </div>
+                    <div class="form-group">
+                      <label>Lokasi Pengambilan *</label>
+                      <input id="pengambilanLocation" type="text" placeholder="Contoh: Gudang Studio" required>
+                    </div>
+                    <div class="form-group">
+                      <label>Bukti Foto Pengambilan *</label>
+                      <input id="pengambilanPhoto" type="file" accept="image/*" required>
+                      <div id="pengambilanPhotoPreview" class="photo-preview"></div>
+                    </div>
+                  </div>
+                </div>
+
                 <div id="itemsContainer"></div>
 
                 <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
@@ -627,9 +675,15 @@
     const itemsContainer = document.getElementById("itemsContainer");
     const pengambilanForm = document.getElementById("pengambilanForm");
     const cancelFormBtn = document.getElementById("cancelFormBtn");
+    const pengambilanDate = document.getElementById("pengambilanDate");
+    const pengambilanTime = document.getElementById("pengambilanTime");
+    const pengambilanLocation = document.getElementById("pengambilanLocation");
+    const pengambilanPhoto = document.getElementById("pengambilanPhoto");
+    const pengambilanPhotoPreview = document.getElementById("pengambilanPhotoPreview");
 
     const PENGAJUAN_STORAGE_KEY = "crembo-peminjaman-pengajuan";
     const RIWAYAT_STORAGE_KEY = "crembo-peminjaman-riwayat";
+    let pengambilanPhotoData = "";
 
     function updateLiveDateTime() {
       const now = new Date();
@@ -675,6 +729,76 @@
       localStorage.setItem(RIWAYAT_STORAGE_KEY, JSON.stringify(items));
     }
 
+    function getTodayValue() {
+      const now = new Date();
+      return now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
+    }
+
+    function getNowTimeValue() {
+      const now = new Date();
+      return String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+    }
+
+    function resetPhotoPreview() {
+      pengambilanPhotoData = "";
+      pengambilanPhoto.value = "";
+      pengambilanPhotoPreview.style.display = "none";
+      pengambilanPhotoPreview.innerHTML = "";
+    }
+
+    function setPhotoPreview(dataUrl, fileName) {
+      pengambilanPhotoData = dataUrl;
+      pengambilanPhotoPreview.innerHTML = '<img src="' + dataUrl + '" alt="Pratinjau bukti foto">' + '<span>' + fileName + '</span>';
+      pengambilanPhotoPreview.style.display = "flex";
+    }
+
+    function seedPengajuanIfEmpty() {
+      if (localStorage.getItem(PENGAJUAN_STORAGE_KEY)) {
+        return;
+      }
+
+      const demo = [
+        {
+          id: "pjn-demo-1",
+          barangId: "inv-001",
+          barangNama: "Kamera Sony A6400",
+          barangCode: "CAM-001",
+          jumlahDiminta: 1,
+          tanggalPengajuan: "2026-04-08",
+          tanggalMulai: "2026-04-10",
+          tanggalSelesai: "2026-04-12",
+          tujuan: "Dokumentasi Misa Harian",
+          status: "approved"
+        },
+        {
+          id: "pjn-demo-2",
+          barangId: "inv-002",
+          barangNama: "Wireless Microphone Set",
+          barangCode: "AUD-004",
+          jumlahDiminta: 2,
+          tanggalPengajuan: "2026-04-07",
+          tanggalMulai: "2026-04-10",
+          tanggalSelesai: "2026-04-11",
+          tujuan: "Siaran live dan rekaman audio",
+          status: "approved"
+        },
+        {
+          id: "pjn-demo-3",
+          barangId: "inv-003",
+          barangNama: "Tripod Heavy Duty",
+          barangCode: "TRI-002",
+          jumlahDiminta: 1,
+          tanggalPengajuan: "2026-04-09",
+          tanggalMulai: "2026-04-11",
+          tanggalSelesai: "2026-04-13",
+          tujuan: "Pendukung kamera misa",
+          status: "approved"
+        }
+      ];
+
+      localStorage.setItem(PENGAJUAN_STORAGE_KEY, JSON.stringify(demo));
+    }
+
     function renderApprovedTable() {
       let items = readPengajuan().filter(function (item) {
         return item.status === "approved";
@@ -706,6 +830,10 @@
       }
 
       pengambilanForm.setAttribute("data-pengajuan-id", pengajuanId);
+      pengambilanDate.value = getTodayValue();
+      pengambilanTime.value = getNowTimeValue();
+      pengambilanLocation.value = "";
+      resetPhotoPreview();
       
       itemsContainer.innerHTML = '';
       for (let i = 0; i < pengajuan.jumlahDiminta; i += 1) {
@@ -732,9 +860,25 @@
       document.querySelector("html").scrollIntoView({ behavior: "smooth" });
     }
 
+    pengambilanPhoto.addEventListener("change", function () {
+      const file = pengambilanPhoto.files && pengambilanPhoto.files[0];
+
+      if (!file) {
+        resetPhotoPreview();
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function () {
+        setPhotoPreview(String(reader.result || ""), file.name);
+      };
+      reader.readAsDataURL(file);
+    });
+
     cancelFormBtn.addEventListener("click", function () {
       formsContainer.style.display = "none";
       pengambilanForm.reset();
+      resetPhotoPreview();
     });
 
     pengambilanForm.addEventListener("submit", function (event) {
@@ -763,9 +907,19 @@
         return;
       }
 
-      const now = new Date();
-      const today = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
-      const time = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+      if (!pengambilanPhotoData) {
+        alert("Mohon unggah bukti foto pengambilan");
+        return;
+      }
+
+      const today = pengambilanDate.value;
+      const time = pengambilanTime.value;
+      const location = pengambilanLocation.value.trim();
+
+      if (!location) {
+        alert("Mohon isi lokasi pengambilan");
+        return;
+      }
 
       const riwayat = readRiwayat();
       const newEntry = {
@@ -780,7 +934,13 @@
         jamDikembalikan: null,
         kondisiSebelum: Array.from(kondisiSelects).map(function (s) { return s.value; }).join(", "),
         kondisiSesudah: null,
-        keterangan: Array.from(keteranganInputs).map(function (t) { return t.value; }).join(" | ")
+        keterangan: Array.from(keteranganInputs).map(function (t) { return t.value; }).join(" | "),
+        pickup: {
+          date: today,
+          time: time,
+          location: location,
+          photo: pengambilanPhotoData
+        }
       };
 
       riwayat.push(newEntry);
@@ -796,10 +956,12 @@
 
       formsContainer.style.display = "none";
       pengambilanForm.reset();
+      resetPhotoPreview();
       renderApprovedTable();
       alert("Pengambilan barang berhasil disimpan!");
     });
 
+    seedPengajuanIfEmpty();
     renderApprovedTable();
   </script>
 </body>

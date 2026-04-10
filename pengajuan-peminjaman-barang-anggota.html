@@ -363,6 +363,24 @@
       gap: 8px;
     }
 
+    .barang-photo {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid #dbe2ef;
+      background: #f8fafc;
+    }
+
+    .barang-photo.placeholder {
+      display: grid;
+      place-items: center;
+      color: #64748b;
+      font-size: 0.76rem;
+      font-weight: 700;
+      background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    }
+
     .barang-card h3 {
       margin: 0;
       font-size: 1rem;
@@ -389,6 +407,32 @@
       background: #f1f5f9;
       padding: 2px 6px;
       border-radius: 4px;
+    }
+
+    .barang-detail {
+      display: grid;
+      gap: 4px;
+      font-size: 0.76rem;
+      color: #4b5563;
+      padding-top: 4px;
+      border-top: 1px solid #e5e9f2;
+    }
+
+    .barang-detail strong {
+      color: #111827;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .card-actions .btn {
+      flex: 1 1 0;
+      justify-content: center;
+      display: inline-flex;
+      align-items: center;
     }
 
     .btn {
@@ -575,6 +619,10 @@
       overflow-y: auto;
     }
 
+    .detail-modal-content {
+      max-width: 760px;
+    }
+
     .modal-head {
       font-size: 1.1rem;
       font-weight: 700;
@@ -590,6 +638,65 @@
       cursor: pointer;
       font-size: 1.3rem;
       color: #64748b;
+    }
+
+    .detail-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 16px;
+    }
+
+    .detail-photo {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid #dbe2ef;
+      background: #f8fafc;
+    }
+
+    .detail-photo.placeholder {
+      display: grid;
+      place-items: center;
+      color: #64748b;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      font-size: 0.84rem;
+    }
+
+    .detail-item {
+      border: 1px solid #dbe2ef;
+      border-radius: 10px;
+      padding: 10px;
+      background: #fafbfc;
+      color: #4b5563;
+    }
+
+    .detail-item strong {
+      display: block;
+      color: #111827;
+      margin-bottom: 4px;
+    }
+
+    .detail-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .detail-title {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    @media (max-width: 640px) {
+      .detail-layout { grid-template-columns: 1fr; }
+      .detail-grid { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 1080px) {
@@ -743,10 +850,6 @@
                 <label>Kategori:</label>
                 <select id="barangCategorySelect" class="select-input">
                   <option value="">Semua</option>
-                  <option value="Audio/Video">Audio/Video</option>
-                  <option value="Lighting">Lighting</option>
-                  <option value="Peralatan Studio">Peralatan Studio</option>
-                  <option value="Komputer">Komputer</option>
                 </select>
               </div>
               <div class="filter-group">
@@ -834,6 +937,16 @@
     </div>
   </div>
 
+  <div id="detailModal" class="modal">
+    <div class="modal-content detail-modal-content">
+      <div class="modal-head">
+        <span>Detail Barang</span>
+        <button id="detailCloseBtn" class="modal-close">&times;</button>
+      </div>
+      <div id="detailBody"></div>
+    </div>
+  </div>
+
   <script>
     const menuGroups = Array.from(document.querySelectorAll(".menu-group"));
     menuGroups.forEach(function (group) {
@@ -876,12 +989,16 @@
     const pengajuanTableRows = document.getElementById("pengajuanTableRows");
 
     const formModal = document.getElementById("formModal");
+    const detailModal = document.getElementById("detailModal");
     const formCancelBtn = document.getElementById("formCancelBtn");
     const modalCloseBtn = document.getElementById("modalCloseBtn");
+    const detailCloseBtn = document.getElementById("detailCloseBtn");
+    const detailBody = document.getElementById("detailBody");
     const pengajuanForm = document.getElementById("pengajuanForm");
 
     const BARANG_STORAGE_KEY = "crembo-barang-inventaris";
     const PENGAJUAN_STORAGE_KEY = "crembo-peminjaman-pengajuan";
+    const INVENTORY_STORAGE_KEY = "crembo-inventaris-barang";
 
     let barangFilterSearch = "";
     let barangFilterCategory = "";
@@ -916,24 +1033,75 @@
     }
 
     function seedBarangIfEmpty() {
-      if (localStorage.getItem(BARANG_STORAGE_KEY)) {
+      if (localStorage.getItem(BARANG_STORAGE_KEY) || localStorage.getItem(INVENTORY_STORAGE_KEY)) {
         return;
       }
       const demo = [
-        { id: "brg-1", nama: "Kamera Canon EOS 5D Mark IV", kategori: "Audio/Video", kondisi: "Baik", tersedia: 2, total: 2, deskripsi: "Kamera profesional full-frame" },
-        { id: "brg-2", nama: "Lensa Canon 24-70mm", kategori: "Audio/Video", kondisi: "Baik", tersedia: 1, total: 2, deskripsi: "Lensa standar profesional" },
-        { id: "brg-3", nama: "Microphone Rode Wireless", kategori: "Audio/Video", kondisi: "Baik", tersedia: 3, total: 3, deskripsi: "Microphone wireless untuk lapangan" },
-        { id: "brg-4", nama: "Ring Light LED 18 inch", kategori: "Lighting", kondisi: "Baik", tersedia: 2, total: 2, deskripsi: "Lampu ring untuk beauty/interview" },
-        { id: "brg-5", nama: "Soft Box 80x120cm", kategori: "Lighting", kondisi: "Baik", tersedia: 4, total: 4, deskripsi: "Softbox untuk studio lighting" },
-        { id: "brg-6", nama: "Tripod Video Manfrotto", kategori: "Peralatan Studio", kondisi: "Baik", tersedia: 3, total: 3, deskripsi: "Tripod profesional dengan head" },
-        { id: "brg-7", nama: "Green Screen 3x3m", kategori: "Peralatan Studio", kondisi: "Baik", tersedia: 1, total: 1, deskripsi: "Green screen untuk chroma key" },
-        { id: "brg-8", nama: "Laptop Editing (Dell)", kategori: "Komputer", kondisi: "Baik", tersedia: 1, total: 1, deskripsi: "Laptop spesifikasi tinggi untuk editing" }
+        { id: "brg-1", code: "CAM-001", nama: "Kamera Sony A6400", kategori: "Kamera", foto: "", tanggalBeli: "2025-11-12", hargaBeli: 12500000, total: 2, tersedia: 1, dipinjam: 1, bisaDipinjam: true, kondisi: "Baik", status: "Dipinjam", lokasi: "Lemari Studio A", catatan: "Satu unit sedang dipakai untuk dokumentasi agenda." },
+        { id: "brg-2", code: "AUD-004", nama: "Wireless Microphone Set", kategori: "Audio", foto: "", tanggalBeli: "2025-12-03", hargaBeli: null, total: 4, tersedia: 4, dipinjam: 0, bisaDipinjam: true, kondisi: "Baik", status: "Tersedia", lokasi: "Rak Audio 2", catatan: "Baterai cadangan tersedia 8 pcs." },
+        { id: "brg-3", code: "TRI-002", nama: "Tripod Heavy Duty", kategori: "Aksesori", foto: "", tanggalBeli: "2025-10-28", hargaBeli: 850000, total: 3, tersedia: 2, dipinjam: 1, bisaDipinjam: true, kondisi: "Rusak Ringan", status: "Tersedia", lokasi: "Gudang Perlengkapan", catatan: "1 unit perlu pengencangan lock kaki." },
+        { id: "brg-4", code: "SWI-001", nama: "Video Switcher ATEM Mini", kategori: "Switcher", foto: "", tanggalBeli: "2025-09-19", hargaBeli: 7600000, total: 1, tersedia: 0, dipinjam: 1, bisaDipinjam: true, kondisi: "Baik", status: "Dipinjam", lokasi: "Meja Kontrol", catatan: "Dipakai untuk misa Kamis malam." },
+        { id: "brg-5", code: "CAB-015", nama: "Kabel HDMI 10m", kategori: "Kabel", foto: "", tanggalBeli: "2025-11-30", hargaBeli: 450000, total: 6, tersedia: 5, dipinjam: 1, bisaDipinjam: true, kondisi: "Baik", status: "Tersedia", lokasi: "Laci Kabel", catatan: "Label kabel sudah diperbarui." }
       ];
       localStorage.setItem(BARANG_STORAGE_KEY, JSON.stringify(demo));
     }
 
+    function normalizeBarangFromInventory(item) {
+      const availableUnit = Number(item.availableUnit);
+      const totalUnit = Number(item.totalUnit);
+      const borrowedUnit = Number.isFinite(Number(item.borrowedUnit))
+        ? Number(item.borrowedUnit)
+        : Math.max(0, (Number.isFinite(totalUnit) ? totalUnit : 0) - (Number.isFinite(availableUnit) ? availableUnit : 0));
+
+      return {
+        id: String(item.id || item.code || item.name || ""),
+        code: String(item.code || item.kode || "-"),
+        nama: String(item.name || item.nama || "Barang Inventaris"),
+        kategori: String(item.category || item.kategori || "Lainnya"),
+        foto: String(item.photo || item.foto || "").trim(),
+        tanggalBeli: String(item.purchaseDate || item.tanggalBeli || ""),
+        hargaBeli: item.purchasePrice !== undefined ? item.purchasePrice : item.hargaBeli,
+        total: Number.isFinite(totalUnit) ? totalUnit : Number(item.total || 0),
+        tersedia: Number.isFinite(availableUnit) ? availableUnit : Number(item.tersedia || 0),
+        dipinjam: borrowedUnit,
+        bisaDipinjam: item.canBorrow !== false,
+        kondisi: String(item.condition || item.kondisi || "Baik"),
+        status: String(item.status || (Number.isFinite(availableUnit) && availableUnit > 0 ? "Tersedia" : "Dipinjam")),
+        lokasi: String(item.location || item.lokasi || "-"),
+        catatan: String(item.notes || item.catatan || ""),
+        deskripsi: String(item.notes || item.catatan || item.description || item.deskripsi || ""),
+        sumber: "admin"
+      };
+    }
+
     function readBarang() {
-      return safeParse(localStorage.getItem(BARANG_STORAGE_KEY), []);
+      const adminInventory = safeParse(localStorage.getItem(INVENTORY_STORAGE_KEY), []);
+      if (Array.isArray(adminInventory) && adminInventory.length) {
+        return adminInventory.map(normalizeBarangFromInventory);
+      }
+
+      const fallbackInventory = safeParse(localStorage.getItem(BARANG_STORAGE_KEY), []);
+      return Array.isArray(fallbackInventory) ? fallbackInventory.map(function (item) {
+        return {
+          id: String(item.id || ""),
+          code: String(item.code || item.id || "-"),
+          nama: String(item.nama || item.name || "Barang Inventaris"),
+          kategori: String(item.kategori || item.category || "Lainnya"),
+          foto: String(item.foto || item.photo || "").trim(),
+          tanggalBeli: String(item.tanggalBeli || item.purchaseDate || ""),
+          hargaBeli: item.hargaBeli !== undefined ? item.hargaBeli : item.purchasePrice,
+          total: Number(item.total || item.totalUnit || 0),
+          tersedia: Number(item.tersedia || item.availableUnit || 0),
+          dipinjam: Number(item.dipinjam || item.borrowedUnit || 0),
+          bisaDipinjam: item.bisaDipinjam !== false,
+          kondisi: String(item.kondisi || item.condition || "Baik"),
+          status: String(item.status || "Tersedia"),
+          lokasi: String(item.lokasi || item.location || "-"),
+          catatan: String(item.catatan || item.notes || ""),
+          deskripsi: String(item.deskripsi || item.description || item.notes || ""),
+          sumber: "fallback"
+        };
+      }) : [];
     }
 
     function readPengajuan() {
@@ -942,6 +1110,78 @@
 
     function savePengajuan(items) {
       localStorage.setItem(PENGAJUAN_STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function formatCurrency(value) {
+      const amount = Number(value);
+      if (!Number.isFinite(amount)) {
+        return "-";
+      }
+      return "Rp " + amount.toLocaleString("id-ID");
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function populateCategoryFilter(items) {
+      const categories = Array.from(new Set(items.map(function (item) {
+        return item.kategori;
+      }).filter(Boolean))).sort(function (a, b) {
+        return a.localeCompare(b);
+      });
+
+      const currentValue = barangCategorySelect.value;
+      barangCategorySelect.innerHTML = '<option value="">Semua</option>' + categories.map(function (category) {
+        return '<option value="' + escapeHtml(category) + '">' + escapeHtml(category) + '</option>';
+      }).join("");
+
+      if (categories.includes(currentValue)) {
+        barangCategorySelect.value = currentValue;
+      }
+    }
+
+    function openDetailModal(item) {
+      const photoMarkup = item.foto
+        ? '<img class="detail-photo" src="' + escapeHtml(item.foto) + '" alt="' + escapeHtml(item.nama) + '">'
+        : '<div class="detail-photo placeholder">Tidak ada foto</div>';
+
+      detailBody.innerHTML = '<div class="detail-layout">'
+        + '<div class="detail-stack">'
+        + photoMarkup
+        + '<div class="detail-item">'
+        + '<strong>Keterangan</strong>' + escapeHtml(item.deskripsi || item.catatan || '-')
+        + '</div>'
+        + '</div>'
+        + '<div class="detail-stack">'
+        + '<h3 class="detail-title">' + escapeHtml(item.nama) + '</h3>'
+        + '<div class="detail-grid">'
+        + '<div class="detail-item"><strong>Kode</strong>' + escapeHtml(item.code) + '</div>'
+        + '<div class="detail-item"><strong>Kategori</strong>' + escapeHtml(item.kategori) + '</div>'
+        + '<div class="detail-item"><strong>Tanggal Beli</strong>' + escapeHtml(item.tanggalBeli || '-') + '</div>'
+        + '<div class="detail-item"><strong>Harga Beli</strong>' + escapeHtml(formatCurrency(item.hargaBeli)) + '</div>'
+        + '<div class="detail-item"><strong>Total Unit</strong>' + String(item.total) + '</div>'
+        + '<div class="detail-item"><strong>Tersedia</strong>' + String(item.tersedia) + '</div>'
+        + '<div class="detail-item"><strong>Dipinjam</strong>' + String(item.dipinjam) + '</div>'
+        + '<div class="detail-item"><strong>Bisa Dipinjam</strong>' + (item.bisaDipinjam ? 'Ya' : 'Tidak') + '</div>'
+        + '<div class="detail-item"><strong>Kondisi</strong>' + escapeHtml(item.kondisi) + '</div>'
+        + '<div class="detail-item"><strong>Status</strong>' + escapeHtml(item.status) + '</div>'
+        + '<div class="detail-item" style="grid-column: 1 / -1;"><strong>Lokasi</strong>' + escapeHtml(item.lokasi) + '</div>'
+        + '<div class="detail-item" style="grid-column: 1 / -1;"><strong>Catatan</strong>' + escapeHtml(item.catatan || '-') + '</div>'
+        + '</div>'
+        + '</div>'
+        + '</div>';
+
+      detailModal.classList.add("show");
+    }
+
+    function closeDetailModal() {
+      detailModal.classList.remove("show");
     }
 
     function renderBarangGrid() {
@@ -980,16 +1220,31 @@
       barangGrid.innerHTML = items.map(function (item) {
         const statusColor = item.tersedia > 0 ? "#166534" : "#991b1b";
         const statusText = item.tersedia > 0 ? "Tersedia" : "Habis";
-        const disabledAttr = item.tersedia > 0 ? "" : "disabled";
+        const disabledAttr = item.tersedia > 0 && item.bisaDipinjam ? "" : "disabled";
+        const photoMarkup = item.foto
+          ? '<img class="barang-photo" src="' + escapeHtml(item.foto) + '" alt="' + escapeHtml(item.nama) + '">'
+          : '<div class="barang-photo placeholder">Tidak ada foto</div>';
 
         return '<div class="barang-card">'
+          + photoMarkup
           + '<h3>' + item.nama + '</h3>'
           + '<p>' + item.deskripsi + '</p>'
           + '<div class="barang-meta">'
           + '<span style="background: #f1f5f9;">' + item.kategori + '</span>'
           + '<span style="color: ' + statusColor + '; font-weight: 700;">' + statusText + ' (' + item.tersedia + ')</span>'
           + '</div>'
+          + '<div class="barang-detail">'
+          + '<div><strong>Kode:</strong> ' + item.code + '</div>'
+          + '<div><strong>Tanggal Beli:</strong> ' + (item.tanggalBeli || '-') + '</div>'
+          + '<div><strong>Harga:</strong> ' + formatCurrency(item.hargaBeli) + '</div>'
+          + '<div><strong>Total/Pinjam:</strong> ' + item.total + ' / ' + item.dipinjam + '</div>'
+          + '<div><strong>Kondisi:</strong> ' + item.kondisi + '</div>'
+          + '<div><strong>Lokasi:</strong> ' + item.lokasi + '</div>'
+          + '</div>'
+          + '<div class="card-actions">'
+          + '<button class="btn secondary" type="button" data-detail-id="' + item.id + '" onclick="openDetailById(this)">Detail</button>'
           + '<button class="btn" ' + disabledAttr + ' data-barang-id="' + item.id + '" data-barang-nama="' + item.nama + '" onclick="openPengajuanForm(this)">Ajukan Peminjaman</button>'
+          + '</div>'
           + '</div>';
       }).join("");
     }
@@ -1038,6 +1293,7 @@
     function openPengajuanForm(btn) {
       const barangId = btn.getAttribute("data-barang-id");
       const barangNama = btn.getAttribute("data-barang-nama");
+      const barang = readBarang().find(function (item) { return item.id === barangId; });
 
       document.getElementById("barangIdInput").value = barangId;
       document.getElementById("barangNamaInput").value = barangNama;
@@ -1047,11 +1303,28 @@
       document.getElementById("tanggalSelesaiInput").value = "";
       document.getElementById("tujuanInput").value = "";
 
+      if (barang) {
+        document.getElementById("jumlahInput").max = String(Math.max(1, barang.tersedia));
+      }
+
       formModal.classList.add("show");
+    }
+
+    function openDetailById(btn) {
+      const id = btn.getAttribute("data-detail-id");
+      const item = readBarang().find(function (row) { return row.id === id; });
+      if (!item) {
+        return;
+      }
+      openDetailModal(item);
     }
 
     function closePengajuanForm() {
       formModal.classList.remove("show");
+    }
+
+    function closeDetail() {
+      closeDetailModal();
     }
 
     function cancelPengajuan(btn) {
@@ -1100,6 +1373,7 @@
 
     formCancelBtn.addEventListener("click", closePengajuanForm);
     modalCloseBtn.addEventListener("click", closePengajuanForm);
+    detailCloseBtn.addEventListener("click", closeDetail);
 
     pengajuanForm.addEventListener("submit", function (event) {
       event.preventDefault();
@@ -1111,8 +1385,15 @@
       const tanggalSelesai = document.getElementById("tanggalSelesaiInput").value;
       const tujuan = document.getElementById("tujuanInput").value;
 
+      const barang = readBarang().find(function (item) { return item.id === barangId; });
+
       if (!barangId || !jumlah || !tanggalMulai || !tanggalSelesai || !tujuan) {
         alert("Mohon isi semua field yang diperlukan");
+        return;
+      }
+
+      if (barang && jumlah > barang.tersedia) {
+        alert("Jumlah yang diminta melebihi stok tersedia");
         return;
       }
 
@@ -1128,6 +1409,11 @@
         id: "pjn-" + Date.now(),
         barangId: barangId,
         barangNama: barangNama,
+        barangCode: barang ? barang.code : "-",
+        barangFoto: barang ? barang.foto : "",
+        barangKategori: barang ? barang.kategori : "",
+        barangKondisi: barang ? barang.kondisi : "",
+        barangLokasi: barang ? barang.lokasi : "",
         jumlahDiminta: jumlah,
         tanggalPengajuan: today,
         tanggalMulai: tanggalMulai,

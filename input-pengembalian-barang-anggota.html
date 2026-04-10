@@ -374,6 +374,31 @@
       min-height: 60px;
     }
 
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .photo-preview {
+      margin-top: 8px;
+      display: none;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.78rem;
+      color: #5b6473;
+    }
+
+    .photo-preview img {
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #dbe2ef;
+      background: #fff;
+    }
+
     .btn {
       text-decoration: none;
       border: 0;
@@ -579,6 +604,29 @@
 
             <div style="padding: 16px;">
               <form id="pengembalianForm">
+                <div class="item-form">
+                  <h3>Data Pengembalian</h3>
+                  <div class="meta-grid">
+                    <div class="form-group">
+                      <label>Tanggal Pengembalian *</label>
+                      <input id="pengembalianDate" type="date" required>
+                    </div>
+                    <div class="form-group">
+                      <label>Waktu Pengembalian *</label>
+                      <input id="pengembalianTime" type="time" required>
+                    </div>
+                    <div class="form-group">
+                      <label>Lokasi Pengembalian *</label>
+                      <input id="pengembalianLocation" type="text" placeholder="Contoh: Gudang Studio" required>
+                    </div>
+                    <div class="form-group">
+                      <label>Bukti Foto Pengembalian *</label>
+                      <input id="pengembalianPhoto" type="file" accept="image/*" required>
+                      <div id="pengembalianPhotoPreview" class="photo-preview"></div>
+                    </div>
+                  </div>
+                </div>
+
                 <div id="itemsContainer"></div>
 
                 <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
@@ -630,8 +678,14 @@
     const itemsContainer = document.getElementById("itemsContainer");
     const pengembalianForm = document.getElementById("pengembalianForm");
     const cancelFormBtn = document.getElementById("cancelFormBtn");
+    const pengembalianDate = document.getElementById("pengembalianDate");
+    const pengembalianTime = document.getElementById("pengembalianTime");
+    const pengembalianLocation = document.getElementById("pengembalianLocation");
+    const pengembalianPhoto = document.getElementById("pengembalianPhoto");
+    const pengembalianPhotoPreview = document.getElementById("pengembalianPhotoPreview");
 
     const RIWAYAT_STORAGE_KEY = "crembo-peminjaman-riwayat";
+    let pengembalianPhotoData = "";
 
     function updateLiveDateTime() {
       const now = new Date();
@@ -669,6 +723,82 @@
       localStorage.setItem(RIWAYAT_STORAGE_KEY, JSON.stringify(items));
     }
 
+    function getTodayValue() {
+      const now = new Date();
+      return now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
+    }
+
+    function getNowTimeValue() {
+      const now = new Date();
+      return String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+    }
+
+    function resetPhotoPreview() {
+      pengembalianPhotoData = "";
+      pengembalianPhoto.value = "";
+      pengembalianPhotoPreview.style.display = "none";
+      pengembalianPhotoPreview.innerHTML = "";
+    }
+
+    function setPhotoPreview(dataUrl, fileName) {
+      pengembalianPhotoData = dataUrl;
+      pengembalianPhotoPreview.innerHTML = '<img src="' + dataUrl + '" alt="Pratinjau bukti foto">' + '<span>' + fileName + '</span>';
+      pengembalianPhotoPreview.style.display = "flex";
+    }
+
+    function seedRiwayatIfEmpty() {
+      if (localStorage.getItem(RIWAYAT_STORAGE_KEY)) {
+        return;
+      }
+
+      const demo = [
+        {
+          id: "rwyt-demo-1",
+          pengajuanId: "pjn-demo-1",
+          barangId: "inv-001",
+          barangNama: "Kamera Sony A6400",
+          jumlah: 1,
+          tanggalDiambil: "2026-04-10",
+          jamDiambil: "08:15",
+          tanggalDikembalikan: null,
+          jamDikembalikan: null,
+          kondisiSebelum: "Baik",
+          kondisiSesudah: null,
+          keterangan: "Dipakai untuk dokumentasi Misa Harian"
+        },
+        {
+          id: "rwyt-demo-2",
+          pengajuanId: "pjn-demo-2",
+          barangId: "inv-002",
+          barangNama: "Wireless Microphone Set",
+          jumlah: 2,
+          tanggalDiambil: "2026-04-09",
+          jamDiambil: "17:30",
+          tanggalDikembalikan: null,
+          jamDikembalikan: null,
+          kondisiSebelum: "Baik, Baik",
+          kondisiSesudah: null,
+          keterangan: "Satu set untuk live dan satu set cadangan"
+        },
+        {
+          id: "rwyt-demo-3",
+          pengajuanId: "pjn-demo-3",
+          barangId: "inv-003",
+          barangNama: "Tripod Heavy Duty",
+          jumlah: 1,
+          tanggalDiambil: "2026-04-05",
+          jamDiambil: "09:00",
+          tanggalDikembalikan: "2026-04-08",
+          jamDikembalikan: "16:45",
+          kondisiSebelum: "Baik",
+          kondisiSesudah: "Baik",
+          keterangan: "Sudah dikembalikan setelah kegiatan"
+        }
+      ];
+
+      localStorage.setItem(RIWAYAT_STORAGE_KEY, JSON.stringify(demo));
+    }
+
     function renderActiveLoanTable() {
       let items = readRiwayat().filter(function (item) {
         return !item.tanggalDikembalikan;
@@ -699,6 +829,10 @@
       }
 
       pengembalianForm.setAttribute("data-riwayat-id", riwayatId);
+      pengembalianDate.value = getTodayValue();
+      pengembalianTime.value = getNowTimeValue();
+      pengembalianLocation.value = "";
+      resetPhotoPreview();
       
       itemsContainer.innerHTML = '';
       for (let i = 0; i < riwayat.jumlah; i += 1) {
@@ -728,9 +862,25 @@
       document.querySelector("html").scrollIntoView({ behavior: "smooth" });
     }
 
+    pengembalianPhoto.addEventListener("change", function () {
+      const file = pengembalianPhoto.files && pengembalianPhoto.files[0];
+
+      if (!file) {
+        resetPhotoPreview();
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function () {
+        setPhotoPreview(String(reader.result || ""), file.name);
+      };
+      reader.readAsDataURL(file);
+    });
+
     cancelFormBtn.addEventListener("click", function () {
       formsContainer.style.display = "none";
       pengembalianForm.reset();
+      resetPhotoPreview();
     });
 
     pengembalianForm.addEventListener("submit", function (event) {
@@ -762,24 +912,43 @@
         return;
       }
 
-      const now = new Date();
-      const today = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
-      const time = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+      if (!pengembalianPhotoData) {
+        alert("Mohon unggah bukti foto pengembalian");
+        return;
+      }
+
+      const today = pengembalianDate.value;
+      const time = pengembalianTime.value;
+      const location = pengembalianLocation.value.trim();
+
+      if (!location) {
+        alert("Mohon isi lokasi pengembalian");
+        return;
+      }
 
       riwayat.tanggalDikembalikan = today;
       riwayat.jamDikembalikan = time;
       riwayat.kondisiSesudah = Array.from(kondisiSelects).map(function (s) { return s.value; }).join(", ");
       riwayat.keterangan = (riwayat.keterangan || "") + " | " + Array.from(keteranganInputs).map(function (t) { return t.value; }).join(" | ");
+      riwayat.returnInfo = {
+        date: today,
+        time: time,
+        location: location,
+        photo: pengembalianPhotoData,
+        conditions: riwayat.kondisiSesudah
+      };
 
       riwayatItems[idx] = riwayat;
       saveRiwayat(riwayatItems);
 
       formsContainer.style.display = "none";
       pengembalianForm.reset();
+      resetPhotoPreview();
       renderActiveLoanTable();
       alert("Pengembalian barang berhasil disimpan!");
     });
 
+    seedRiwayatIfEmpty();
     renderActiveLoanTable();
   </script>
 </body>
