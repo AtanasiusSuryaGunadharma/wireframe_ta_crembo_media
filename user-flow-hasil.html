@@ -555,8 +555,11 @@
             <tr>
               <th>Submission ID</th>
               <th>Role</th>
+              <th>Flow</th>
               <th>Nama Penguji</th>
               <th>Email</th>
+              <th>Device</th>
+              <th>Browser</th>
               <th>Jumlah Item</th>
               <th>Tanggal</th>
               <th>Aksi</th>
@@ -660,9 +663,15 @@
         var text = [
           row.submission_id,
           row.role_name,
+          row.flow_slug,
           row.tester_full_name,
+          row.tester_org,
           row.tester_email,
+          row.tester_phone,
+          row.tester_device,
+          row.tester_browser,
           row.step_title,
+          row.action_instruction,
           row.question_text,
           row.answer_value,
           row.question_note,
@@ -691,8 +700,13 @@
           map[key] = {
             submission_id: row.submission_id,
             role_name: row.role_name,
+            flow_slug: row.flow_slug,
             tester_full_name: row.tester_full_name,
+            tester_org: row.tester_org,
             tester_email: row.tester_email,
+            tester_phone: row.tester_phone,
+            tester_device: row.tester_device,
+            tester_browser: row.tester_browser,
             submitted_at: row.submitted_at,
             items: []
           };
@@ -726,8 +740,11 @@
           "<tr>" +
             "<td>" + esc(row.submission_id) + "</td>" +
             "<td>" + esc(row.role_name) + "</td>" +
+              "<td>" + esc(row.flow_slug || "-") + "</td>" +
             "<td>" + esc(row.tester_full_name) + "</td>" +
             "<td>" + esc(row.tester_email) + "</td>" +
+              "<td>" + esc(row.tester_device || "-") + "</td>" +
+              "<td>" + esc(row.tester_browser || "-") + "</td>" +
             "<td>" + esc(row.items.length + " item") + "</td>" +
             "<td>" + esc(new Date(row.submitted_at).toLocaleString("id-ID")) + "</td>" +
             "<td><div class='act'><button class='detail' type='button' data-detail='" + esc(row.submission_id) + "'>Detail</button><button class='delete' type='button' data-delete='" + esc(row.submission_id) + "'>Hapus</button></div></td>" +
@@ -769,8 +786,13 @@
       var summaryHtml = [
         ["Submission ID", row.submission_id],
         ["Role", row.role_name],
+        ["Flow", row.flow_slug || "-"],
         ["Nama Penguji", row.tester_full_name],
+        ["Instansi / Unit", row.tester_org || "-"],
         ["Email", row.tester_email],
+        ["No HP", row.tester_phone || "-"],
+        ["Device", row.tester_device || "-"],
+        ["Browser", row.tester_browser || "-"],
         ["Tanggal Submit", new Date(row.submitted_at).toLocaleString("id-ID")],
         ["Total Item", row.items.length]
       ].map(function (item) {
@@ -783,6 +805,7 @@
       }).join("");
 
       var stepsHtml = stepList.map(function (step) {
+        var instructionText = (step.items[0] && step.items[0].action_instruction) || "";
         var itemsHtml = step.items.map(function (item) {
           return (
             "<div class='qa-grid'>" +
@@ -801,6 +824,16 @@
             "</div>"
           );
         }).join("");
+
+        if (instructionText) {
+          itemsHtml =
+            "<div class='qa-grid'>" +
+              "<div class='qa-item'>" +
+                "<span class='qa-label'>Instruksi Uji Step</span>" +
+                "<div class='qa-value'>" + esc(instructionText) + "</div>" +
+              "</div>" +
+            "</div>" + itemsHtml;
+        }
 
         return (
           "<section class='step-card'>" +
@@ -832,14 +865,61 @@
     async function loadData() {
       setStatus("Memuat data...", false);
       try {
-        allRows = await request(
-          "GET",
-          "/rest/v1/v_uf_report?select=submission_id,role_name,tester_full_name,tester_email,step_title,question_text,answer_value,question_note,step_opinion,submitted_at&order=submitted_at.desc"
-        );
+        allRows = await fetchReportRows();
         applyFilters();
         setStatus("Data berhasil dimuat", false);
       } catch (error) {
         setStatus("Gagal memuat: " + error.message, true);
+      }
+    }
+
+    async function fetchReportRows() {
+      var baseSelect = [
+        "submission_id",
+        "role_name",
+        "tester_full_name",
+        "tester_email",
+        "step_title",
+        "question_text",
+        "answer_value",
+        "question_note",
+        "step_opinion",
+        "submitted_at"
+      ].join(",");
+
+      var extendedSelect = [
+        baseSelect,
+        "step_order",
+        "flow_slug",
+        "tester_org",
+        "tester_phone",
+        "tester_device",
+        "tester_browser",
+        "action_instruction"
+      ].join(",");
+
+      try {
+        return await request(
+          "GET",
+          "/rest/v1/v_uf_report?select=" + extendedSelect + "&order=submitted_at.desc"
+        );
+      } catch (error) {
+        var basicRows = await request(
+          "GET",
+          "/rest/v1/v_uf_report?select=" + baseSelect + "&order=submitted_at.desc"
+        );
+
+        return (basicRows || []).map(function (row) {
+          return Object.assign({
+            step_order: null,
+            flow_slug: "",
+            tester_org: "",
+            tester_phone: "",
+            tester_device: "",
+            tester_browser: "",
+            action_instruction: ""
+          }, row);
+        });
       }
     }
 
@@ -891,12 +971,19 @@
       var header = [
         "Submission ID",
         "Role",
+        "Flow",
         "Nama Penguji",
+        "Instansi/Unit",
         "Email",
+        "No HP",
+        "Device",
+        "Browser",
         "Tanggal"
       ];
 
       for (var i = 1; i <= maxItems; i += 1) {
+        header.push("Step " + i + " - Judul");
+        header.push("Step " + i + " - Instruksi");
         header.push("Step " + i + " - Pertanyaan");
         header.push("Step " + i + " - Jawaban");
         header.push("Step " + i + " - Catatan");
@@ -905,19 +992,26 @@
       var lines = [header.map(toCsvValue).join(",")];
 
       groups.forEach(function (group) {
-        group.items = group.items.slice().sort(function (a, b) {
+        var orderedItems = group.items.slice().sort(function (a, b) {
           return Number(a.step_order || 0) - Number(b.step_order || 0);
         });
 
         var row = [
           group.submission_id,
           group.role_name,
+          group.flow_slug || "",
           group.tester_full_name,
+          group.tester_org || "",
           group.tester_email,
+          group.tester_phone || "",
+          group.tester_device || "",
+          group.tester_browser || "",
           new Date(group.submitted_at).toLocaleString("id-ID")
         ];
 
-        group.items.forEach(function (item, index) {
+        orderedItems.forEach(function (item) {
+          row.push(item.step_title || "");
+          row.push(item.action_instruction || "");
           row.push(item.question_text || "");
           row.push(item.answer_value || "");
           row.push(item.question_note || item.step_opinion || "");
@@ -968,6 +1062,7 @@
         });
 
         var stepsHtml = stepList.map(function (step) {
+          var instructionText = (step.items[0] && step.items[0].action_instruction) || "";
           var qaHtml = step.items.map(function (item) {
             return (
               "<div class='print-qa-item'>" +
@@ -980,6 +1075,14 @@
               "</div>"
             );
           }).join("");
+
+          if (instructionText) {
+            qaHtml =
+              "<div class='print-qa-item'>" +
+                "<span class='print-qa-label'>Instruksi Uji Step</span>" +
+                "<div class='print-qa-value'>" + esc(instructionText) + "</div>" +
+              "</div>" + qaHtml;
+          }
 
           return (
             "<div class='print-step'>" +
@@ -997,7 +1100,13 @@
             "</div>" +
             "<div class='summary-grid'>" +
               "<div class='detail-item'><span class='detail-label'>Submission ID</span><div class='detail-value'>" + esc(row.submission_id) + "</div></div>" +
+              "<div class='detail-item'><span class='detail-label'>Role</span><div class='detail-value'>" + esc(row.role_name || "-") + "</div></div>" +
+              "<div class='detail-item'><span class='detail-label'>Flow</span><div class='detail-value'>" + esc(row.flow_slug || "-") + "</div></div>" +
               "<div class='detail-item'><span class='detail-label'>Email</span><div class='detail-value'>" + esc(row.tester_email) + "</div></div>" +
+              "<div class='detail-item'><span class='detail-label'>Instansi / Unit</span><div class='detail-value'>" + esc(row.tester_org || "-") + "</div></div>" +
+              "<div class='detail-item'><span class='detail-label'>No HP</span><div class='detail-value'>" + esc(row.tester_phone || "-") + "</div></div>" +
+              "<div class='detail-item'><span class='detail-label'>Device</span><div class='detail-value'>" + esc(row.tester_device || "-") + "</div></div>" +
+              "<div class='detail-item'><span class='detail-label'>Browser</span><div class='detail-value'>" + esc(row.tester_browser || "-") + "</div></div>" +
               "<div class='detail-item'><span class='detail-label'>Total Item</span><div class='detail-value'>" + esc(row.items.length) + "</div></div>" +
             "</div>" +
             stepsHtml +
