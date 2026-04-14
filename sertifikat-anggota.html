@@ -277,6 +277,17 @@
       font-size: 1.3rem;
       letter-spacing: 0.06em;
       text-transform: uppercase;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cert-logo {
+      width: 160px;
+      max-width: 100%;
+      height: auto;
+      object-fit: contain;
     }
 
     .cert-header p {
@@ -467,6 +478,7 @@
             <article id="certificatePreview" class="certificate" aria-label="Preview sertifikat">
               <div class="cert-accent"></div>
               <div class="cert-header">
+                <img class="cert-logo" src="logo crembo hitam.png" alt="Logo Crembo Media">
                 <h3>CREMBO MEDIA BACIRO</h3>
                 <p>Komunitas Multimedia Paroki Baciro - Yogyakarta</p>
               </div>
@@ -512,6 +524,7 @@
     const CERT_SETTINGS_KEY = "crembo-member-certificate-settings";
     const MEMBER_STORAGE_KEY = "crembo-members";
     const SESSION_KEY = "crembo-login-session";
+    const CERT_LOGO_SRC = "logo crembo hitam.png";
 
     const certMemberName = document.getElementById("certMemberName");
     const certRegisteredDate = document.getElementById("certRegisteredDate");
@@ -662,44 +675,52 @@
       ctx.fillStyle = "#0f172a";
       ctx.textAlign = "center";
 
+      const logoImg = await loadImage(CERT_LOGO_SRC);
+      if (logoImg) {
+        const targetWidth = 170;
+        const ratio = targetWidth / logoImg.width;
+        const targetHeight = logoImg.height * ratio;
+        ctx.drawImage(logoImg, (canvas.width - targetWidth) / 2, 58, targetWidth, targetHeight);
+      }
+
       ctx.font = "700 40px Segoe UI";
-      ctx.fillText("CREMBO MEDIA BACIRO", canvas.width / 2, 132);
+      ctx.fillText("CREMBO MEDIA BACIRO", canvas.width / 2, 156);
 
       ctx.font = "500 24px Segoe UI";
       ctx.fillStyle = "#334155";
-      ctx.fillText("Komunitas Multimedia Paroki Baciro - Yogyakarta", canvas.width / 2, 172);
+      ctx.fillText("Komunitas Multimedia Paroki Baciro - Yogyakarta", canvas.width / 2, 196);
 
       ctx.fillStyle = "#0f172a";
       ctx.font = "800 64px Segoe UI";
-      ctx.fillText("SERTIFIKAT KEANGGOTAAN", canvas.width / 2, 258);
+      ctx.fillText("SERTIFIKAT KEANGGOTAAN", canvas.width / 2, 284);
 
       ctx.font = "600 30px Segoe UI";
       ctx.fillStyle = "#334155";
-      ctx.fillText("Crew Multimedia Baciro", canvas.width / 2, 302);
+      ctx.fillText("Crew Multimedia Baciro", canvas.width / 2, 328);
 
       ctx.fillStyle = "#1f2937";
       ctx.font = "500 34px Segoe UI";
-      ctx.fillText("Diberikan kepada:", canvas.width / 2, 395);
+      ctx.fillText("Diberikan kepada:", canvas.width / 2, 420);
 
       ctx.font = "800 62px Segoe UI";
       ctx.fillStyle = "#111827";
-      ctx.fillText(toUpperName(data.memberName), canvas.width / 2, 486);
+      ctx.fillText(toUpperName(data.memberName), canvas.width / 2, 512);
       ctx.strokeStyle = "#64748b";
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(320, 510);
-      ctx.lineTo(canvas.width - 320, 510);
+      ctx.moveTo(320, 536);
+      ctx.lineTo(canvas.width - 320, 536);
       ctx.stroke();
 
       ctx.fillStyle = "#1f2937";
       ctx.font = "500 31px Segoe UI";
-      ctx.fillText("sebagai anggota aktif Crembo Media", canvas.width / 2, 566);
-      ctx.fillText("sejak terdaftar pada " + data.registeredDateText, canvas.width / 2, 612);
+      ctx.fillText("sebagai anggota aktif Crembo Media", canvas.width / 2, 592);
+      ctx.fillText("sejak terdaftar pada " + data.registeredDateText, canvas.width / 2, 638);
 
       ctx.font = "600 23px Segoe UI";
       ctx.fillStyle = "#334155";
-      ctx.fillText("No. Sertifikat: " + data.certificateNumber, canvas.width / 2, 676);
-      ctx.fillText("Tanggal Terbit: " + data.issueDateText, canvas.width / 2, 712);
+      ctx.fillText("No. Sertifikat: " + data.certificateNumber, canvas.width / 2, 702);
+      ctx.fillText("Tanggal Terbit: " + data.issueDateText, canvas.width / 2, 738);
 
       const ketuaImg = await loadImage(data.ketuaSignDataUrl);
       const pembinaImg = await loadImage(data.pembinaSignDataUrl);
@@ -714,30 +735,30 @@
         ctx.drawImage(image, x + (w - dw) / 2, y + (h - dh), dw, dh);
       }
 
-      drawSignature(ketuaImg, 250, 775, 430, 150);
-      drawSignature(pembinaImg, 920, 775, 430, 150);
+      drawSignature(ketuaImg, 250, 800, 430, 150);
+      drawSignature(pembinaImg, 920, 800, 430, 150);
 
       ctx.strokeStyle = "#334155";
       ctx.lineWidth = 1.6;
       ctx.beginPath();
-      ctx.moveTo(250, 930);
-      ctx.lineTo(680, 930);
+      ctx.moveTo(250, 955);
+      ctx.lineTo(680, 955);
       ctx.stroke();
 
       ctx.beginPath();
-      ctx.moveTo(920, 930);
-      ctx.lineTo(1350, 930);
+      ctx.moveTo(920, 955);
+      ctx.lineTo(1350, 955);
       ctx.stroke();
 
       ctx.fillStyle = "#1f2937";
       ctx.font = "700 28px Segoe UI";
-      ctx.fillText(data.ketuaName, 465, 972);
-      ctx.fillText(data.pembinaName, 1135, 972);
+      ctx.fillText(data.ketuaName, 465, 997);
+      ctx.fillText(data.pembinaName, 1135, 997);
 
       ctx.font = "500 22px Segoe UI";
       ctx.fillStyle = "#334155";
-      ctx.fillText("Ketua Crembo Media", 465, 1006);
-      ctx.fillText("Pembina Crembo Media", 1135, 1006);
+      ctx.fillText("Ketua Crembo Media", 465, 1031);
+      ctx.fillText("Pembina Crembo Media", 1135, 1031);
 
       return canvas;
     }
