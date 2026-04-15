@@ -368,10 +368,12 @@
     .status-pill.available { border-color: #91c89c; background: #ecf8ef; color: #235c2d; }
     .status-pill.borrowed { border-color: #c6b07b; background: #fff8ea; color: #7a5a1f; }
     .status-pill.repair { border-color: #d29a9a; background: #fff1f1; color: #7c2222; }
+    .status-pill.lost { border-color: #9ca3af; background: #f3f4f6; color: #374151; }
 
     .condition-pill.good { border-color: #91c89c; background: #ecf8ef; color: #235c2d; }
     .condition-pill.light-damage { border-color: #c6b07b; background: #fff8ea; color: #7a5a1f; }
     .condition-pill.heavy-damage { border-color: #d29a9a; background: #fff1f1; color: #7c2222; }
+    .condition-pill.lost { border-color: #9ca3af; background: #f3f4f6; color: #374151; }
 
     .empty-note {
       margin: 10px 0 0;
@@ -678,6 +680,7 @@
               <option value="Baik">Baik</option>
               <option value="Rusak Ringan">Rusak Ringan</option>
               <option value="Rusak Berat">Rusak Berat</option>
+              <option value="Hilang">Hilang</option>
             </select>
           </div>
 
@@ -688,6 +691,7 @@
               <option value="Tersedia">Tersedia</option>
               <option value="Dipinjam">Dipinjam</option>
               <option value="Perbaikan">Perbaikan</option>
+              <option value="Hilang">Hilang</option>
             </select>
           </div>
 
@@ -800,6 +804,7 @@
               <option value="Baik">Baik</option>
               <option value="Rusak Ringan">Rusak Ringan</option>
               <option value="Rusak Berat">Rusak Berat</option>
+              <option value="Hilang">Hilang</option>
             </select>
           </div>
           <div class="field">
@@ -808,6 +813,7 @@
               <option value="Tersedia">Tersedia</option>
               <option value="Dipinjam">Dipinjam</option>
               <option value="Perbaikan">Perbaikan</option>
+              <option value="Hilang">Hilang</option>
             </select>
           </div>
         </div>
@@ -1378,6 +1384,9 @@
     }
 
     function getConditionClass(value) {
+      if (value === "Hilang") {
+        return "lost";
+      }
       if (value === "Rusak Ringan") {
         return "light-damage";
       }
@@ -1388,6 +1397,9 @@
     }
 
     function getStatusClass(value) {
+      if (value === "Hilang") {
+        return "lost";
+      }
       if (value === "Dipinjam") {
         return "borrowed";
       }
