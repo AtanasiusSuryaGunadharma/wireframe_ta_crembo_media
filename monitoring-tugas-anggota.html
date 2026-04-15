@@ -643,6 +643,12 @@
           </select>
         </div>
         <div class="control-group">
+          <label for="scheduleTime">Pilih Jam</label>
+          <select id="scheduleTime">
+            <option value="">-- Pilih Jam --</option>
+          </select>
+        </div>
+        <div class="control-group">
           <label for="scheduleRole">Pilih Role / Posisi</label>
           <select id="scheduleRole">
             <option value="">-- Pilih Role --</option>
@@ -651,10 +657,6 @@
             <option value="Supervisor">Supervisor</option>
             <option value="Editor">Editor</option>
           </select>
-        </div>
-        <div class="control-group">
-          <label for="scheduleNotes">Catatan (Opsional)</label>
-          <input id="scheduleNotes" type="text" placeholder="Catatan tambahan...">
         </div>
       </div>
       <div class="modal-actions">
@@ -677,13 +679,16 @@
       { nama: "Tejo", role: "Kameramen", catatan: "" }
     ];
 
-    const DEFAULT_SCHEDULE = [
-      { date: "2026-03-05", time: "06:45", title: "Misa Subuh", status: "Siap" },
-      { date: "2026-03-05", time: "11:00", title: "Misa Siang", status: "Siap" },
-      { date: "2026-03-07", time: "18:30", title: "Misa Sore", status: "Siap" },
-      { date: "2026-03-12", time: "06:45", title: "Misa Subuh", status: "Siap" },
-      { date: "2026-03-15", time: "11:00", title: "Misa Siang", status: "Siap" }
-    ];
+    const WEEKLY_TIMES_KEY = "crembo-admin-weekly-mass-times";
+    const DEFAULT_WEEKLY_TIMES = {
+      0: ["07:30", "10:00", "16:30", "18:00"],
+      1: ["18:00"],
+      2: ["18:00"],
+      3: ["18:00"],
+      4: ["18:00"],
+      5: ["18:00"],
+      6: ["18:00"]
+    };
 
     // DOM Elements
     const liveDateTime = document.getElementById("liveDateTime");
@@ -705,8 +710,8 @@
     const modalTitle = document.getElementById("modalTitle");
     const scheduleMemberName = document.getElementById("scheduleMemberName");
     const scheduleDate = document.getElementById("scheduleDate");
+    const scheduleTime = document.getElementById("scheduleTime");
     const scheduleRole = document.getElementById("scheduleRole");
-    const scheduleNotes = document.getElementById("scheduleNotes");
     const modalCancelBtn = document.getElementById("modalCancelBtn");
     const modalSaveBtn = document.getElementById("modalSaveBtn");
     const modalCloseBtn = document.querySelector(".modal-close");
@@ -763,6 +768,43 @@
       localStorage.setItem(key, JSON.stringify(tasks));
     }
 
+    function safeParse(raw, fallback) {
+      try {
+        const parsed = JSON.parse(raw);
+        return parsed == null ? fallback : parsed;
+      } catch (error) {
+        return fallback;
+      }
+    }
+
+    function normalizeTimesArray(times) {
+      const seen = {};
+      return times.filter(function (time) {
+        return /^([01]\d|2[0-3]):[0-5]\d$/.test(time);
+      }).filter(function (time) {
+        if (seen[time]) {
+          return false;
+        }
+        seen[time] = true;
+        return true;
+      }).sort();
+    }
+
+    function getWeeklyTimesConfig() {
+      const stored = safeParse(localStorage.getItem(WEEKLY_TIMES_KEY), null);
+      const result = {};
+      for (let day = 0; day <= 6; day += 1) {
+        const source = stored && Array.isArray(stored[day]) ? stored[day] : DEFAULT_WEEKLY_TIMES[day];
+        result[day] = normalizeTimesArray(source || []);
+      }
+      return result;
+    }
+
+    function getMassTimesByWeekday(dayOfWeek) {
+      const config = getWeeklyTimesConfig();
+      return config[dayOfWeek] || [];
+    }
+
     function loadMemberTasks() {
       // Initialize with default tasks if not present
       DEFAULT_MEMBERS.forEach(function (member) {
@@ -774,7 +816,11 @@
                                  member.nama === "Claire" && month === 2 ? 1 : 0;
             const tasks = [];
             for (let i = 0; i < defaultCount; i++) {
-              tasks.push({ date: DEFAULT_SCHEDULE[i % DEFAULT_SCHEDULE.length].date, role: "Operator" });
+              const day = Math.min(i + 1, 28);
+              const dateStr = String(2026) + "-" + String(month + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+              const dateObj = new Date(dateStr + "T00:00:00");
+              const availableTimes = getMassTimesByWeekday(dateObj.getDay());
+              tasks.push({ date: dateStr, time: availableTimes[0] || "18:00", role: "Operator" });
             }
             saveMemberTasks(member.nama, 2026, month, tasks);
           }
@@ -787,21 +833,53 @@
       return names[monthIndex];
     }
 
-    function getCurrentYear() {
-      return new Date().getFullYear();
+    function formatScheduleDateLabel(dateObj) {
+      const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+      return dayNames[dateObj.getDay()] + ", " +
+        String(dateObj.getDate()).padStart(2, "0") + " " +
+        getMonthName(dateObj.getMonth()) + " " +
+        dateObj.getFullYear();
+    }
+
+    function updateScheduleTimeOptions() {
+      const dateValue = scheduleDate.value;
+      scheduleTime.innerHTML = '<option value="">-- Pilih Jam --</option>';
+      if (!dateValue) {
+        return;
+      }
+
+      const dateObj = new Date(dateValue + "T00:00:00");
+      const times = getMassTimesByWeekday(dateObj.getDay());
+      if (!times.length) {
+        scheduleTime.innerHTML = '<option value="">Tidak ada jam tersedia</option>';
+        return;
+      }
+
+      scheduleTime.innerHTML += times.map(function (time) {
+        return '<option value="' + time + '">' + time + '</option>';
+      }).join("");
+      scheduleTime.value = times[0];
     }
 
     function populateScheduleDates() {
+      const monthIdx = parseInt(monthSelector.value || currentMonth, 10);
+      const yearValue = parseInt(yearSelector.value || currentYear, 10);
+      const totalDays = new Date(yearValue, monthIdx + 1, 0).getDate();
       const options = [];
-      DEFAULT_SCHEDULE.forEach(function (item) {
-        const dateStr = item.date + " (" + item.title + ")";
-        if (!options.includes(dateStr)) {
-          const optEl = document.createElement("option");
-          optEl.value = item.date;
-          optEl.textContent = dateStr;
-          scheduleDate.appendChild(optEl);
+
+      for (let day = 1; day <= totalDays; day += 1) {
+        const dateObj = new Date(yearValue, monthIdx, day);
+        const availableTimes = getMassTimesByWeekday(dateObj.getDay());
+        if (!availableTimes.length) {
+          continue;
         }
-      });
+
+        const iso = String(yearValue) + "-" + String(monthIdx + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+        options.push('<option value="' + iso + '">' + formatScheduleDateLabel(dateObj) + '</option>');
+      }
+
+      scheduleDate.innerHTML = '<option value="">-- Pilih Tanggal --</option>' + options.join("");
+      updateScheduleTimeOptions();
     }
 
     function calculateStatus(totalTasks) {
@@ -915,9 +993,10 @@
     function openScheduleModal(memberName) {
       currentSchedulingMember = memberName;
       scheduleMemberName.value = memberName;
+      populateScheduleDates();
       scheduleDate.value = "";
+      scheduleTime.value = "";
       scheduleRole.value = "";
-      scheduleNotes.value = "";
       scheduleModal.classList.add("show");
     }
 
@@ -927,7 +1006,7 @@
     }
 
     function saveScheduledTask() {
-      if (!currentSchedulingMember || !scheduleDate.value || !scheduleRole.value) {
+      if (!currentSchedulingMember || !scheduleDate.value || !scheduleTime.value || !scheduleRole.value) {
         alert("Harap isi semua field yang diperlukan");
         return;
       }
@@ -937,8 +1016,8 @@
       const tasks = getMemberTasks(currentSchedulingMember, yearValue, monthIdx);
       tasks.push({
         date: scheduleDate.value,
-        role: scheduleRole.value,
-        notes: scheduleNotes.value
+        time: scheduleTime.value,
+        role: scheduleRole.value
       });
       saveMemberTasks(currentSchedulingMember, yearValue, monthIdx, tasks);
       
@@ -948,8 +1027,14 @@
     }
 
     // Event listeners
-    monthSelector.addEventListener("change", render);
-    yearSelector.addEventListener("change", render);
+    monthSelector.addEventListener("change", function () {
+      render();
+      populateScheduleDates();
+    });
+    yearSelector.addEventListener("change", function () {
+      render();
+      populateScheduleDates();
+    });
     targetMinInput.addEventListener("change", function () {
       targetMinimum = parseInt(this.value) || 2;
       render();
@@ -975,6 +1060,7 @@
     modalCancelBtn.addEventListener("click", closeScheduleModal);
     modalCloseBtn.addEventListener("click", closeScheduleModal);
     modalSaveBtn.addEventListener("click", saveScheduledTask);
+    scheduleDate.addEventListener("change", updateScheduleTimeOptions);
 
     scheduleModal.addEventListener("click", function (e) {
       if (e.target === scheduleModal) {
