@@ -450,6 +450,7 @@
   <script>
     const SESSION_KEY = "crembo-login-session";
     const SUBMISSION_KEY = "crembo-kerusakan-form-submissions";
+    const NOTIFICATION_STORAGE_KEY = "crembo-admin-notifications";
 
     const sidebar = document.getElementById("sidebar");
     const mobileMenuBtn = document.getElementById("mobileMenuBtn");
@@ -522,6 +523,27 @@
 
     function saveSubmissions(items) {
       localStorage.setItem(SUBMISSION_KEY, JSON.stringify(items));
+    }
+
+    function readAdminNotifications() {
+      const parsed = safeParse(localStorage.getItem(NOTIFICATION_STORAGE_KEY), []);
+      return Array.isArray(parsed) ? parsed : [];
+    }
+
+    function saveAdminNotifications(items) {
+      localStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function pushAdminNotification(item) {
+      const notifications = readAdminNotifications();
+      const exists = notifications.some(function (entry) {
+        return String(entry && entry.id ? entry.id : "") === String(item.id || "");
+      });
+      if (exists) {
+        return;
+      }
+      notifications.unshift(item);
+      saveAdminNotifications(notifications);
     }
 
     function setStatus(message) {
@@ -605,6 +627,15 @@
       const all = readSubmissions();
       all.push(submission);
       saveSubmissions(all);
+
+      pushAdminNotification({
+        id: "damage-report-" + submission.id,
+        type: "peminjaman",
+        title: "Laporan Kerusakan Barang Baru",
+        message: fullName + " mengirim laporan kerusakan untuk barang " + submission.itemName + " (" + submission.itemCode + ").",
+        date: new Date().toISOString().slice(0, 16).replace("T", " "),
+        status: "unread"
+      });
 
       reportForm.reset();
       incidentDateInput.value = new Date().toISOString().slice(0, 10);

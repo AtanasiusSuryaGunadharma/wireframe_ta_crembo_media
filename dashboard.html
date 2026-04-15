@@ -1071,8 +1071,10 @@
 
     const DEFAULT_NOTIFICATIONS = [
       { id: "admin-notif-1", type: "tugas", title: "Pengingat penjadwalan petugas", message: "Ada jadwal misa akhir pekan yang masih kurang 1 petugas operator.", date: "2026-04-10 07:30", status: "unread" },
+      { id: "admin-notif-urgent-streaming-1", type: "tugas", title: "Urgent: Kendala Serius Evaluasi Streaming", message: "Misa Kamis Biasa (26/03/2026 - 18:00 WIB) ditandai Kendala Serius (Urgent) dan perlu tindak lanjut cepat.", date: "2026-04-10 07:10", status: "unread" },
       { id: "admin-notif-2", type: "tukar", title: "Permintaan tukar jadwal masuk", message: "Anggota mengajukan tukar jadwal untuk misa hari Minggu.", date: "2026-04-09 15:20", status: "read" },
       { id: "admin-notif-3", type: "peminjaman", title: "Pengajuan peminjaman menunggu persetujuan", message: "Pengajuan peminjaman kamera Sony FX3 menunggu tindakan admin.", date: "2026-04-09 10:10", status: "unread" },
+      { id: "admin-notif-damage-report-1", type: "peminjaman", title: "Laporan Kerusakan Barang Baru", message: "Anggota mengirim laporan kerusakan barang inventaris dan menunggu tindak lanjut admin.", date: "2026-04-09 09:05", status: "unread" },
       { id: "admin-notif-4", type: "agenda", title: "Draft agenda siap dipublikasi", message: "Agenda latihan tim multimedia sudah siap untuk ditinjau.", date: "2026-04-08 18:00", status: "read" },
       { id: "admin-notif-5", type: "keanggotaan", title: "Permintaan status anggota", message: "Ada 2 pengajuan perubahan status keanggotaan yang perlu diverifikasi.", date: "2026-04-08 08:45", status: "unread" }
     ];
@@ -1225,9 +1227,24 @@
     }
 
     function seedNotificationsIfEmpty() {
-      if (!localStorage.getItem(NOTIFICATION_STORAGE_KEY)) {
-        localStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(DEFAULT_NOTIFICATIONS));
-      }
+      const existing = readNotifications();
+      const mapById = {};
+
+      existing.forEach(function (item) {
+        const key = String(item && item.id ? item.id : "");
+        if (!key) {
+          return;
+        }
+        mapById[key] = item;
+      });
+
+      DEFAULT_NOTIFICATIONS.forEach(function (item) {
+        if (!mapById[item.id]) {
+          existing.push(item);
+        }
+      });
+
+      saveNotifications(existing);
     }
 
     function readNotifications() {

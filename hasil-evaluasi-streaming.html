@@ -886,6 +886,7 @@
                   <th>Tanggal</th>
                   <th>Jam</th>
                   <th>Jenis Misa</th>
+                  <th>Penilaian General</th>
                   <th>Judul Misa</th>
                   <th>Petugas Bertugas</th>
                   <th>Pengisi Evaluasi</th>
@@ -927,7 +928,7 @@
     const STORAGE_KEY = "crembo-evaluasi-streaming";
     const STORAGE_SEED_KEY = "crembo-evaluasi-streaming-seed-version";
     const QUESTION_CONFIG_KEY = "crembo-evaluasi-question-config";
-    const DUMMY_SEED_VERSION = "v4";
+    const DUMMY_SEED_VERSION = "v5";
     const RATING_SCORE_MAP = {
       "Sangat Baik": 4,
       "Baik": 3,
@@ -993,6 +994,7 @@
         date: "2026-04-09",
         time: "18:00",
         misaType: "Biasa",
+        generalAssessment: "Kendala Ringan",
         operator: "Lisa",
         camera: "Evan",
         supervisor: "Jose",
@@ -1133,6 +1135,7 @@
         date: "2026-03-26",
         time: "18:00",
         misaType: "Biasa",
+        generalAssessment: "Kendala Serius (Urgent)",
         operator: "Reno",
         camera: "Mika",
         supervisor: "Tara",
@@ -1599,6 +1602,27 @@
       return String(value || "").trim();
     }
 
+    function deriveGeneralAssessment(item) {
+      const direct = normalizeName(item && item.generalAssessment);
+      if (direct) {
+        return direct;
+      }
+
+      const technical = normalizeName(item && item.technicalIssue).toLowerCase();
+      const liturgy = normalizeName(item && item.liturgyIssue).toLowerCase();
+      const combined = (technical + " " + liturgy).trim();
+
+      if (!combined) {
+        return "Aman";
+      }
+
+      if (/(urgent|serius|putus|mati|down|drop|gagal)/.test(combined)) {
+        return "Kendala Serius (Urgent)";
+      }
+
+      return "Kendala Ringan";
+    }
+
     function normalizeStaffList(items) {
       const unique = [];
       items.forEach(function (name) {
@@ -1738,6 +1762,7 @@
           date: date,
           time: time,
           misaType: misaType,
+          generalAssessment: deriveGeneralAssessment(item),
           title: title,
           staff: staff,
           evaluator: normalizeName(item.evaluatorName),
@@ -1794,6 +1819,11 @@
         "Cukup": 0,
         "Perlu Pendampingan": 0
       };
+      const generalCounts = {
+        "Aman": 0,
+        "Kendala Ringan": 0,
+        "Kendala Serius (Urgent)": 0
+      };
 
       let totalStaffEval = 0;
       let totalStaffScore = 0;
@@ -1809,6 +1839,13 @@
       configuredDynamicCount = questionConfig.length;
 
       completed.forEach(function (item) {
+        const generalLabel = String(item.generalAssessment || "Aman");
+        if (generalCounts[generalLabel] != null) {
+          generalCounts[generalLabel] += 1;
+        } else {
+          generalCounts["Kendala Ringan"] += 1;
+        }
+
         if (item.checklist.stream) {
           checklistStream += 1;
         }
@@ -1854,6 +1891,12 @@
       const technicalIssueRate = formCount ? Math.round((technicalIssueCount / formCount) * 100) : 0;
       const liturgyIssueRate = formCount ? Math.round((liturgyIssueCount / formCount) * 100) : 0;
       const checklistRate = Math.round((streamRate + coordinationRate + archiveRate) / 3);
+      const generalSafeRate = formCount
+        ? Math.round((generalCounts["Aman"] / formCount) * 100)
+        : 0;
+      const generalUrgentRate = formCount
+        ? Math.round((generalCounts["Kendala Serius (Urgent)"] / formCount) * 100)
+        : 0;
       const dynamicExpectedCount = formCount * configuredDynamicCount;
       const dynamicCompletionRate = dynamicExpectedCount
         ? Math.round((dynamicAnsweredCount / dynamicExpectedCount) * 100)
@@ -1861,6 +1904,7 @@
 
       const attributeScores = [
         { label: "Siaran berjalan sampai akhir", value: streamRate },
+        { label: "Status general streaming aman", value: generalSafeRate },
         { label: "Koordinasi tim berjalan baik", value: coordinationRate },
         { label: "Rekaman tersimpan dengan benar", value: archiveRate },
         { label: "Penilaian petugas", value: Math.round((averageStaffScore / 4) * 100) },
@@ -1877,6 +1921,8 @@
 
       aiKpiGrid.innerHTML =
         '<article class="ai-kpi"><p>Rata-rata Penilaian Petugas</p><strong>' + formatScore(averageStaffScore) + '/4</strong></article>' +
+        '<article class="ai-kpi"><p>General Streaming Aman</p><strong>' + generalCounts["Aman"] + '/' + formCount + '</strong></article>' +
+        '<article class="ai-kpi"><p>General Urgent</p><strong>' + generalCounts["Kendala Serius (Urgent)"] + ' (' + generalUrgentRate + '%)</strong></article>' +
         '<article class="ai-kpi"><p>Kepatuhan Checklist Layanan</p><strong>' + checklistRate + '%</strong></article>' +
         '<article class="ai-kpi"><p>Jawaban Pertanyaan Tambahan</p><strong>' +
         (configuredDynamicCount > 0 ? (dynamicAnsweredCount + '/' + dynamicExpectedCount) : '-') +
@@ -1909,6 +1955,7 @@
         "Dalam periode terpilih, evaluasi streaming menunjukkan performa " +
         (averageStaffScore >= 3.5 ? "sangat baik" : averageStaffScore >= 3 ? "baik" : "cukup") +
         " dengan rata-rata penilaian petugas " + formatScore(averageStaffScore) + "/4. " +
+        "Penilaian general menunjukkan " + generalCounts["Aman"] + " sesi aman, " + generalCounts["Kendala Ringan"] + " sesi kendala ringan, dan " + generalCounts["Kendala Serius (Urgent)"] + " sesi urgent. " +
         "Aspek paling konsisten ada pada " + strongest[0].label.toLowerCase() +
         ", sementara " + priorities[0].label.toLowerCase() +
         " masih terlihat paling bervariasi antar jadwal.";
@@ -1918,6 +1965,9 @@
         " dan " + priorities[1].label.toLowerCase() +
         ". Targetkan brief 10 menit sebelum misa, validasi checklist layanan per sesi, " +
         "dan tindak lanjut untuk misa terlewat yang belum dievaluasi (" + lateRate + "% dari total jadwal di filter ini)." +
+        (generalUrgentRate > 0
+          ? (" Prioritaskan SOP eskalasi untuk sesi urgent (" + generalCounts["Kendala Serius (Urgent)"] + " sesi).")
+          : " Pertahankan tren tanpa sesi urgent dengan audit rutin sebelum live.") +
         (configuredDynamicCount > 0
           ? (" Pastikan pengisian pertanyaan tambahan konsisten (saat ini " + dynamicCompletionRate + "% terisi).")
           : "");
@@ -1941,7 +1991,10 @@
           '<div class="bar-track"><div class="bar-fill" style="width:' + width + '%"></div></div>' +
           '<strong>' + count + '</strong>' +
         '</div>';
-      }).join("");
+      }).join("") +
+      '<div class="bar-row"><span>General - Aman</span><div class="bar-track"><div class="bar-fill" style="width:' + (formCount ? Math.round((generalCounts["Aman"] / formCount) * 100) : 0) + '%"></div></div><strong>' + generalCounts["Aman"] + '</strong></div>' +
+      '<div class="bar-row"><span>General - Kendala Ringan</span><div class="bar-track"><div class="bar-fill" style="width:' + (formCount ? Math.round((generalCounts["Kendala Ringan"] / formCount) * 100) : 0) + '%"></div></div><strong>' + generalCounts["Kendala Ringan"] + '</strong></div>' +
+      '<div class="bar-row"><span>General - Urgent</span><div class="bar-track"><div class="bar-fill" style="width:' + (formCount ? Math.round((generalCounts["Kendala Serius (Urgent)"] / formCount) * 100) : 0) + '%"></div></div><strong>' + generalCounts["Kendala Serius (Urgent)"] + '</strong></div>';
 
       aiQuestionBars.innerHTML = attributeScores.map(function (item) {
         const width = item.value;
@@ -1975,11 +2028,14 @@
 
     function renderEvaluationSummary(completed, pending) {
       const totalOverdue = completed.length + pending.length;
+      const urgentCount = completed.filter(function (item) {
+        return String(item.generalAssessment || "") === "Kendala Serius (Urgent)";
+      }).length;
       evaluationSummary.innerHTML =
         '<article class="summary-item"><p>Evaluasi Masuk</p><strong>' + completed.length + '</strong></article>' +
         '<article class="summary-item"><p>Misa Terlewat Belum Diisi</p><strong>' + pending.length + '</strong></article>' +
         '<article class="summary-item"><p>Total Misa (Sesuai Filter)</p><strong>' + totalOverdue + '</strong></article>' +
-        '<article class="summary-item"><p>Jenis Misa Aktif</p><strong>' + (resultTypeFilter.value === "all" ? "Semua" : resultTypeFilter.value) + '</strong></article>';
+        '<article class="summary-item"><p>General Urgent</p><strong>' + urgentCount + '</strong></article>';
 
       const typeLabel = resultTypeFilter.value === "all" ? "Semua" : resultTypeFilter.value;
       activeFilterChip.textContent = "Filter: " + typeLabel;
@@ -2003,6 +2059,7 @@
           '<td>' + escapeHtml(formatDate(item.date)) + '</td>' +
           '<td>' + escapeHtml(item.time || "-") + '</td>' +
           '<td>' + escapeHtml(item.misaType || "-") + '</td>' +
+          '<td>' + escapeHtml(item.generalAssessment || "Aman") + '</td>' +
           '<td>' + escapeHtml(item.title) + '</td>' +
           '<td>' + escapeHtml(item.staff.join(", ") || "-") + '</td>' +
           '<td>' + evaluator + '</td>' +
@@ -2064,7 +2121,7 @@
 
       evaluationDetailBody.innerHTML =
         '<div class="detail-grid">' +
-          '<article class="detail-card"><h4>Informasi Jadwal</h4><p><strong>Tanggal:</strong> ' + escapeHtml(formatDate(data.date)) + '<br><strong>Jam:</strong> ' + escapeHtml(data.time || '-') + ' WIB<br><strong>Jenis:</strong> ' + escapeHtml(data.misaType || '-') + '<br><strong>Judul:</strong> ' + escapeHtml(data.title || '-') + '</p></article>' +
+          '<article class="detail-card"><h4>Informasi Jadwal</h4><p><strong>Tanggal:</strong> ' + escapeHtml(formatDate(data.date)) + '<br><strong>Jam:</strong> ' + escapeHtml(data.time || '-') + ' WIB<br><strong>Jenis:</strong> ' + escapeHtml(data.misaType || '-') + '<br><strong>General:</strong> ' + escapeHtml(data.generalAssessment || 'Aman') + '<br><strong>Judul:</strong> ' + escapeHtml(data.title || '-') + '</p></article>' +
           '<article class="detail-card"><h4>Pengisi & Petugas</h4><p><strong>Pengisi:</strong> ' + evaluator + '<br><strong>Petugas bertugas:</strong> ' + escapeHtml(data.staff.join(', ') || '-') + '<br><strong>Waktu submit:</strong> ' + escapeHtml(formatDateTime(data.submittedAt)) + '</p></article>' +
         '</div>' +
         '<article class="detail-card"><h4>Checklist Kondisi Pelayanan</h4><p>' + renderChecklistPills(data) + '</p></article>' +
@@ -2160,7 +2217,7 @@
       html += '<p>Periode: ' + escapeHtml(periodValue) + '</p>';
       html += '<h4>Evaluasi Sudah Masuk</h4>';
       html += '<table border="1" cellspacing="0" cellpadding="6">';
-      html += '<tr><th>Tanggal</th><th>Jam</th><th>Jenis</th><th>Judul</th><th>Petugas</th><th>Pengisi</th><th>Submit</th><th>Catatan</th></tr>';
+      html += '<tr><th>Tanggal</th><th>Jam</th><th>Jenis</th><th>General</th><th>Judul</th><th>Petugas</th><th>Pengisi</th><th>Submit</th><th>Catatan</th></tr>';
 
       if (completed.length) {
         completed.forEach(function (item) {
@@ -2168,6 +2225,7 @@
             '<td>' + escapeHtml(formatDate(item.date)) + '</td>' +
             '<td>' + escapeHtml(item.time || "-") + '</td>' +
             '<td>' + escapeHtml(item.misaType || "-") + '</td>' +
+            '<td>' + escapeHtml(item.generalAssessment || "Aman") + '</td>' +
             '<td>' + escapeHtml(item.title) + '</td>' +
             '<td>' + escapeHtml(item.staff.join(", ") || "-") + '</td>' +
             '<td>' + escapeHtml(item.evaluator + (item.evaluatorRole ? " (" + item.evaluatorRole + ")" : "")) + '</td>' +
@@ -2176,7 +2234,7 @@
           '</tr>';
         });
       } else {
-        html += '<tr><td colspan="8">Tidak ada data evaluasi.</td></tr>';
+        html += '<tr><td colspan="9">Tidak ada data evaluasi.</td></tr>';
       }
 
       html += '</table>';
@@ -2233,13 +2291,14 @@
               '<td>' + escapeHtml(formatDate(item.date)) + '</td>' +
               '<td>' + escapeHtml(item.time || "-") + '</td>' +
               '<td>' + escapeHtml(item.misaType || "-") + '</td>' +
+              '<td>' + escapeHtml(item.generalAssessment || "Aman") + '</td>' +
               '<td>' + escapeHtml(item.title) + '</td>' +
               '<td>' + escapeHtml(item.staff.join(", ") || "-") + '</td>' +
               '<td>' + escapeHtml(item.evaluator + (item.evaluatorRole ? " (" + item.evaluatorRole + ")" : "")) + '</td>' +
               '<td>' + escapeHtml(formatDateTime(item.submittedAt)) + '</td>' +
             '</tr>';
           }).join("")
-        : '<tr><td colspan="7">Tidak ada data evaluasi.</td></tr>';
+        : '<tr><td colspan="8">Tidak ada data evaluasi.</td></tr>';
 
       const pendingRows = pending.length
         ? pending.map(function (item) {
@@ -2267,7 +2326,7 @@
         '<p>Jenis Misa: ' + escapeHtml(resultTypeFilter.value === "all" ? "Semua" : resultTypeFilter.value) + '</p>' +
         '<p>Skala: Per ' + escapeHtml(scaleLabel) + ' | Periode: ' + escapeHtml(periodValue) + '</p>' +
         '<h3>Evaluasi Sudah Masuk</h3>' +
-        '<table><thead><tr><th>Tanggal</th><th>Jam</th><th>Jenis</th><th>Judul</th><th>Petugas</th><th>Pengisi</th><th>Submit</th></tr></thead><tbody>' + completedRows + '</tbody></table>' +
+        '<table><thead><tr><th>Tanggal</th><th>Jam</th><th>Jenis</th><th>General</th><th>Judul</th><th>Petugas</th><th>Pengisi</th><th>Submit</th></tr></thead><tbody>' + completedRows + '</tbody></table>' +
         '<h3>Misa Terlewat Belum Diisi</h3>' +
         '<table><thead><tr><th>Tanggal</th><th>Jam</th><th>Jenis</th><th>Judul</th><th>Petugas Bertugas</th></tr></thead><tbody>' + pendingRows + '</tbody></table>' +
         '</body></html>'
